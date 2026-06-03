@@ -16,6 +16,7 @@ import BrandDashboard from "@/screens/BrandDashboard";
 import PostOpportunity from "@/screens/PostOpportunity";
 import AddRequirements from "@/screens/AddRequirements";
 import ApplicantsList from "@/screens/ApplicantsList";
+import BrandPostDetail from "@/screens/BrandPostDetail";
 import CreatorProfileBrandView from "@/screens/CreatorProfileBrandView";
 import Messages from "@/screens/Messages";
 import ChatScreen from "@/screens/ChatScreen";
@@ -58,6 +59,8 @@ function App() {
               <Route path="/brand/dashboard" element={<BrandDashboard />} />
               <Route path="/brand/applicants" element={<ApplicantsList />} />
               <Route path="/brand/post" element={<PostOpportunity />} />
+              <Route path="/brand/post/:id" element={<BrandPostDetail />} />
+
               <Route path="/brand/requirements" element={<AddRequirements />} />
               <Route path="/brand/creator/:id" element={<CreatorProfileBrandView />} />
 

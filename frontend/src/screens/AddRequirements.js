@@ -6,7 +6,7 @@ import { useApp } from "@/context/AppContext";
 import { toast } from "sonner";
 
 const CATS = ["Beauty", "Fashion", "Lifestyle", "Fitness", "Food", "Tech"];
-const AGES = ["13-17", "18-24", "25-34", "35+"];
+const AGES = ["Any Age", "13-17", "18-24", "25-34", "35+"];
 const GENDERS = ["All", "Female", "Male", "Non-binary"];
 
 export default function AddRequirements() {

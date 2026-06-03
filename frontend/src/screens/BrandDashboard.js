@@ -49,7 +49,7 @@ export default function BrandDashboard() {
             <button
               key={p.id}
               data-testid={`post-${p.id}`}
-              onClick={() => navigate("/brand/applicants")}
+              onClick={() => navigate(`/brand/post/${p.id}`)}
               className="w-full text-left bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center gap-3 hover:bg-white/10 transition-all animate-fade-up"
               style={{ animationDelay: `${idx * 60}ms` }}
             >

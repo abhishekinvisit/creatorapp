@@ -34,8 +34,32 @@ export const AppProvider = ({ children }) => {
   };
 
   const publishOpportunity = (data) => {
-    const newPost = { id: `p-${Date.now()}`, title: data.title, needed: data.creatorsNeeded || 5, applicants: 0 };
+    const newPost = {
+      id: `p-${Date.now()}`,
+      title: data.title,
+      description: data.description || "",
+      payout: data.payout || "",
+      needed: parseInt(data.creatorsNeeded || data.needed || 5),
+      deadline: data.deadline || "",
+      applicants: 0,
+      requirements: data.requirements || {
+        category: data.category || "",
+        minFollowers: data.minFollowers || "",
+        age: data.age || "",
+        gender: data.gender || "",
+        location: data.location || "",
+      },
+      status: "active",
+    };
     setActivePosts((prev) => [newPost, ...prev]);
+  };
+
+  const updatePost = (id, patch) => {
+    setActivePosts((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch, requirements: { ...p.requirements, ...(patch.requirements || {}) } } : p)));
+  };
+
+  const deletePost = (id) => {
+    setActivePosts((prev) => prev.filter((p) => p.id !== id));
   };
 
   const markAllNotificationsRead = () => {
@@ -74,7 +98,7 @@ export const AppProvider = ({ children }) => {
         threads,
         getOrCreateThread,
         notifications, markAllNotificationsRead,
-        activePosts, publishOpportunity,
+        activePosts, publishOpportunity, updatePost, deletePost,
         draftOpportunity, setDraftOpportunity,
       }}
     >

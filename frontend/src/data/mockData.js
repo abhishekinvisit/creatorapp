@@ -233,7 +233,37 @@ export const DEFAULT_USER = {
 };
 
 export const ACTIVE_POSTS = [
-  { id: "p-1", title: "Vitamin C Serum Campaign", needed: 10, applicants: 24 },
-  { id: "p-2", title: "Sunscreen Promotion", needed: 8, applicants: 18 },
-  { id: "p-3", title: "New Facewash Launch", needed: 12, applicants: 32 },
+  {
+    id: "p-1",
+    title: "Vitamin C Serum Campaign",
+    description: "Promote our new Vitamin C Serum with an authentic daily routine reel.",
+    payout: "500",
+    needed: 10,
+    deadline: "2025-06-05",
+    applicants: 24,
+    requirements: { category: "Beauty", minFollowers: "5000", age: "18-24", gender: "All", location: "India" },
+    status: "active",
+  },
+  {
+    id: "p-2",
+    title: "Sunscreen Promotion",
+    description: "Showcase our SPF-50 sunscreen in a beach or summer setting.",
+    payout: "650",
+    needed: 8,
+    deadline: "2025-06-12",
+    applicants: 18,
+    requirements: { category: "Beauty", minFollowers: "10000", age: "25-34", gender: "All", location: "India" },
+    status: "active",
+  },
+  {
+    id: "p-3",
+    title: "New Facewash Launch",
+    description: "Launch reel for our new gentle facewash. First-impression style.",
+    payout: "450",
+    needed: 12,
+    deadline: "2025-06-20",
+    applicants: 32,
+    requirements: { category: "Beauty", minFollowers: "3000", age: "Any Age", gender: "All", location: "India" },
+    status: "active",
+  },
 ];
