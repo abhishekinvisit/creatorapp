@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Camera, Plus, X, Instagram, Link2, Pencil } from "lucide-react";
+import { Camera, Plus, X, Instagram, Link2, Pencil, Upload } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { BrandLogo } from "@/components/BrandLogo";
 import { WorkedWithItem } from "@/components/WorkedWithItem";
@@ -265,32 +265,11 @@ export default function EditProfile() {
 
       {/* Brand picker modal */}
       {showBrandPicker && (
-        <PickerModal title="Add Brand" onClose={() => setShowBrandPicker(false)}>
-          <div className="grid grid-cols-3 gap-3">
-            {BRANDS.map((b) => {
-              const added = workedWith.find((w) => w.id === b.id);
-              return (
-                <button
-                  key={b.id}
-                  data-testid={`pick-brand-${b.id}`}
-                  onClick={() => !added && addBrand(b)}
-                  disabled={!!added}
-                  className={`flex flex-col items-center gap-2 p-3 rounded-2xl transition-all ${
-                    added ? "opacity-40 cursor-not-allowed" : "hover:bg-[#F3F3F3]"
-                  }`}
-                >
-                  <BrandLogo name={b.name} size={48} />
-                  <span className="text-[11px] font-bold text-[#0A0A0A] truncate w-full text-center">
-                    {b.name}
-                  </span>
-                  {added && (
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-[#525252]">Added</span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </PickerModal>
+        <BrandPickerModal
+          existing={workedWith}
+          onClose={() => setShowBrandPicker(false)}
+          onPick={addBrand}
+        />
       )}
 
       {/* Reel edit modal */}
@@ -418,3 +397,160 @@ const ReelEditor = ({ reel, onClose, onSave }) => {
     </PickerModal>
   );
 };
+
+const BrandPickerModal = ({ existing, onClose, onPick }) => {
+  const [tab, setTab] = useState("listed");
+  const [name, setName] = useState("");
+  const [logoSrc, setLogoSrc] = useState(null);
+  const fileRef = useRef(null);
+
+  const handleFile = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Logo must be under 2MB");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setLogoSrc(reader.result);
+    reader.readAsDataURL(file);
+  };
+
+  const addCustom = () => {
+    const trimmed = name.trim();
+    if (!trimmed) {
+      toast.error("Brand name is required");
+      return;
+    }
+    onPick({
+      id: `custom-${Date.now()}`,
+      name: trimmed,
+      category: "Custom",
+      verified: false,
+      logo: trimmed.slice(0, 4).toUpperCase(),
+      customLogo: logoSrc || undefined,
+    });
+    toast.success(`${trimmed} added`);
+  };
+
+  return (
+    <PickerModal title="Add Brand" onClose={onClose}>
+      {/* Tabs */}
+      <div className="flex gap-1 mb-5 bg-[#F3F3F3] rounded-full p-1">
+        <button
+          data-testid="picker-tab-listed"
+          onClick={() => setTab("listed")}
+          className={`flex-1 py-2 rounded-full text-xs font-bold uppercase tracking-[0.15em] transition-all ${
+            tab === "listed" ? "bg-white text-[#0A0A0A] shadow-sm" : "text-[#525252]"
+          }`}
+        >
+          Listed
+        </button>
+        <button
+          data-testid="picker-tab-custom"
+          onClick={() => setTab("custom")}
+          className={`flex-1 py-2 rounded-full text-xs font-bold uppercase tracking-[0.15em] transition-all ${
+            tab === "custom" ? "bg-white text-[#0A0A0A] shadow-sm" : "text-[#525252]"
+          }`}
+        >
+          Add Custom
+        </button>
+      </div>
+
+      {tab === "listed" ? (
+        <div className="grid grid-cols-3 gap-3">
+          {BRANDS.map((b) => {
+            const added = existing.find((w) => w.id === b.id);
+            return (
+              <button
+                key={b.id}
+                data-testid={`pick-brand-${b.id}`}
+                onClick={() => !added && onPick(b)}
+                disabled={!!added}
+                className={`flex flex-col items-center gap-2 p-3 rounded-2xl transition-all ${
+                  added ? "opacity-40 cursor-not-allowed" : "hover:bg-[#F3F3F3]"
+                }`}
+              >
+                <BrandLogo name={b.name} size={48} />
+                <span className="text-[11px] font-bold text-[#0A0A0A] truncate w-full text-center">
+                  {b.name}
+                </span>
+                {added && <span className="text-[9px] font-bold uppercase tracking-wider text-[#525252]">Added</span>}
+              </button>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <p className="text-xs text-[#525252] font-medium">
+            Can't find the brand? Add it manually below.
+          </p>
+
+          {/* Logo upload */}
+          <div className="flex flex-col items-center gap-2">
+            <button
+              data-testid="custom-logo-upload"
+              onClick={() => fileRef.current?.click()}
+              className="relative w-24 h-24 rounded-3xl border-2 border-dashed border-[#0A0A0A] bg-[#F9F9F8] flex items-center justify-center overflow-hidden hover:border-[#E25238] transition-colors"
+            >
+              {logoSrc ? (
+                <>
+                  <img src={logoSrc} alt="logo" className="w-full h-full object-cover" />
+                  <span className="absolute bottom-1 right-1 w-7 h-7 rounded-full bg-[#0A0A0A] text-white flex items-center justify-center">
+                    <Camera size={12} />
+                  </span>
+                </>
+              ) : (
+                <div className="flex flex-col items-center gap-1 text-[#0A0A0A]">
+                  <Upload size={20} />
+                  <span className="text-[10px] font-bold uppercase tracking-wider">Logo</span>
+                </div>
+              )}
+            </button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleFile}
+              data-testid="custom-logo-input"
+            />
+            <p className="text-[10px] text-[#525252] font-medium">PNG, JPG · up to 2MB · optional</p>
+          </div>
+
+          {/* Name input */}
+          <Field label="Brand Name">
+            <Input
+              testId="custom-brand-name"
+              value={name}
+              onChange={setName}
+              placeholder="e.g. Studio Sapphire"
+            />
+          </Field>
+
+          <div className="flex gap-3 pt-1">
+            <button
+              data-testid="custom-cancel"
+              onClick={onClose}
+              className="flex-1 py-4 rounded-full border border-[#E5E5E5] font-bold text-sm"
+            >
+              Cancel
+            </button>
+            <button
+              data-testid="custom-add"
+              onClick={addCustom}
+              className="flex-1 py-4 rounded-full bg-[#0A0A0A] text-white font-bold text-sm hover:bg-[#E25238] transition-colors"
+            >
+              Add Brand
+            </button>
+          </div>
+        </div>
+      )}
+    </PickerModal>
+  );
+};
+
