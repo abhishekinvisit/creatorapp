@@ -99,7 +99,7 @@ export default function OpportunityDetails() {
             onClick={() => setShowApply(true)}
             className="w-full bg-[#0A0A0A] text-white rounded-full py-5 font-bold text-base hover:bg-[#E25238] transition-colors shadow-xl"
           >
-            Apply Now
+            Send My Profile
           </button>
           <button data-testid="share-btn" className="w-full mt-3 py-3 rounded-full border border-[#E5E5E5] font-bold text-sm flex items-center justify-center gap-2 bg-white hover:bg-black hover:text-white transition-colors">
             <Share2 size={16} /> Share

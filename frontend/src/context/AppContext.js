@@ -10,7 +10,7 @@ export const AppProvider = ({ children }) => {
   const [workedWith, setWorkedWith] = useState(BRANDS.slice(0, 6));
   const [applications, setApplications] = useState(MY_APPLICATIONS);
   const [opportunities, setOpportunities] = useState(OPPORTUNITIES);
-  const [threads] = useState(MESSAGES_THREADS);
+  const [threads, setThreads] = useState(MESSAGES_THREADS);
   const [notifications, setNotifications] = useState(NOTIFICATIONS);
   const [activePosts, setActivePosts] = useState(ACTIVE_POSTS);
   const [draftOpportunity, setDraftOpportunity] = useState({});
@@ -42,6 +42,26 @@ export const AppProvider = ({ children }) => {
     setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
   };
 
+  // Returns thread id for a given brand name; creates one if needed.
+  const getOrCreateThread = (brandName) => {
+    const existing = threads.find((t) => t.name === brandName);
+    if (existing) return existing.id;
+    const newThread = {
+      id: `t-${Date.now()}`,
+      name: brandName,
+      avatar: brandName.slice(0, 4).toUpperCase(),
+      online: false,
+      lastMessage: "Conversation started",
+      time: "now",
+      unread: 0,
+      messages: [
+        { from: "brand", text: `Hi! Welcome — excited to collaborate with you. 🎉`, time: "now" },
+      ],
+    };
+    setThreads((prev) => [newThread, ...prev]);
+    return newThread.id;
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -52,6 +72,7 @@ export const AppProvider = ({ children }) => {
         applications, addApplication, withdrawApplication,
         opportunities,
         threads,
+        getOrCreateThread,
         notifications, markAllNotificationsRead,
         activePosts, publishOpportunity,
         draftOpportunity, setDraftOpportunity,

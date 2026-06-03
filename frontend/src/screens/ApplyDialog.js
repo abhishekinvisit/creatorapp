@@ -16,7 +16,7 @@ export const ApplyDialog = ({ opportunity, onClose, onApplied }) => {
       <div className="w-full sm:max-w-md bg-white rounded-t-3xl sm:rounded-3xl p-6 max-h-[92vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start justify-between mb-5">
           <div>
-            <h2 className="font-display font-black text-2xl text-[#0A0A0A] tracking-tight">Apply for this opportunity</h2>
+            <h2 className="font-display font-black text-2xl text-[#0A0A0A] tracking-tight">Send my profile</h2>
             <p className="text-sm text-[#525252] mt-1 font-medium">Your OLLCOLLAB profile will be shared with this brand.</p>
           </div>
           <button data-testid="apply-close" onClick={onClose} className="w-9 h-9 rounded-full bg-[#F3F3F3] flex items-center justify-center flex-shrink-0">
@@ -63,7 +63,7 @@ export const ApplyDialog = ({ opportunity, onClose, onApplied }) => {
             Cancel
           </button>
           <button data-testid="apply-submit" onClick={handleApply} className="flex-1 py-4 rounded-full bg-[#0A0A0A] text-white font-bold text-sm hover:bg-[#E25238] transition-colors">
-            Apply
+            Send Profile
           </button>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { MessageCircle } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { BrandLogo } from "@/components/BrandLogo";
 import { useApp } from "@/context/AppContext";
@@ -15,7 +16,7 @@ const statusBadge = {
 
 export default function MyApplications() {
   const navigate = useNavigate();
-  const { applications } = useApp();
+  const { applications, getOrCreateThread } = useApp();
   const [tab, setTab] = useState("Applied");
 
   const filtered = applications.filter((a) =>
@@ -45,23 +46,41 @@ export default function MyApplications() {
         <div className="space-y-3 mt-3">
           {filtered.map((a, idx) => {
             const badge = statusBadge[a.status];
+            const isAccepted = a.status === "accepted";
             return (
-              <button
+              <div
                 key={a.id}
                 data-testid={`app-row-${a.id}`}
-                onClick={() => navigate(`/application/${a.id}`)}
-                className="w-full text-left bg-white rounded-2xl border border-[#E5E5E5] p-4 flex items-center gap-4 hover:-translate-y-0.5 hover:shadow-md transition-all animate-fade-up"
+                className="bg-white rounded-2xl border border-[#E5E5E5] p-4 flex items-center gap-4 animate-fade-up"
                 style={{ animationDelay: `${idx * 60}ms` }}
               >
-                <BrandLogo name={a.brandName} size={48} />
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-display font-bold text-[#0A0A0A] truncate">{a.brandName}</h3>
-                  <p className="text-xs text-[#525252] font-medium">Applied on {a.appliedOn}</p>
-                </div>
-                <span className={`px-3 py-1.5 rounded-full text-xs font-bold ${badge.bg} ${badge.text}`}>
-                  {badge.label}
-                </span>
-              </button>
+                <button
+                  onClick={() => navigate(`/application/${a.id}`)}
+                  className="flex items-center gap-4 flex-1 min-w-0 text-left"
+                >
+                  <BrandLogo name={a.brandName} size={48} />
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-display font-bold text-[#0A0A0A] truncate">{a.brandName}</h3>
+                    <p className="text-xs text-[#525252] font-medium">Applied on {a.appliedOn}</p>
+                  </div>
+                  <span className={`px-3 py-1.5 rounded-full text-xs font-bold ${badge.bg} ${badge.text}`}>
+                    {badge.label}
+                  </span>
+                </button>
+                {isAccepted && (
+                  <button
+                    data-testid={`row-message-${a.id}`}
+                    onClick={() => {
+                      const tid = getOrCreateThread(a.brandName);
+                      navigate(`/chat/${tid}`);
+                    }}
+                    aria-label={`Message ${a.brandName}`}
+                    className="w-10 h-10 rounded-full bg-[#0A0A0A] text-white flex items-center justify-center hover:bg-[#E25238] transition-colors flex-shrink-0"
+                  >
+                    <MessageCircle size={16} />
+                  </button>
+                )}
+              </div>
             );
           })}
 
