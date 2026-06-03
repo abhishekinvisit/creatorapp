@@ -4,69 +4,82 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Base ── */
 body {
     margin: 0;
     font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background-color: #1A1A1A;
+    background-color: #111111;
     color: #0A0A0A;
+    overflow-x: hidden;
 }
 
-* {
-    font-family: 'Manrope', sans-serif;
-}
+* { font-family: 'Manrope', sans-serif; }
 
 h1, h2, h3, h4, h5, h6, .font-display {
     font-family: 'Outfit', sans-serif;
     letter-spacing: -0.02em;
 }
 
+/* ── Scrollbar ── */
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* Phone frame on desktop */
+/* ── Phone frame wrapper (desktop bg) ── */
 .phone-frame-wrapper {
-    background: #1A1A1A;
+    background-color: #111111;
     background-image:
-        radial-gradient(at 0% 0%, rgba(226, 82, 56, 0.08) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(245, 158, 11, 0.06) 0px, transparent 50%);
+        radial-gradient(ellipse at 15% 50%, rgba(226, 82, 56, 0.12) 0px, transparent 55%),
+        radial-gradient(ellipse at 85% 20%, rgba(245, 158, 11, 0.07) 0px, transparent 50%),
+        radial-gradient(ellipse at 60% 85%, rgba(99, 102, 241, 0.05) 0px, transparent 45%);
+    min-height: 100dvh;
 }
 
-.app-screen {
-    background-color: #F9F9F8;
+/* Mobile: plain bg, no radial decorations */
+@media (max-width: 639px) {
+    .phone-frame-wrapper {
+        background: #F9F9F8;
+        background-image: none;
+        padding: 0;
+    }
 }
 
-.app-screen-dark {
-    background-color: #0A0A0A;
-    color: #F9F9F8;
-}
+/* ── App screen themes ── */
+.app-screen { background-color: #F9F9F8; }
+.app-screen-dark { background-color: #0A0A0A; color: #F9F9F8; }
 
-/* Soft grain overlay */
+/* ── Grain overlay ── */
 .grain::before {
     content: "";
     position: absolute;
     inset: 0;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
-    opacity: 0.04;
+    opacity: 0.035;
     pointer-events: none;
     z-index: 100;
 }
 
+/* ── Animations ── */
 @keyframes fadeInUp {
     from { opacity: 0; transform: translateY(12px); }
-    to { opacity: 1; transform: translateY(0); }
+    to   { opacity: 1; transform: translateY(0); }
 }
-.animate-fade-up {
-    animation: fadeInUp 0.4s ease-out forwards;
+.animate-fade-up { animation: fadeInUp 0.4s ease-out forwards; }
+
+@keyframes fadeInLeft {
+    from { opacity: 0; transform: translateX(-16px); }
+    to   { opacity: 1; transform: translateX(0); }
 }
+.animate-fade-left { animation: fadeInLeft 0.5s ease-out forwards; }
 
 @keyframes pulseRing {
-    0% { box-shadow: 0 0 0 0 rgba(226, 82, 56, 0.6); }
+    0%   { box-shadow: 0 0 0 0 rgba(226, 82, 56, 0.6); }
     100% { box-shadow: 0 0 0 16px rgba(226, 82, 56, 0); }
 }
 .pulse-ring { animation: pulseRing 1.8s infinite; }
 
+/* ── Shadcn CSS vars ── */
 @layer base {
     :root {
         --background: 40 6% 97%;
@@ -95,4 +108,15 @@ h1, h2, h3, h4, h5, h6, .font-display {
 @layer base {
     * { @apply border-border; }
     body { @apply bg-background text-foreground; }
+}
+
+/* ── Touch target sizing on mobile ── */
+@media (max-width: 639px) {
+    button, a[role="button"] { min-height: 44px; }
+}
+
+/* ── Safe area insets for notched phones ── */
+@supports (padding-top: env(safe-area-inset-top)) {
+    .safe-top    { padding-top: env(safe-area-inset-top); }
+    .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
 }
