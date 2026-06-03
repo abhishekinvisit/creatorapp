@@ -84,11 +84,11 @@ export default function LoginScreen() {
         )}
 
         <button
-          data-testid="login-continue"
+          data-testid={step === "otp" ? "otp-verify" : "login-continue"}
           onClick={handleContinue}
           className="w-full mt-6 bg-[#0A0A0A] text-white rounded-full py-5 font-bold hover:bg-[#E25238] transition-colors"
         >
-          Continue
+          {step === "otp" ? "Verify & Continue" : "Continue"}
         </button>
 
         {step === "phone" && (

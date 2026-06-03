@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
 import { TopBar } from "@/components/TopBar";
-import { BottomNav } from "@/components/BottomNav";
 import { BrandLogo } from "@/components/BrandLogo";
 import { useApp } from "@/context/AppContext";
 
@@ -10,7 +9,7 @@ export default function Messages() {
   const dark = accountType === "brand";
 
   return (
-    <div data-testid="messages-list" className={`min-h-full pb-24 ${dark ? "bg-[#0A0A0A] text-white" : "bg-[#F9F9F8]"}`}>
+    <div data-testid="messages-list" className={`min-h-full pb-6 ${dark ? "bg-[#0A0A0A] text-white" : "bg-[#F9F9F8]"}`}>
       <TopBar title="Messages" showBack={false} dark={dark} />
       <div className="px-5">
         {threads.map((t, idx) => (
@@ -43,7 +42,6 @@ export default function Messages() {
           </button>
         ))}
       </div>
-      <BottomNav />
     </div>
   );
 }

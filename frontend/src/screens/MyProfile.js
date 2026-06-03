@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Settings, BadgeCheck, Instagram, Youtube, Globe, Pencil, Briefcase } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
-import { BottomNav } from "@/components/BottomNav";
 import { useApp } from "@/context/AppContext";
 import { PORTFOLIO, BRANDS } from "@/data/mockData";
 import { BrandLogo } from "@/components/BrandLogo";
@@ -14,7 +13,7 @@ export default function MyProfile() {
   if (accountType === "brand") {
     const b = user.brand;
     return (
-      <div data-testid="my-profile-brand" className="min-h-full bg-[#0A0A0A] text-white pb-28">
+      <div data-testid="my-profile-brand" className="min-h-full bg-[#0A0A0A] text-white pb-6">
         <TopBar title="Profile" dark rightSlot={
           <button data-testid="open-settings" onClick={() => navigate("/settings")} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
             <Settings size={18} />
@@ -53,7 +52,6 @@ export default function MyProfile() {
             </button>
           </div>
         </div>
-        <BottomNav />
       </div>
     );
   }
@@ -61,7 +59,7 @@ export default function MyProfile() {
   // Creator profile
   const c = user.creator;
   return (
-    <div data-testid="my-profile-creator" className="min-h-full bg-[#F9F9F8] pb-28">
+    <div data-testid="my-profile-creator" className="min-h-full bg-[#F9F9F8] pb-6">
       <TopBar title="Profile" dark={false} rightSlot={
         <button data-testid="open-settings" onClick={() => navigate("/settings")} className="w-10 h-10 rounded-full bg-black/5 flex items-center justify-center">
           <Settings size={18} />
@@ -131,7 +129,6 @@ export default function MyProfile() {
         </div>
       </div>
 
-      <BottomNav />
     </div>
   );
 }

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Search, SlidersHorizontal, BadgeCheck } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
-import { BottomNav } from "@/components/BottomNav";
 import { BrandLogo } from "@/components/BrandLogo";
 import { BRANDS } from "@/data/mockData";
 
@@ -10,7 +9,7 @@ export default function BrandsList() {
   const filtered = BRANDS.filter((b) => b.name.toLowerCase().includes(q.toLowerCase()));
 
   return (
-    <div data-testid="brands-list" className="min-h-full bg-[#F9F9F8] pb-24">
+    <div data-testid="brands-list" className="min-h-full bg-[#F9F9F8] pb-6">
       <TopBar title="Brands" />
 
       <div className="px-5">
@@ -50,7 +49,6 @@ export default function BrandsList() {
         </div>
       </div>
 
-      <BottomNav />
     </div>
   );
 }

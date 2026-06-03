@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
 import { Plus, ChevronRight, Bell, Menu } from "lucide-react";
-import { BottomNav } from "@/components/BottomNav";
 import { useApp } from "@/context/AppContext";
 
 export default function BrandDashboard() {
@@ -9,7 +8,7 @@ export default function BrandDashboard() {
   const stats = user.brand.stats;
 
   return (
-    <div data-testid="brand-dashboard" className="min-h-full bg-[#0A0A0A] text-white pb-28">
+    <div data-testid="brand-dashboard" className="min-h-full bg-[#0A0A0A] text-white pb-6">
       <div className="sticky top-0 z-30 bg-[#0A0A0A] px-5 py-4 flex items-center justify-between">
         <button data-testid="brand-menu" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
           <Menu size={20} />
@@ -77,7 +76,6 @@ export default function BrandDashboard() {
         </button>
       </div>
 
-      <BottomNav />
     </div>
   );
 }

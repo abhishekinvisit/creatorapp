@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, SlidersHorizontal, Wallet, Calendar, Users, BadgeCheck } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
-import { BottomNav } from "@/components/BottomNav";
 import { BrandLogo } from "@/components/BrandLogo";
 import { CATEGORIES } from "@/data/mockData";
 import { useApp } from "@/context/AppContext";
@@ -20,7 +19,7 @@ export default function HomeFeed() {
   });
 
   return (
-    <div data-testid="home-feed" className="min-h-full bg-[#F9F9F8] pb-24">
+    <div data-testid="home-feed" className="min-h-full bg-[#F9F9F8] pb-6">
       <TopBar title="Home" showBack={false} showMenu showBell />
 
       <div className="px-5 pb-4">
@@ -119,7 +118,6 @@ export default function HomeFeed() {
         )}
       </div>
 
-      <BottomNav />
     </div>
   );
 }

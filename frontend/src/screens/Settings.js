@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { User, Lock, Bell, ShieldCheck, UserX, HelpCircle, LogOut, ChevronRight, Repeat } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
-import { BottomNav } from "@/components/BottomNav";
 import { useApp } from "@/context/AppContext";
 import { toast } from "sonner";
 
@@ -27,7 +26,7 @@ export default function Settings() {
   ];
 
   return (
-    <div data-testid="settings-screen" className={`min-h-full pb-24 ${dark ? "bg-[#0A0A0A] text-white" : "bg-[#F9F9F8]"}`}>
+    <div data-testid="settings-screen" className={`min-h-full pb-6 ${dark ? "bg-[#0A0A0A] text-white" : "bg-[#F9F9F8]"}`}>
       <TopBar title="Settings" dark={dark} />
       <div className="px-5">
         <div className={`rounded-3xl overflow-hidden ${dark ? "bg-white/5 border border-white/10" : "bg-white border border-[#E5E5E5]"}`}>
@@ -60,7 +59,6 @@ export default function Settings() {
           OLLCOLLAB · v1.0.0
         </p>
       </div>
-      <BottomNav />
     </div>
   );
 }

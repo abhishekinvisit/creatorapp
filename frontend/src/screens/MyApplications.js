@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { TopBar } from "@/components/TopBar";
-import { BottomNav } from "@/components/BottomNav";
 import { BrandLogo } from "@/components/BrandLogo";
 import { useApp } from "@/context/AppContext";
 
@@ -24,7 +23,7 @@ export default function MyApplications() {
   );
 
   return (
-    <div data-testid="my-applications" className="min-h-full bg-[#F9F9F8] pb-24">
+    <div data-testid="my-applications" className="min-h-full bg-[#F9F9F8] pb-6">
       <TopBar title="My Applications" showBack={false} />
 
       <div className="px-5">
@@ -82,7 +81,6 @@ export default function MyApplications() {
         </div>
       </div>
 
-      <BottomNav />
     </div>
   );
 }

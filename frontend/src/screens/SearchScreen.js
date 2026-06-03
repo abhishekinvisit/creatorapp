@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search as SearchIcon, SlidersHorizontal, Sparkles, Shirt, Camera, Dumbbell, UtensilsCrossed } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
-import { BottomNav } from "@/components/BottomNav";
 import { BrandLogo } from "@/components/BrandLogo";
 import { BRANDS, RECENT_SEARCHES } from "@/data/mockData";
 
@@ -19,7 +18,7 @@ export default function SearchScreen() {
   const [q, setQ] = useState("");
 
   return (
-    <div data-testid="search-screen" className="min-h-full bg-[#F9F9F8] pb-24">
+    <div data-testid="search-screen" className="min-h-full bg-[#F9F9F8] pb-6">
       <TopBar title="Search" showBack={false} />
 
       <div className="px-5">
@@ -85,7 +84,6 @@ export default function SearchScreen() {
         </Section>
       </div>
 
-      <BottomNav />
     </div>
   );
 }

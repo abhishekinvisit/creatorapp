@@ -21,7 +21,7 @@ export default function AddRequirements() {
   };
 
   return (
-    <div data-testid="add-requirements" className="min-h-full bg-[#0A0A0A] text-white pb-32">
+    <div data-testid="add-requirements" className="min-h-full bg-[#0A0A0A] text-white flex flex-col pb-2">
       <TopBar title="Add Requirements" dark />
 
       <div className="px-5 space-y-5">
@@ -70,7 +70,7 @@ export default function AddRequirements() {
         </Field>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 sm:relative sm:mt-8">
+      <div className="sticky bottom-0 left-0 right-0 z-20 mt-4">
         <div className="px-5 py-4 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/95 to-transparent">
           <button
             data-testid="publish-opportunity"

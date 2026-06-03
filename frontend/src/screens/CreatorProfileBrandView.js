@@ -10,7 +10,7 @@ export default function CreatorProfileBrandView() {
   const c = APPLICANTS.find((a) => a.id === id) || APPLICANTS[0];
 
   return (
-    <div data-testid="creator-profile-brand" className="min-h-full bg-[#F9F9F8] pb-32">
+    <div data-testid="creator-profile-brand" className="min-h-full bg-[#F9F9F8] flex flex-col pb-2">
       <TopBar title="Creator Profile" showMore />
 
       <div className="px-5">
@@ -74,7 +74,7 @@ export default function CreatorProfileBrandView() {
       </div>
 
       {/* Floating actions */}
-      <div className="fixed bottom-0 left-0 right-0 sm:relative sm:mt-4">
+      <div className="sticky bottom-0 left-0 right-0 z-20 mt-4">
         <div className="px-5 py-4 bg-gradient-to-t from-[#F9F9F8] via-[#F9F9F8]/95 to-transparent flex gap-3">
           <button
             data-testid="shortlist-btn"

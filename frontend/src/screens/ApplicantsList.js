@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { TopBar } from "@/components/TopBar";
-import { BottomNav } from "@/components/BottomNav";
 import { APPLICANTS } from "@/data/mockData";
 
 const TABS = [
@@ -17,7 +16,7 @@ export default function ApplicantsList() {
   const filtered = tab === "all" ? APPLICANTS : APPLICANTS.filter((a) => a.status === tab);
 
   return (
-    <div data-testid="applicants-list" className="min-h-full bg-[#0A0A0A] text-white pb-28">
+    <div data-testid="applicants-list" className="min-h-full bg-[#0A0A0A] text-white pb-6">
       <TopBar title="Applicants" dark />
 
       <div className="px-5">
@@ -65,7 +64,6 @@ export default function ApplicantsList() {
         </div>
       </div>
 
-      <BottomNav />
     </div>
   );
 }

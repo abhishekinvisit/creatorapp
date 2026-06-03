@@ -14,7 +14,7 @@ export default function OpportunityDetails() {
   const op = opportunities.find((o) => o.id === id) || opportunities[0];
 
   return (
-    <div data-testid="opportunity-details" className="min-h-full bg-[#F9F9F8] pb-32">
+    <div data-testid="opportunity-details" className="min-h-full bg-[#F9F9F8] flex flex-col pb-2">
       <TopBar title="" showBack showBookmark />
 
       <div className="px-5">
@@ -92,7 +92,7 @@ export default function OpportunityDetails() {
       </div>
 
       {/* Floating actions */}
-      <div className="fixed bottom-0 left-0 right-0 sm:left-auto sm:right-auto sm:w-[400px] mx-auto sm:relative sm:mt-2">
+      <div className="sticky bottom-0 left-0 right-0 z-20 mt-4">
         <div className="px-5 py-4 bg-gradient-to-t from-[#F9F9F8] via-[#F9F9F8]/95 to-transparent">
           <button
             data-testid="apply-now-btn"

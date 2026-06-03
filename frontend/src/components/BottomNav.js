@@ -28,7 +28,7 @@ export const BottomNav = () => {
   return (
     <div
       data-testid="bottom-nav"
-      className={`absolute bottom-0 left-0 right-0 z-40 ${isBrand ? "bg-[#0A0A0A]/95 border-t border-neutral-800" : "bg-white/95 border-t border-[#E5E5E5]"} backdrop-blur-xl px-2 py-2 pb-3`}
+      className={`flex-shrink-0 ${isBrand ? "bg-[#0A0A0A]/95 border-t border-neutral-800" : "bg-white/95 border-t border-[#E5E5E5]"} backdrop-blur-xl px-2 py-2 pb-3 z-40`}
     >
       <div className="flex justify-between items-center">
         {items.map((it) => {
