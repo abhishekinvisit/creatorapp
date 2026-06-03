@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Camera, Plus, X, Instagram, Link2, Pencil, Upload } from "lucide-react";
+import { Camera, Plus, X, Instagram, Link2, Pencil, Upload, MapPin } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { BrandLogo } from "@/components/BrandLogo";
 import { WorkedWithItem } from "@/components/WorkedWithItem";
@@ -19,6 +19,7 @@ export default function EditProfile() {
   const [name, setName] = useState(profile.name);
   const [handle, setHandle] = useState(profile.handle || "");
   const [bio, setBio] = useState(profile.bio);
+  const [location, setLocation] = useState(profile.location || "");
   const [instagramUrl, setInstagramUrl] = useState(profile.instagramUrl || `https://instagram.com/${(profile.handle || "").replace("@", "")}`);
   const [cats, setCats] = useState(profile.category);
   const [reels, setReels] = useState(DEFAULT_REELS);
@@ -29,7 +30,7 @@ export default function EditProfile() {
     if (accountType === "brand") {
       setUser({ ...user, brand: { ...user.brand, name, bio } });
     } else {
-      setUser({ ...user, creator: { ...user.creator, name, handle, bio, instagramUrl, category: cats } });
+      setUser({ ...user, creator: { ...user.creator, name, handle, bio, instagramUrl, category: cats, location } });
     }
     toast.success("Profile updated");
     navigate(-1);
@@ -119,6 +120,22 @@ export default function EditProfile() {
               className="w-full bg-white border border-[#E5E5E5] rounded-2xl px-4 py-4 outline-none font-medium resize-none focus:border-[#0A0A0A] transition-colors"
             />
           </Field>
+          {accountType !== "brand" && (
+            <Field label="Location">
+              <div className="flex items-center bg-white border border-[#E5E5E5] rounded-2xl overflow-hidden focus-within:border-[#0A0A0A] transition-colors">
+                <div className="px-4 py-4 border-r border-[#E5E5E5] bg-[#F9F9F8]">
+                  <MapPin size={16} className="text-[#E25238]" />
+                </div>
+                <input
+                  data-testid="profile-location"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  placeholder="e.g. Mumbai, India"
+                  className="flex-1 px-3 py-4 outline-none font-medium bg-transparent text-sm"
+                />
+              </div>
+            </Field>
+          )}
         </Section>
 
         {/* Instagram link */}

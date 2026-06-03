@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Settings, BadgeCheck, Pencil, Briefcase, Share2, Instagram } from "lucide-react";
+import { Settings, BadgeCheck, Pencil, Briefcase, Share2, Instagram, MapPin } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { useApp } from "@/context/AppContext";
 import { REELS, BRANDS } from "@/data/mockData";
@@ -96,6 +96,12 @@ export default function MyProfile() {
                 <Instagram size={12} className="text-white" strokeWidth={2.6} />
               </button>
             </div>
+            {c.location && (
+              <div data-testid="profile-location" className="flex items-center gap-1 mt-1.5 text-xs text-[#525252] font-medium">
+                <MapPin size={12} className="text-[#E25238]" />
+                <span>{c.location}</span>
+              </div>
+            )}
 
             {/* Stats row: Followers + Brand Collaborations */}
             <div className="flex items-center gap-5 mt-3">

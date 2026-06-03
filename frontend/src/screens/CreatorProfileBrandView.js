@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { Instagram } from "lucide-react";
+import { Instagram, MapPin } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { BrandLogo } from "@/components/BrandLogo";
 import { APPLICANTS, REELS, BRANDS } from "@/data/mockData";
@@ -43,6 +43,12 @@ export default function CreatorProfileBrandView() {
                 <Instagram size={12} className="text-white" strokeWidth={2.6} />
               </button>
             </div>
+            {c.location && (
+              <div data-testid="profile-location" className="flex items-center gap-1 mt-1.5 text-xs text-[#525252] font-medium">
+                <MapPin size={12} className="text-[#E25238]" />
+                <span>{c.location}</span>
+              </div>
+            )}
 
             <div className="flex items-center gap-5 mt-3">
               <div data-testid="stat-followers">

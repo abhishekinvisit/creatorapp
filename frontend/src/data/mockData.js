@@ -91,11 +91,16 @@ export const CREATOR_AVATARS = [
 ];
 
 export const APPLICANTS = [
-  { id: "c-1", name: "Riya Sharma", handle: "@riya.sharmaa", followers: "124K", engagement: "8.2%", avatar: CREATOR_AVATARS[0], status: "shortlisted" },
-  { id: "c-2", name: "Ananya Gupta", handle: "@ananya.g", followers: "25.1K", engagement: "6.8%", avatar: CREATOR_AVATARS[1], status: "applied" },
-  { id: "c-3", name: "Mehak Verma", handle: "@mehak.v", followers: "9.8K", engagement: "7.1%", avatar: CREATOR_AVATARS[2], status: "applied" },
-  { id: "c-4", name: "Neha Iyer", handle: "@neha.iyer", followers: "15.3K", engagement: "5.9%", avatar: CREATOR_AVATARS[3], status: "accepted" },
-  { id: "c-5", name: "Pooja Nair", handle: "@pooja.nair", followers: "48K", engagement: "9.0%", avatar: CREATOR_AVATARS[0], status: "shortlisted" },
+  { id: "c-1", name: "Riya Sharma", handle: "@riya.sharmaa", followers: "124K", followersNum: 124000, engagement: "8.2%", avatar: CREATOR_AVATARS[0], status: "shortlisted", location: "Delhi, India", age: "25-34", gender: "Female", categories: ["Lifestyle", "Beauty"] },
+  { id: "c-2", name: "Ananya Gupta", handle: "@ananya.g", followers: "25.1K", followersNum: 25100, engagement: "6.8%", avatar: CREATOR_AVATARS[1], status: "applied", location: "Mumbai, India", age: "18-24", gender: "Female", categories: ["Fashion", "Lifestyle"] },
+  { id: "c-3", name: "Mehak Verma", handle: "@mehak.v", followers: "9.8K", followersNum: 9800, engagement: "7.1%", avatar: CREATOR_AVATARS[2], status: "applied", location: "Bengaluru, India", age: "25-34", gender: "Female", categories: ["Beauty"] },
+  { id: "c-4", name: "Neha Iyer", handle: "@neha.iyer", followers: "15.3K", followersNum: 15300, engagement: "5.9%", avatar: CREATOR_AVATARS[3], status: "accepted", location: "Chennai, India", age: "18-24", gender: "Female", categories: ["Lifestyle", "Food"] },
+  { id: "c-5", name: "Pooja Nair", handle: "@pooja.nair", followers: "48K", followersNum: 48000, engagement: "9.0%", avatar: CREATOR_AVATARS[0], status: "shortlisted", location: "Kochi, India", age: "25-34", gender: "Female", categories: ["Beauty", "Fashion"] },
+  { id: "c-6", name: "Aarav Mehta", handle: "@aarav.m", followers: "62K", followersNum: 62000, engagement: "7.4%", avatar: CREATOR_AVATARS[1], status: "applied", location: "Ahmedabad, India", age: "25-34", gender: "Male", categories: ["Tech", "Lifestyle"] },
+  { id: "c-7", name: "Karthik Rao", handle: "@karthik.rao", followers: "210K", followersNum: 210000, engagement: "6.1%", avatar: CREATOR_AVATARS[2], status: "applied", location: "Hyderabad, India", age: "25-34", gender: "Male", categories: ["Fitness", "Tech"] },
+  { id: "c-8", name: "Simran Kaur", handle: "@simrankaur", followers: "7.5K", followersNum: 7500, engagement: "8.9%", avatar: CREATOR_AVATARS[3], status: "applied", location: "Chandigarh, India", age: "18-24", gender: "Female", categories: ["Food", "Lifestyle"] },
+  { id: "c-9", name: "Ishaan Bhatt", handle: "@ishaan.b", followers: "33K", followersNum: 33000, engagement: "5.4%", avatar: CREATOR_AVATARS[0], status: "applied", location: "Pune, India", age: "18-24", gender: "Male", categories: ["Fashion"] },
+  { id: "c-10", name: "Tara Khanna", handle: "@tara.k", followers: "92K", followersNum: 92000, engagement: "7.7%", avatar: CREATOR_AVATARS[1], status: "shortlisted", location: "Jaipur, India", age: "35+", gender: "Female", categories: ["Travel", "Lifestyle"] },
 ];
 
 export const MY_APPLICATIONS = [
@@ -214,6 +219,7 @@ export const DEFAULT_USER = {
     handle: "@riya.sharmaa",
     bio: "Lifestyle creator | Skincare & Fashion Lover",
     category: ["Lifestyle", "Fashion", "Beauty"],
+    location: "Delhi, India",
     followers: "124K",
     engagement: "8.2%",
     collaborations: 42,

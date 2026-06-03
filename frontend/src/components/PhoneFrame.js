@@ -1,7 +1,7 @@
 import { Outlet, useLocation } from "react-router-dom";
 import { BottomNav } from "@/components/BottomNav";
 
-const DARK_ROUTES = ["/brand/dashboard", "/brand/applicants", "/brand/post", "/brand/requirements"];
+const DARK_ROUTES = ["/brand/dashboard", "/brand/applicants", "/brand/post", "/brand/requirements", "/brand/discover"];
 
 // Routes that should show the bottom nav (tab destinations only)
 const NAV_ROUTES = new Set([
@@ -15,6 +15,7 @@ const NAV_ROUTES = new Set([
   "/brands",
   "/brand/dashboard",
   "/brand/applicants",
+  "/brand/discover",
 ]);
 
 export const PhoneFrame = () => {
