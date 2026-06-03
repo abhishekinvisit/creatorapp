@@ -105,6 +105,51 @@ export const MY_APPLICATIONS = [
   { id: "a-4", opportunityId: "op-4", brandName: "FitLife India", appliedOn: "25 May 2025", status: "rejected" },
 ];
 
+export const REELS = [
+  {
+    id: "reel-1",
+    thumbnail: "https://images.unsplash.com/photo-1571513722275-4b41940f54b8?crop=entropy&cs=srgb&fm=jpg&w=600&q=85",
+    brand: "Mamaearth",
+    title: "GRWM ft. Vit-C Serum",
+    instagramUrl: "https://instagram.com/p/reel-1",
+  },
+  {
+    id: "reel-2",
+    thumbnail: "https://images.unsplash.com/photo-1601597565151-70c4020dc0e1?crop=entropy&cs=srgb&fm=jpg&w=600&q=85",
+    brand: "Luxe Fashion",
+    title: "Summer drops haul",
+    instagramUrl: "https://instagram.com/p/reel-2",
+  },
+  {
+    id: "reel-3",
+    thumbnail: "https://images.unsplash.com/photo-1527203561188-dae1bc1a417f?crop=entropy&cs=srgb&fm=jpg&w=600&q=85",
+    brand: "Plum Goodness",
+    title: "Night routine that works",
+    instagramUrl: "https://instagram.com/p/reel-3",
+  },
+  {
+    id: "reel-4",
+    thumbnail: "https://images.unsplash.com/photo-1629380108599-ea06489d66f5?crop=entropy&cs=srgb&fm=jpg&w=600&q=85",
+    brand: "Glow Skincare",
+    title: "Sunscreen first impression",
+    instagramUrl: "https://instagram.com/p/reel-4",
+  },
+  {
+    id: "reel-5",
+    thumbnail: "https://images.pexels.com/photos/31977358/pexels-photo-31977358.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=900",
+    brand: "boAt",
+    title: "Morning beats walkthrough",
+    instagramUrl: "https://instagram.com/p/reel-5",
+  },
+  {
+    id: "reel-6",
+    thumbnail: "https://images.unsplash.com/photo-1748543668676-ea8241cb3886?crop=entropy&cs=srgb&fm=jpg&w=600&q=85",
+    brand: "Pure Nutrition",
+    title: "What I eat in a day",
+    instagramUrl: "https://instagram.com/p/reel-6",
+  },
+];
+
 export const PORTFOLIO = [
   "https://images.unsplash.com/photo-1527203561188-dae1bc1a417f?crop=entropy&cs=srgb&fm=jpg&w=400&q=80",
   "https://images.unsplash.com/photo-1601597565151-70c4020dc0e1?crop=entropy&cs=srgb&fm=jpg&w=400&q=80",

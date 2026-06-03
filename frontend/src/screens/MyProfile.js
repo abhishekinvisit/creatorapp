@@ -1,14 +1,14 @@
 import { useNavigate } from "react-router-dom";
-import { Settings, BadgeCheck, Instagram, Youtube, Globe, Pencil, Briefcase } from "lucide-react";
+import { Settings, BadgeCheck, Pencil, Briefcase, Share2, Instagram } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { useApp } from "@/context/AppContext";
-import { PORTFOLIO, BRANDS } from "@/data/mockData";
+import { REELS, BRANDS } from "@/data/mockData";
 import { BrandLogo } from "@/components/BrandLogo";
+import { ReelCard } from "@/components/ReelCard";
 
 export default function MyProfile() {
   const navigate = useNavigate();
   const { user, accountType } = useApp();
-  const dark = accountType === "brand";
 
   if (accountType === "brand") {
     const b = user.brand;
@@ -56,79 +56,130 @@ export default function MyProfile() {
     );
   }
 
-  // Creator profile
+  // ----- Creator profile (own view) -----
   const c = user.creator;
+  const workedWith = BRANDS.slice(0, 6);
+  const openInstagram = () => window.open(c.instagramUrl, "_blank", "noopener,noreferrer");
+
   return (
     <div data-testid="my-profile-creator" className="min-h-full bg-[#F9F9F8] pb-6">
-      <TopBar title="Profile" dark={false} rightSlot={
-        <button data-testid="open-settings" onClick={() => navigate("/settings")} className="w-10 h-10 rounded-full bg-black/5 flex items-center justify-center">
-          <Settings size={18} />
-        </button>
-      } />
+      <TopBar
+        title="Profile"
+        dark={false}
+        rightSlot={
+          <button data-testid="open-settings" onClick={() => navigate("/settings")} className="w-10 h-10 rounded-full bg-black/5 flex items-center justify-center">
+            <Settings size={18} />
+          </button>
+        }
+      />
 
+      {/* HEADER */}
       <div className="px-5">
-        <div className="flex items-start gap-4 mb-4">
-          <img src={c.avatar} alt={c.name} className="w-20 h-20 rounded-3xl object-cover" />
-          <div className="flex-1 pt-1">
-            <h2 className="font-display font-black text-xl text-[#0A0A0A] tracking-tight">{c.name}</h2>
-            <p className="text-sm text-[#525252] font-medium">{c.handle}</p>
-            <div className="flex items-center gap-3 mt-2 text-xs">
-              <span className="font-bold">{c.followers} <span className="font-medium text-[#525252]">Followers</span></span>
-              <span className="font-bold">{c.engagement} <span className="font-medium text-[#525252]">Eng.</span></span>
+        <div className="flex items-start gap-4">
+          <img
+            src={c.avatar}
+            alt={c.name}
+            className="w-[88px] h-[88px] rounded-[28px] object-cover ring-4 ring-white shadow-md flex-shrink-0"
+          />
+          <div className="flex-1 min-w-0 pt-0.5">
+            <h2 className="font-display font-black text-2xl text-[#0A0A0A] tracking-tight leading-tight">
+              {c.name}
+            </h2>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <p className="text-sm text-[#525252] font-medium truncate">{c.handle}</p>
+              <button
+                data-testid="ig-link"
+                onClick={openInstagram}
+                aria-label="Open Instagram"
+                className="w-6 h-6 rounded-full bg-gradient-to-tr from-[#E25238] via-[#F59E0B] to-[#E25238] flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform"
+              >
+                <Instagram size={12} className="text-white" strokeWidth={2.6} />
+              </button>
+            </div>
+
+            {/* Stats row: Followers + Brand Collaborations */}
+            <div className="flex items-center gap-5 mt-3">
+              <div data-testid="stat-followers">
+                <p className="font-display font-black text-base text-[#0A0A0A] leading-none">{c.followers}</p>
+                <p className="text-[10px] font-bold tracking-[0.15em] uppercase text-[#525252] mt-1">Followers</p>
+              </div>
+              <div className="w-px h-7 bg-[#E5E5E5]" />
+              <div data-testid="stat-collaborations">
+                <p className="font-display font-black text-base text-[#0A0A0A] leading-none">{c.collaborations}</p>
+                <p className="text-[10px] font-bold tracking-[0.15em] uppercase text-[#525252] mt-1">Collaborations</p>
+              </div>
             </div>
           </div>
         </div>
 
-        <p className="text-sm font-medium text-[#0A0A0A] mb-4 leading-relaxed">{c.bio}</p>
+        {/* Bio */}
+        <p className="text-sm font-medium text-[#0A0A0A] mt-5 leading-relaxed">{c.bio}</p>
 
-        <div className="flex flex-wrap gap-2 mb-5">
+        {/* Categories */}
+        <div className="flex flex-wrap gap-2 mt-4">
           {c.category.map((cat) => (
-            <span key={cat} className="px-3 py-1.5 rounded-full bg-white border border-[#E5E5E5] text-xs font-bold uppercase tracking-wider">{cat}</span>
+            <span
+              key={cat}
+              className="px-3 py-1.5 rounded-full bg-white border border-[#E5E5E5] text-[10px] font-bold uppercase tracking-[0.15em]"
+            >
+              {cat}
+            </span>
           ))}
         </div>
 
-        <div className="flex gap-3 mb-7">
-          <button data-testid="edit-profile-btn" onClick={() => navigate("/profile/edit")} className="flex-1 py-3 rounded-full border-2 border-[#0A0A0A] font-bold text-sm flex items-center justify-center gap-2">
+        {/* Worked With – small horizontal logo row */}
+        <div className="mt-6">
+          <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#525252] mb-3">Worked With</p>
+          <div data-testid="worked-with" className="flex items-center gap-2 overflow-x-auto scrollbar-hide -mx-1 px-1">
+            {workedWith.map((b) => (
+              <div key={b.id} title={b.name} className="flex-shrink-0">
+                <BrandLogo name={b.name} size={36} />
+              </div>
+            ))}
+            <div className="flex-shrink-0 w-9 h-9 rounded-2xl bg-white border border-[#E5E5E5] flex items-center justify-center text-[10px] font-black text-[#525252]">
+              +12
+            </div>
+          </div>
+        </div>
+
+        {/* Action buttons */}
+        <div className="flex gap-3 mt-6">
+          <button
+            data-testid="edit-profile-btn"
+            onClick={() => navigate("/profile/edit")}
+            className="flex-1 py-3 rounded-full border-2 border-[#0A0A0A] font-bold text-sm flex items-center justify-center gap-2 hover:bg-[#0A0A0A] hover:text-white transition-colors"
+          >
             <Pencil size={14} /> Edit Profile
           </button>
-          <button data-testid="share-profile-btn" className="flex-1 py-3 rounded-full bg-[#0A0A0A] text-white font-bold text-sm">Share Profile</button>
-        </div>
-
-        <div className="mb-7">
-          <h3 className="font-display font-bold text-base text-[#0A0A0A] mb-3">Portfolio</h3>
-          <div className="grid grid-cols-3 gap-2">
-            {PORTFOLIO.map((p, i) => (
-              <div key={i} className="aspect-square rounded-2xl overflow-hidden">
-                <img src={p} className="w-full h-full object-cover" alt="" />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="mb-7">
-          <h3 className="font-display font-bold text-base text-[#0A0A0A] mb-3">Past Collaborations</h3>
-          <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide">
-            {BRANDS.slice(0, 5).map((b) => (
-              <div key={b.id} className="flex flex-col items-center gap-1 flex-shrink-0">
-                <BrandLogo name={b.name} size={48} />
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#525252]">{b.name.split(" ")[0]}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="mb-7">
-          <h3 className="font-display font-bold text-base text-[#0A0A0A] mb-3">Social Links</h3>
-          <div className="flex gap-3">
-            {[Instagram, Youtube, Globe].map((Icon, i) => (
-              <div key={i} className="w-12 h-12 rounded-2xl bg-white border border-[#E5E5E5] flex items-center justify-center">
-                <Icon size={18} />
-              </div>
-            ))}
-          </div>
+          <button
+            data-testid="share-profile-btn"
+            className="px-5 py-3 rounded-full bg-[#0A0A0A] text-white font-bold text-sm flex items-center justify-center gap-2"
+          >
+            <Share2 size={14} /> Share
+          </button>
         </div>
       </div>
 
+      {/* PORTFOLIO – main focus */}
+      <div className="mt-9">
+        <div className="px-5 flex items-end justify-between mb-4">
+          <div>
+            <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#E25238]">Portfolio</p>
+            <h3 className="font-display font-black text-2xl text-[#0A0A0A] tracking-tight leading-tight mt-1">
+              Featured Reels
+            </h3>
+          </div>
+          <span className="text-xs font-bold uppercase tracking-wider text-[#525252]">
+            {REELS.length} reels
+          </span>
+        </div>
+
+        <div data-testid="reels-grid" className="px-5 grid grid-cols-2 gap-3">
+          {REELS.map((r, i) => (
+            <ReelCard key={r.id} reel={r} testId={`reel-${r.id}`} delay={i * 70} />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
