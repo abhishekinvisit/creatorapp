@@ -10,7 +10,7 @@ body {
     font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background-color: #111111;
+    background-color: #F9F9F8;
     color: #0A0A0A;
     overflow-x: hidden;
 }
@@ -26,30 +26,11 @@ h1, h2, h3, h4, h5, h6, .font-display {
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* ── Phone frame wrapper (desktop bg) ── */
-.phone-frame-wrapper {
-    background-color: #111111;
-    background-image:
-        radial-gradient(ellipse at 15% 50%, rgba(226, 82, 56, 0.12) 0px, transparent 55%),
-        radial-gradient(ellipse at 85% 20%, rgba(245, 158, 11, 0.07) 0px, transparent 50%),
-        radial-gradient(ellipse at 60% 85%, rgba(99, 102, 241, 0.05) 0px, transparent 45%);
-    min-height: 100dvh;
-}
-
-/* Mobile: plain bg, no radial decorations */
-@media (max-width: 639px) {
-    .phone-frame-wrapper {
-        background: #F9F9F8;
-        background-image: none;
-        padding: 0;
-    }
-}
-
 /* ── App screen themes ── */
-.app-screen { background-color: #F9F9F8; }
+.app-screen      { background-color: #F9F9F8; }
 .app-screen-dark { background-color: #0A0A0A; color: #F9F9F8; }
 
-/* ── Grain overlay ── */
+/* ── Grain overlay (mobile only) ── */
 .grain::before {
     content: "";
     position: absolute;
@@ -60,6 +41,11 @@ h1, h2, h3, h4, h5, h6, .font-display {
     z-index: 100;
 }
 
+/* Hide grain on tablet and desktop — clean web look */
+@media (min-width: 640px) {
+    .grain::before { display: none; }
+}
+
 /* ── Animations ── */
 @keyframes fadeInUp {
     from { opacity: 0; transform: translateY(12px); }
@@ -67,19 +53,23 @@ h1, h2, h3, h4, h5, h6, .font-display {
 }
 .animate-fade-up { animation: fadeInUp 0.4s ease-out forwards; }
 
-@keyframes fadeInLeft {
-    from { opacity: 0; transform: translateX(-16px); }
-    to   { opacity: 1; transform: translateX(0); }
-}
-.animate-fade-left { animation: fadeInLeft 0.5s ease-out forwards; }
-
 @keyframes pulseRing {
     0%   { box-shadow: 0 0 0 0 rgba(226, 82, 56, 0.6); }
     100% { box-shadow: 0 0 0 16px rgba(226, 82, 56, 0); }
 }
 .pulse-ring { animation: pulseRing 1.8s infinite; }
 
-/* ── Shadcn CSS vars ── */
+/* ── Touch target sizing on mobile ── */
+@media (max-width: 639px) {
+    button { min-height: 44px; }
+}
+
+/* ── Safe area insets for notched phones ── */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+    .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+}
+
+/* ── Shadcn/ui CSS vars ── */
 @layer base {
     :root {
         --background: 40 6% 97%;
@@ -108,15 +98,4 @@ h1, h2, h3, h4, h5, h6, .font-display {
 @layer base {
     * { @apply border-border; }
     body { @apply bg-background text-foreground; }
-}
-
-/* ── Touch target sizing on mobile ── */
-@media (max-width: 639px) {
-    button, a[role="button"] { min-height: 44px; }
-}
-
-/* ── Safe area insets for notched phones ── */
-@supports (padding-top: env(safe-area-inset-top)) {
-    .safe-top    { padding-top: env(safe-area-inset-top); }
-    .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
 }
