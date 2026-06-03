@@ -1,0 +1,72 @@
+import { useState } from "react";
+import { X } from "lucide-react";
+import { useApp } from "@/context/AppContext";
+
+export const ApplyDialog = ({ opportunity, onClose, onApplied }) => {
+  const { user, addApplication } = useApp();
+  const [note, setNote] = useState("");
+
+  const handleApply = () => {
+    addApplication(opportunity.id, opportunity.brandName);
+    onApplied();
+  };
+
+  return (
+    <div data-testid="apply-dialog" className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-up" onClick={onClose}>
+      <div className="w-full sm:max-w-md bg-white rounded-t-3xl sm:rounded-3xl p-6 max-h-[92vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-start justify-between mb-5">
+          <div>
+            <h2 className="font-display font-black text-2xl text-[#0A0A0A] tracking-tight">Apply for this opportunity</h2>
+            <p className="text-sm text-[#525252] mt-1 font-medium">Your OLLCOLLAB profile will be shared with this brand.</p>
+          </div>
+          <button data-testid="apply-close" onClick={onClose} className="w-9 h-9 rounded-full bg-[#F3F3F3] flex items-center justify-center flex-shrink-0">
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Profile preview */}
+        <div className="bg-[#F9F9F8] rounded-2xl p-4 flex items-center gap-4 mb-5 border border-[#E5E5E5]">
+          <img src={user.creator.avatar} alt={user.creator.name} className="w-14 h-14 rounded-full object-cover" />
+          <div className="flex-1">
+            <p className="font-display font-bold text-base text-[#0A0A0A]">{user.creator.name}</p>
+            <p className="text-xs text-[#525252] font-medium">{user.creator.handle}</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-3 mb-5">
+          {[
+            { label: "Followers", value: user.creator.followers },
+            { label: "Engagement", value: user.creator.engagement },
+            { label: "Collabs", value: user.creator.collaborations },
+          ].map((s) => (
+            <div key={s.label} className="bg-[#F9F9F8] rounded-2xl p-3 text-center border border-[#E5E5E5]">
+              <p className="font-display font-black text-lg text-[#0A0A0A]">{s.value}</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[#525252] mt-0.5">{s.label}</p>
+            </div>
+          ))}
+        </div>
+
+        <p className="text-xs font-bold tracking-[0.2em] uppercase text-[#525252] mb-2">Cover Note (Optional)</p>
+        <p className="text-xs text-[#525252] mb-2 font-medium">Tell the brand why you're a great fit.</p>
+        <textarea
+          data-testid="cover-note"
+          value={note}
+          onChange={(e) => setNote(e.target.value.slice(0, 300))}
+          rows={4}
+          placeholder="Write your note here..."
+          className="w-full px-4 py-3 rounded-2xl bg-[#F9F9F8] border border-[#E5E5E5] outline-none focus:border-[#0A0A0A] text-sm font-medium resize-none"
+        />
+        <p className="text-xs text-[#525252] text-right mt-1 font-medium">{note.length}/300</p>
+
+        <div className="flex gap-3 mt-5">
+          <button data-testid="apply-cancel" onClick={onClose} className="flex-1 py-4 rounded-full border border-[#E5E5E5] font-bold text-sm">
+            Cancel
+          </button>
+          <button data-testid="apply-submit" onClick={handleApply} className="flex-1 py-4 rounded-full bg-[#0A0A0A] text-white font-bold text-sm hover:bg-[#E25238] transition-colors">
+            Apply
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
