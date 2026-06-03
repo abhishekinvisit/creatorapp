@@ -21,9 +21,28 @@ export default function HomeFeed() {
 
   return (
     <div data-testid="home-feed" className="min-h-full bg-[#F9F9F8] pb-6">
-      <TopBar title="Home" showBack={false} showMenu showBell />
+      <TopBar
+        title=""
+        showBack={false}
+        showMenu
+        showBell
+        rightSlot={
+          <div className="hidden" />
+        }
+      />
+      {/* Brand wordmark + tagline */}
+      <div className="-mt-12 px-5 pb-3 flex flex-col items-center pointer-events-none">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-[10px] bg-gradient-to-br from-[#E25238] to-[#F59E0B] flex items-center justify-center">
+            <div className="w-3 h-3 rounded-full border-2 border-white" />
+          </div>
+          <h1 className="font-display font-black text-2xl tracking-[-0.04em] text-[#0A0A0A]">
+            OLLCOLLAB
+          </h1>
+        </div>
+      </div>
 
-      <div className="px-5 pb-4">
+      <div className="px-5 pb-4 pt-2">
         {/* Search */}
         <div className="bg-white rounded-2xl border border-[#E5E5E5] flex items-center px-4 py-3.5 mb-4">
           <Search size={18} className="text-[#525252]" />
@@ -58,64 +77,64 @@ export default function HomeFeed() {
         </div>
       </div>
 
-      {/* Opportunity cards */}
-      <div className="px-5 space-y-4">
+      {/* Opportunity cards (compact) */}
+      <div className="px-5 space-y-3">
         {filtered.map((op, idx) => {
           const saved = isSaved(op.id);
           return (
           <div
             key={op.id}
             className="relative animate-fade-up"
-            style={{ animationDelay: `${idx * 80}ms` }}
+            style={{ animationDelay: `${idx * 60}ms` }}
           >
             <button
               data-testid={`opportunity-${op.id}`}
               onClick={() => navigate(`/opportunity/${op.id}`)}
-              className="w-full text-left bg-white rounded-3xl overflow-hidden border border-[#E5E5E5] hover:-translate-y-1 hover:shadow-xl transition-all"
+              className="w-full text-left bg-white rounded-3xl overflow-hidden border border-[#E5E5E5] hover:-translate-y-0.5 hover:shadow-lg transition-all flex"
             >
-              <div className="relative h-32 overflow-hidden">
-                <img src={op.cover} alt={op.title} className="w-full h-full object-cover" />
-                <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-white/95 backdrop-blur text-xs font-bold uppercase tracking-wider">
+              {/* Left thumbnail */}
+              <div className="relative w-28 flex-shrink-0">
+                <img src={op.cover} alt={op.title} className="absolute inset-0 w-full h-full object-cover" />
+                <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded-full bg-white/95 backdrop-blur text-[9px] font-bold uppercase tracking-wider">
                   {op.category}
                 </div>
               </div>
-              <div className="p-5">
-                <div className="flex items-center gap-3 mb-3">
-                  <BrandLogo name={op.brandName} size={40} />
+
+              {/* Right body */}
+              <div className="flex-1 min-w-0 p-3.5 pr-12">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <BrandLogo name={op.brandName} size={28} />
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <h3 className="font-display font-bold text-base text-[#0A0A0A] truncate">{op.brandName}</h3>
-                      {op.verified && <BadgeCheck size={16} className="text-[#E25238] flex-shrink-0" fill="#E25238" stroke="white" />}
+                    <div className="flex items-center gap-1">
+                      <h3 className="font-display font-bold text-sm text-[#0A0A0A] truncate">{op.brandName}</h3>
+                      {op.verified && <BadgeCheck size={12} className="text-[#E25238] flex-shrink-0" fill="#E25238" stroke="white" />}
                     </div>
-                    <p className="text-xs text-[#525252] font-medium">{op.brandCategory}</p>
+                    <p className="text-[10px] text-[#525252] font-medium truncate">{op.brandCategory}</p>
                   </div>
                 </div>
 
-                <p className="text-sm font-medium text-[#0A0A0A] mb-4 leading-snug">{op.pitch}</p>
+                <p className="text-xs font-medium text-[#0A0A0A] leading-snug line-clamp-2 mb-2">
+                  {op.pitch}
+                </p>
 
-                <div className="space-y-2 mb-4">
-                  <div className="flex items-center gap-2 text-sm text-[#525252]">
-                    <Wallet size={14} className="text-[#E25238]" />
+                <div className="flex items-center gap-3 text-[11px] text-[#525252] flex-wrap">
+                  <span className="flex items-center gap-1">
+                    <Wallet size={11} className="text-[#E25238]" />
                     <span className="font-bold text-[#0A0A0A]">₹{op.payout}</span>
-                    <span className="font-medium">per reel</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-[#525252]">
-                    <Calendar size={14} className="text-[#E25238]" />
-                    <span className="font-medium">Apply before {op.deadline}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-[#525252]">
-                    <Users size={14} className="text-[#E25238]" />
-                    <span className="font-medium">{op.creatorsNeeded} Creators Needed</span>
-                  </div>
-                </div>
-
-                <div className="bg-[#0A0A0A] text-white text-center py-3 rounded-full font-bold text-sm hover:bg-[#E25238] transition-colors">
-                  View Details
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Users size={11} className="text-[#E25238]" />
+                    <span className="font-medium">{op.creatorsNeeded}</span>
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Calendar size={11} className="text-[#E25238]" />
+                    <span className="font-medium truncate">{op.deadline}</span>
+                  </span>
                 </div>
               </div>
             </button>
 
-            {/* Save button overlay */}
+            {/* Save button */}
             <button
               data-testid={`save-${op.id}`}
               onClick={(e) => {
@@ -124,10 +143,10 @@ export default function HomeFeed() {
                 toast.success(saved ? "Removed from saved" : "Saved");
               }}
               aria-label={saved ? "Unsave" : "Save"}
-              className="absolute top-3 right-3 w-10 h-10 rounded-full bg-white/95 backdrop-blur flex items-center justify-center hover:scale-110 transition-transform shadow-md"
+              className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white/95 backdrop-blur flex items-center justify-center hover:scale-110 transition-transform shadow-sm"
             >
               <Bookmark
-                size={16}
+                size={13}
                 className={saved ? "text-[#E25238]" : "text-[#0A0A0A]"}
                 fill={saved ? "#E25238" : "none"}
                 strokeWidth={saved ? 0 : 2}
