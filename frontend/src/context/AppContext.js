@@ -1,5 +1,5 @@
 import { createContext, useContext, useState } from "react";
-import { DEFAULT_USER, MY_APPLICATIONS, OPPORTUNITIES, MESSAGES_THREADS, NOTIFICATIONS, ACTIVE_POSTS } from "@/data/mockData";
+import { DEFAULT_USER, MY_APPLICATIONS, OPPORTUNITIES, MESSAGES_THREADS, NOTIFICATIONS, ACTIVE_POSTS, BRANDS } from "@/data/mockData";
 
 const AppContext = createContext(null);
 
@@ -7,6 +7,7 @@ export const AppProvider = ({ children }) => {
   const [accountType, setAccountType] = useState("creator"); // "creator" | "brand"
   const [isAuthed, setIsAuthed] = useState(false);
   const [user, setUser] = useState(DEFAULT_USER);
+  const [workedWith, setWorkedWith] = useState(BRANDS.slice(0, 6));
   const [applications, setApplications] = useState(MY_APPLICATIONS);
   const [opportunities, setOpportunities] = useState(OPPORTUNITIES);
   const [threads] = useState(MESSAGES_THREADS);
@@ -47,6 +48,7 @@ export const AppProvider = ({ children }) => {
         accountType, setAccountType, switchMode,
         isAuthed, setIsAuthed, logout,
         user, setUser,
+        workedWith, setWorkedWith,
         applications, addApplication, withdrawApplication,
         opportunities,
         threads,

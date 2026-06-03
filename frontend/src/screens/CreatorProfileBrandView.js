@@ -4,6 +4,7 @@ import { TopBar } from "@/components/TopBar";
 import { BrandLogo } from "@/components/BrandLogo";
 import { APPLICANTS, REELS, BRANDS } from "@/data/mockData";
 import { ReelCard } from "@/components/ReelCard";
+import { WorkedWithItem } from "@/components/WorkedWithItem";
 import { toast } from "sonner";
 
 export default function CreatorProfileBrandView() {
@@ -73,16 +74,16 @@ export default function CreatorProfileBrandView() {
         </div>
 
         <div className="mt-6">
-          <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#525252] mb-3">Worked With</p>
-          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide -mx-1 px-1">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#525252]">Worked With</p>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#525252]">
+              {workedWith.length} brands
+            </span>
+          </div>
+          <div className="flex items-start gap-3 overflow-x-auto scrollbar-hide -mx-1 px-1 pb-1">
             {workedWith.map((b) => (
-              <div key={b.id} title={b.name} className="flex-shrink-0">
-                <BrandLogo name={b.name} size={36} />
-              </div>
+              <WorkedWithItem key={b.id} brand={b} />
             ))}
-            <div className="flex-shrink-0 w-9 h-9 rounded-2xl bg-white border border-[#E5E5E5] flex items-center justify-center text-[10px] font-black text-[#525252]">
-              +12
-            </div>
           </div>
         </div>
       </div>

@@ -216,9 +216,10 @@ export const DEFAULT_USER = {
     category: ["Lifestyle", "Fashion", "Beauty"],
     followers: "124K",
     engagement: "8.2%",
-    collaborations: 48,
+    collaborations: 42,
     avatar: CREATOR_AVATARS[0],
     socials: { instagram: "@riya.sharmaa", youtube: "riyasharmaa", tiktok: "riyaa" },
+    instagramUrl: "https://instagram.com/riya.sharmaa",
   },
   brand: {
     name: "Glow Skincare",

@@ -4,11 +4,12 @@ import { TopBar } from "@/components/TopBar";
 import { useApp } from "@/context/AppContext";
 import { REELS, BRANDS } from "@/data/mockData";
 import { BrandLogo } from "@/components/BrandLogo";
+import { WorkedWithItem } from "@/components/WorkedWithItem";
 import { ReelCard } from "@/components/ReelCard";
 
 export default function MyProfile() {
   const navigate = useNavigate();
-  const { user, accountType } = useApp();
+  const { user, accountType, workedWith } = useApp();
 
   if (accountType === "brand") {
     const b = user.brand;
@@ -58,7 +59,6 @@ export default function MyProfile() {
 
   // ----- Creator profile (own view) -----
   const c = user.creator;
-  const workedWith = BRANDS.slice(0, 6);
   const openInstagram = () => window.open(c.instagramUrl, "_blank", "noopener,noreferrer");
 
   return (
@@ -127,18 +127,18 @@ export default function MyProfile() {
           ))}
         </div>
 
-        {/* Worked With – small horizontal logo row */}
+        {/* Worked With – small horizontal logo row with names */}
         <div className="mt-6">
-          <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#525252] mb-3">Worked With</p>
-          <div data-testid="worked-with" className="flex items-center gap-2 overflow-x-auto scrollbar-hide -mx-1 px-1">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#525252]">Worked With</p>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#525252]">
+              {workedWith.length} brands
+            </span>
+          </div>
+          <div data-testid="worked-with" className="flex items-start gap-3 overflow-x-auto scrollbar-hide -mx-1 px-1 pb-1">
             {workedWith.map((b) => (
-              <div key={b.id} title={b.name} className="flex-shrink-0">
-                <BrandLogo name={b.name} size={36} />
-              </div>
+              <WorkedWithItem key={b.id} brand={b} />
             ))}
-            <div className="flex-shrink-0 w-9 h-9 rounded-2xl bg-white border border-[#E5E5E5] flex items-center justify-center text-[10px] font-black text-[#525252]">
-              +12
-            </div>
           </div>
         </div>
 

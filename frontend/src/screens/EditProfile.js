@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Camera, Plus, X, Instagram, Link2, Pencil } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { BrandLogo } from "@/components/BrandLogo";
+import { WorkedWithItem } from "@/components/WorkedWithItem";
 import { useApp } from "@/context/AppContext";
 import { REELS as DEFAULT_REELS, BRANDS } from "@/data/mockData";
 import { toast } from "sonner";
@@ -11,7 +12,7 @@ const ALL_CATEGORIES = ["Lifestyle", "Fashion", "Beauty", "Fitness", "Food", "Te
 
 export default function EditProfile() {
   const navigate = useNavigate();
-  const { user, setUser, accountType } = useApp();
+  const { user, setUser, accountType, workedWith, setWorkedWith } = useApp();
   const profile = accountType === "brand" ? user.brand : user.creator;
 
   // Form state
@@ -20,7 +21,6 @@ export default function EditProfile() {
   const [bio, setBio] = useState(profile.bio);
   const [instagramUrl, setInstagramUrl] = useState(profile.instagramUrl || `https://instagram.com/${(profile.handle || "").replace("@", "")}`);
   const [cats, setCats] = useState(profile.category);
-  const [workedWith, setWorkedWith] = useState(BRANDS.slice(0, 6));
   const [reels, setReels] = useState(DEFAULT_REELS);
   const [showBrandPicker, setShowBrandPicker] = useState(false);
   const [editingReel, setEditingReel] = useState(null); // null | "new" | reelId
@@ -168,30 +168,37 @@ export default function EditProfile() {
 
         {/* Worked With */}
         {accountType !== "brand" && (
-          <Section label="Worked With" hint="Brands you've collaborated with.">
-            <div className="flex flex-wrap items-center gap-3">
-              {workedWith.map((b) => (
-                <div key={b.id} className="relative group" data-testid={`worked-${b.id}`}>
-                  <BrandLogo name={b.name} size={48} />
-                  <button
-                    data-testid={`worked-remove-${b.id}`}
-                    onClick={() => removeBrand(b.id)}
-                    className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-[#EF4444] text-white flex items-center justify-center shadow-md"
-                    aria-label={`Remove ${b.name}`}
-                  >
-                    <X size={11} strokeWidth={3} />
-                  </button>
-                </div>
-              ))}
+          <Section
+            label="Worked With"
+            hint="Brands you've collaborated with — shown on your profile."
+            action={
               <button
                 data-testid="add-brand"
                 onClick={() => setShowBrandPicker(true)}
-                className="w-12 h-12 rounded-2xl border-2 border-dashed border-[#0A0A0A] flex items-center justify-center hover:bg-[#0A0A0A] hover:text-white transition-colors"
-                aria-label="Add brand"
+                className="px-4 py-2 bg-[#0A0A0A] text-white rounded-full text-xs font-bold uppercase tracking-[0.15em] flex items-center gap-1.5"
               >
-                <Plus size={18} />
+                <Plus size={14} strokeWidth={2.6} /> Add Brand
               </button>
-            </div>
+            }
+          >
+            {workedWith.length === 0 ? (
+              <p className="text-sm text-[#525252] py-6 text-center font-medium">No brands yet. Tap "Add Brand" to start.</p>
+            ) : (
+              <div className="flex flex-wrap items-start gap-3">
+                {workedWith.map((b) => (
+                  <WorkedWithItem key={b.id} brand={b}>
+                    <button
+                      data-testid={`worked-remove-${b.id}`}
+                      onClick={() => removeBrand(b.id)}
+                      className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-[#EF4444] text-white flex items-center justify-center shadow-md hover:scale-110 transition-transform"
+                      aria-label={`Remove ${b.name}`}
+                    >
+                      <X size={11} strokeWidth={3} />
+                    </button>
+                  </WorkedWithItem>
+                ))}
+              </div>
+            )}
           </Section>
         )}
 
@@ -259,7 +266,7 @@ export default function EditProfile() {
       {/* Brand picker modal */}
       {showBrandPicker && (
         <PickerModal title="Add Brand" onClose={() => setShowBrandPicker(false)}>
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             {BRANDS.map((b) => {
               const added = workedWith.find((w) => w.id === b.id);
               return (
@@ -268,14 +275,17 @@ export default function EditProfile() {
                   data-testid={`pick-brand-${b.id}`}
                   onClick={() => !added && addBrand(b)}
                   disabled={!!added}
-                  className={`flex flex-col items-center gap-1.5 p-2 rounded-2xl transition-all ${
-                    added ? "opacity-40" : "hover:bg-[#F3F3F3]"
+                  className={`flex flex-col items-center gap-2 p-3 rounded-2xl transition-all ${
+                    added ? "opacity-40 cursor-not-allowed" : "hover:bg-[#F3F3F3]"
                   }`}
                 >
                   <BrandLogo name={b.name} size={48} />
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#525252] truncate w-full text-center">
-                    {b.name.split(" ")[0]}
+                  <span className="text-[11px] font-bold text-[#0A0A0A] truncate w-full text-center">
+                    {b.name}
                   </span>
+                  {added && (
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-[#525252]">Added</span>
+                  )}
                 </button>
               );
             })}
