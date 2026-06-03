@@ -1,10 +1,10 @@
-import { Home, Search, ClipboardList, MessageCircle, User, LayoutDashboard, Megaphone, Users } from "lucide-react";
+import { Home, Bookmark, ClipboardList, MessageCircle, User, LayoutDashboard, Megaphone, Users } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useApp } from "@/context/AppContext";
 
 const creatorItems = [
   { id: "home", label: "Home", icon: Home, path: "/home" },
-  { id: "search", label: "Search", icon: Search, path: "/search" },
+  { id: "saved", label: "Saved", icon: Bookmark, path: "/saved" },
   { id: "apps", label: "Applications", icon: ClipboardList, path: "/applications" },
   { id: "msg", label: "Messages", icon: MessageCircle, path: "/messages" },
   { id: "profile", label: "Profile", icon: User, path: "/profile" },

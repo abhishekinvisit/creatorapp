@@ -13,6 +13,7 @@ export const AppProvider = ({ children }) => {
   const [threads, setThreads] = useState(MESSAGES_THREADS);
   const [notifications, setNotifications] = useState(NOTIFICATIONS);
   const [activePosts, setActivePosts] = useState(ACTIVE_POSTS);
+  const [savedIds, setSavedIds] = useState([]);
   const [draftOpportunity, setDraftOpportunity] = useState({});
 
   const switchMode = (mode) => setAccountType(mode);
@@ -62,6 +63,12 @@ export const AppProvider = ({ children }) => {
     setActivePosts((prev) => prev.filter((p) => p.id !== id));
   };
 
+  const isSaved = (id) => savedIds.includes(id);
+  const toggleSave = (id) => {
+    setSavedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [id, ...prev]));
+  };
+  const savedOpportunities = opportunities.filter((o) => savedIds.includes(o.id));
+
   const markAllNotificationsRead = () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
   };
@@ -99,6 +106,7 @@ export const AppProvider = ({ children }) => {
         getOrCreateThread,
         notifications, markAllNotificationsRead,
         activePosts, publishOpportunity, updatePost, deletePost,
+        savedIds, isSaved, toggleSave, savedOpportunities,
         draftOpportunity, setDraftOpportunity,
       }}
     >

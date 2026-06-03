@@ -5,17 +5,28 @@ import { TopBar } from "@/components/TopBar";
 import { BrandLogo } from "@/components/BrandLogo";
 import { useApp } from "@/context/AppContext";
 import { ApplyDialog } from "@/screens/ApplyDialog";
+import { toast } from "sonner";
 
 export default function OpportunityDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { opportunities } = useApp();
+  const { opportunities, isSaved, toggleSave } = useApp();
   const [showApply, setShowApply] = useState(false);
   const op = opportunities.find((o) => o.id === id) || opportunities[0];
+  const saved = isSaved(op.id);
 
   return (
     <div data-testid="opportunity-details" className="min-h-full bg-[#F9F9F8] flex flex-col pb-2">
-      <TopBar title="" showBack showBookmark />
+      <TopBar
+        title=""
+        showBack
+        showBookmark
+        bookmarkActive={saved}
+        onBookmarkClick={() => {
+          toggleSave(op.id);
+          toast.success(saved ? "Removed from saved" : "Saved");
+        }}
+      />
 
       <div className="px-5">
         {/* Brand header */}

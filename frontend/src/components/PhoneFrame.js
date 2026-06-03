@@ -7,6 +7,7 @@ const DARK_ROUTES = ["/brand/dashboard", "/brand/applicants", "/brand/post", "/b
 const NAV_ROUTES = new Set([
   "/home",
   "/search",
+  "/saved",
   "/applications",
   "/messages",
   "/profile",

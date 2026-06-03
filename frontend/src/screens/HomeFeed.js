@@ -1,14 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, SlidersHorizontal, Wallet, Calendar, Users, BadgeCheck } from "lucide-react";
+import { Search, SlidersHorizontal, Wallet, Calendar, Users, BadgeCheck, Bookmark } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { BrandLogo } from "@/components/BrandLogo";
 import { CATEGORIES } from "@/data/mockData";
 import { useApp } from "@/context/AppContext";
+import { toast } from "sonner";
 
 export default function HomeFeed() {
   const navigate = useNavigate();
-  const { opportunities } = useApp();
+  const { opportunities, isSaved, toggleSave } = useApp();
   const [activeCat, setActiveCat] = useState("All");
   const [search, setSearch] = useState("");
 
@@ -59,56 +60,82 @@ export default function HomeFeed() {
 
       {/* Opportunity cards */}
       <div className="px-5 space-y-4">
-        {filtered.map((op, idx) => (
-          <button
+        {filtered.map((op, idx) => {
+          const saved = isSaved(op.id);
+          return (
+          <div
             key={op.id}
-            data-testid={`opportunity-${op.id}`}
-            onClick={() => navigate(`/opportunity/${op.id}`)}
-            className="w-full text-left bg-white rounded-3xl overflow-hidden border border-[#E5E5E5] hover:-translate-y-1 hover:shadow-xl transition-all animate-fade-up"
+            className="relative animate-fade-up"
             style={{ animationDelay: `${idx * 80}ms` }}
           >
-            <div className="relative h-32 overflow-hidden">
-              <img src={op.cover} alt={op.title} className="w-full h-full object-cover" />
-              <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-white/95 backdrop-blur text-xs font-bold uppercase tracking-wider">
-                {op.category}
+            <button
+              data-testid={`opportunity-${op.id}`}
+              onClick={() => navigate(`/opportunity/${op.id}`)}
+              className="w-full text-left bg-white rounded-3xl overflow-hidden border border-[#E5E5E5] hover:-translate-y-1 hover:shadow-xl transition-all"
+            >
+              <div className="relative h-32 overflow-hidden">
+                <img src={op.cover} alt={op.title} className="w-full h-full object-cover" />
+                <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-white/95 backdrop-blur text-xs font-bold uppercase tracking-wider">
+                  {op.category}
+                </div>
               </div>
-            </div>
-            <div className="p-5">
-              <div className="flex items-center gap-3 mb-3">
-                <BrandLogo name={op.brandName} size={40} />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <h3 className="font-display font-bold text-base text-[#0A0A0A] truncate">{op.brandName}</h3>
-                    {op.verified && <BadgeCheck size={16} className="text-[#E25238] flex-shrink-0" fill="#E25238" stroke="white" />}
+              <div className="p-5">
+                <div className="flex items-center gap-3 mb-3">
+                  <BrandLogo name={op.brandName} size={40} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <h3 className="font-display font-bold text-base text-[#0A0A0A] truncate">{op.brandName}</h3>
+                      {op.verified && <BadgeCheck size={16} className="text-[#E25238] flex-shrink-0" fill="#E25238" stroke="white" />}
+                    </div>
+                    <p className="text-xs text-[#525252] font-medium">{op.brandCategory}</p>
                   </div>
-                  <p className="text-xs text-[#525252] font-medium">{op.brandCategory}</p>
+                </div>
+
+                <p className="text-sm font-medium text-[#0A0A0A] mb-4 leading-snug">{op.pitch}</p>
+
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-center gap-2 text-sm text-[#525252]">
+                    <Wallet size={14} className="text-[#E25238]" />
+                    <span className="font-bold text-[#0A0A0A]">₹{op.payout}</span>
+                    <span className="font-medium">per reel</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-[#525252]">
+                    <Calendar size={14} className="text-[#E25238]" />
+                    <span className="font-medium">Apply before {op.deadline}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-[#525252]">
+                    <Users size={14} className="text-[#E25238]" />
+                    <span className="font-medium">{op.creatorsNeeded} Creators Needed</span>
+                  </div>
+                </div>
+
+                <div className="bg-[#0A0A0A] text-white text-center py-3 rounded-full font-bold text-sm hover:bg-[#E25238] transition-colors">
+                  View Details
                 </div>
               </div>
+            </button>
 
-              <p className="text-sm font-medium text-[#0A0A0A] mb-4 leading-snug">{op.pitch}</p>
-
-              <div className="space-y-2 mb-4">
-                <div className="flex items-center gap-2 text-sm text-[#525252]">
-                  <Wallet size={14} className="text-[#E25238]" />
-                  <span className="font-bold text-[#0A0A0A]">₹{op.payout}</span>
-                  <span className="font-medium">per reel</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-[#525252]">
-                  <Calendar size={14} className="text-[#E25238]" />
-                  <span className="font-medium">Apply before {op.deadline}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-[#525252]">
-                  <Users size={14} className="text-[#E25238]" />
-                  <span className="font-medium">{op.creatorsNeeded} Creators Needed</span>
-                </div>
-              </div>
-
-              <div className="bg-[#0A0A0A] text-white text-center py-3 rounded-full font-bold text-sm hover:bg-[#E25238] transition-colors">
-                View Details
-              </div>
-            </div>
-          </button>
-        ))}
+            {/* Save button overlay */}
+            <button
+              data-testid={`save-${op.id}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleSave(op.id);
+                toast.success(saved ? "Removed from saved" : "Saved");
+              }}
+              aria-label={saved ? "Unsave" : "Save"}
+              className="absolute top-3 right-3 w-10 h-10 rounded-full bg-white/95 backdrop-blur flex items-center justify-center hover:scale-110 transition-transform shadow-md"
+            >
+              <Bookmark
+                size={16}
+                className={saved ? "text-[#E25238]" : "text-[#0A0A0A]"}
+                fill={saved ? "#E25238" : "none"}
+                strokeWidth={saved ? 0 : 2}
+              />
+            </button>
+          </div>
+          );
+        })}
 
         {filtered.length === 0 && (
           <div className="text-center py-16">

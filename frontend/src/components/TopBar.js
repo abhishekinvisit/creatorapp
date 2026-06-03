@@ -1,7 +1,7 @@
 import { ChevronLeft, Bell, Menu, Bookmark, MoreVertical } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-export const TopBar = ({ title, showBack = true, showMenu = false, showBell = false, showBookmark = false, showMore = false, dark = false, onMenuClick, rightSlot }) => {
+export const TopBar = ({ title, showBack = true, showMenu = false, showBell = false, showBookmark = false, bookmarkActive = false, onBookmarkClick, showMore = false, dark = false, onMenuClick, rightSlot }) => {
   const navigate = useNavigate();
   const textCls = dark ? "text-white" : "text-[#0A0A0A]";
   const iconBtnCls = `w-10 h-10 rounded-full flex items-center justify-center ${dark ? "bg-white/10 hover:bg-white/20" : "bg-black/5 hover:bg-black/10"} transition-colors`;
@@ -24,8 +24,18 @@ export const TopBar = ({ title, showBack = true, showMenu = false, showBell = fa
       <div className="flex items-center gap-2">
         {rightSlot}
         {showBookmark && (
-          <button data-testid="topbar-bookmark" className={iconBtnCls}>
-            <Bookmark size={18} className={textCls} />
+          <button
+            data-testid="topbar-bookmark"
+            onClick={onBookmarkClick}
+            className={iconBtnCls}
+            aria-label={bookmarkActive ? "Remove from saved" : "Save"}
+          >
+            <Bookmark
+              size={18}
+              className={bookmarkActive ? "text-[#E25238]" : textCls}
+              fill={bookmarkActive ? "#E25238" : "none"}
+              strokeWidth={bookmarkActive ? 0 : 2}
+            />
           </button>
         )}
         {showBell && (

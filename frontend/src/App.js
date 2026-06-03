@@ -23,6 +23,7 @@ import Messages from "@/screens/Messages";
 import ChatScreen from "@/screens/ChatScreen";
 import Notifications from "@/screens/Notifications";
 import SearchScreen from "@/screens/SearchScreen";
+import SavedScreen from "@/screens/SavedScreen";
 import Settings from "@/screens/Settings";
 import EditProfile from "@/screens/EditProfile";
 import BrandsList from "@/screens/BrandsList";
@@ -46,6 +47,7 @@ function App() {
               <Route path="/applications" element={<MyApplications />} />
               <Route path="/application/:id" element={<ApplicationStatus />} />
               <Route path="/search" element={<SearchScreen />} />
+              <Route path="/saved" element={<SavedScreen />} />
               <Route path="/brands" element={<BrandsList />} />
 
               {/* Shared */}
