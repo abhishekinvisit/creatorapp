@@ -1,27 +1,69 @@
-import { useState } from "react";
-import { Settings as SettingsIcon, Eye, Check, MessageCircle, Megaphone, AtSign } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Check, MessageCircle, Megaphone, AtSign, Bell, Briefcase, Users } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { useApp } from "@/context/AppContext";
+import { notificationsApi } from "@/lib/api";
 
-const TABS = ["All", "Unread", "Mentions"];
+const TABS = ["All", "Unread"];
 
 const iconMap = {
-  view: Eye,
-  accept: Check,
-  message: MessageCircle,
-  post: Megaphone,
-  mention: AtSign,
+  message:   MessageCircle,
+  MessageCircle: MessageCircle,
+  post:      Megaphone,
+  mention:   AtSign,
+  apply:     Users,
+  Users:     Users,
+  status:    Briefcase,
+  Briefcase: Briefcase,
+  info:      Bell,
+  Bell:      Bell,
 };
 
+function timeAgo(isoStr) {
+  if (!isoStr) return "just now";
+  try {
+    const diff = (Date.now() - new Date(isoStr).getTime()) / 1000;
+    if (diff < 60) return "just now";
+    if (diff < 3600) return `${Math.floor(diff / 60)}m`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
+    return `${Math.floor(diff / 86400)}d`;
+  } catch (_) {
+    return "just now";
+  }
+}
+
 export default function Notifications() {
-  const { notifications, markAllNotificationsRead, accountType } = useApp();
+  const { notifications, setNotifications, markAllNotificationsRead, accountType } = useApp();
   const [tab, setTab] = useState("All");
+  const [loading, setLoading] = useState(true);
   const dark = accountType === "brand";
 
+  useEffect(() => {
+    notificationsApi.list()
+      .then((data) => {
+        if (!data.length) return;
+        const mapped = data.map((n) => ({
+          id: n.id,
+          type: n.type || "info",
+          icon: n.icon || "Bell",
+          text: n.text,
+          unread: !n.is_read,
+          time: timeAgo(n.created_at),
+        }));
+        setNotifications(mapped);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleMarkAll = async () => {
+    markAllNotificationsRead();
+    try { await notificationsApi.markAll(); } catch (_) {}
+  };
+
   const filtered = notifications.filter((n) => {
-    if (tab === "All") return true;
     if (tab === "Unread") return n.unread;
-    return n.type === "mention";
+    return true;
   });
 
   return (
@@ -30,8 +72,12 @@ export default function Notifications() {
         title="Notifications"
         dark={dark}
         rightSlot={
-          <button data-testid="notif-settings" onClick={markAllNotificationsRead} className={`w-10 h-10 rounded-full flex items-center justify-center ${dark ? "bg-white/10" : "bg-black/5"}`}>
-            <SettingsIcon size={18} />
+          <button
+            data-testid="notif-settings"
+            onClick={handleMarkAll}
+            className={`px-3 py-2 rounded-full text-xs font-bold ${dark ? "bg-white/10 text-white" : "bg-black/5 text-[#0A0A0A]"}`}
+          >
+            Mark all read
           </button>
         }
       />
@@ -54,38 +100,44 @@ export default function Notifications() {
           ))}
         </div>
 
-        <div className="space-y-1">
-          {filtered.map((n, idx) => {
-            const Icon = iconMap[n.type] || Eye;
-            return (
-              <div
-                key={n.id}
-                data-testid={`notif-${n.id}`}
-                className={`flex items-start gap-4 py-4 ${idx !== 0 ? (dark ? "border-t border-white/10" : "border-t border-[#E5E5E5]") : ""}`}
-              >
-                <div className={`w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 ${
-                  n.unread
-                    ? "bg-[#E25238] text-white"
-                    : (dark ? "bg-white/10 text-neutral-300" : "bg-[#F3F3F3] text-[#525252]")
-                }`}>
-                  <Icon size={18} />
-                </div>
-                <div className="flex-1">
-                  <p className={`text-sm font-medium leading-snug ${dark ? "text-white" : "text-[#0A0A0A]"}`}>{n.text}</p>
-                  <p className={`text-xs mt-1 font-bold uppercase tracking-wider ${dark ? "text-neutral-500" : "text-[#525252]"}`}>{n.time} ago</p>
-                </div>
-                {n.unread && <div className="w-2 h-2 rounded-full bg-[#E25238] mt-2 flex-shrink-0" />}
+        {loading ? (
+          <div className="pt-16 flex justify-center">
+            <div className="w-8 h-8 border-4 border-[#E5E5E5] border-t-[#E25238] rounded-full animate-spin" />
+          </div>
+        ) : (
+          <div className="space-y-1">
+            {filtered.length === 0 && (
+              <div className="text-center py-16">
+                <Bell size={32} className={`mx-auto mb-3 ${dark ? "text-neutral-600" : "text-[#CCCCCC]"}`} />
+                <p className={`font-bold ${dark ? "text-white" : "text-[#0A0A0A]"}`}>All caught up!</p>
+                <p className={`text-sm mt-1 ${dark ? "text-neutral-400" : "text-[#525252]"}`}>No notifications here.</p>
               </div>
-            );
-          })}
-        </div>
-
-        <button
-          data-testid="view-all-notif"
-          className={`w-full text-center py-4 text-sm font-bold uppercase tracking-wider mt-4 ${dark ? "text-[#E25238]" : "text-[#E25238]"}`}
-        >
-          View all notifications
-        </button>
+            )}
+            {filtered.map((n, idx) => {
+              const Icon = iconMap[n.icon] || iconMap[n.type] || Bell;
+              return (
+                <div
+                  key={n.id}
+                  data-testid={`notif-${n.id}`}
+                  className={`flex items-start gap-4 py-4 ${idx !== 0 ? (dark ? "border-t border-white/10" : "border-t border-[#E5E5E5]") : ""}`}
+                >
+                  <div className={`w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 ${
+                    n.unread
+                      ? "bg-[#E25238] text-white"
+                      : (dark ? "bg-white/10 text-neutral-300" : "bg-[#F3F3F3] text-[#525252]")
+                  }`}>
+                    <Icon size={18} />
+                  </div>
+                  <div className="flex-1">
+                    <p className={`text-sm font-medium leading-snug ${dark ? "text-white" : "text-[#0A0A0A]"}`}>{n.text}</p>
+                    <p className={`text-xs mt-1 font-bold uppercase tracking-wider ${dark ? "text-neutral-500" : "text-[#525252]"}`}>{n.time} ago</p>
+                  </div>
+                  {n.unread && <div className="w-2 h-2 rounded-full bg-[#E25238] mt-2 flex-shrink-0" />}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

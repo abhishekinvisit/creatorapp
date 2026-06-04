@@ -1,120 +1,177 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Mail, ChevronLeft } from "lucide-react";
+import { ChevronLeft, Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { useApp } from "@/context/AppContext";
+import { authApi } from "@/lib/api";
 import { toast } from "sonner";
 
 export default function LoginScreen() {
   const navigate = useNavigate();
-  const { setIsAuthed, accountType } = useApp();
-  const [phone, setPhone] = useState("");
-  const [step, setStep] = useState("phone"); // phone | otp
-  const [otp, setOtp] = useState("");
+  const { loginWithToken, accountType } = useApp();
 
-  const goToOnboarding = () => {
-    setIsAuthed(true);
-    navigate("/onboarding");
-  };
+  const [step, setStep] = useState("email"); // email | password
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPw, setShowPw] = useState(false);
+  const [isNew, setIsNew] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleContinue = () => {
-    if (step === "phone") {
-      if (phone.length < 10) {
-        toast.error("Enter a valid 10-digit mobile number");
-        return;
-      }
-      setStep("otp");
-      toast.success("OTP sent: 1234 (demo)");
-    } else {
-      if (otp !== "1234") {
-        toast.error("Invalid OTP. Use 1234 for demo.");
-        return;
-      }
-      goToOnboarding();
+  const handleEmail = async () => {
+    if (!email.trim() || !email.includes("@")) {
+      toast.error("Enter a valid email address");
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await authApi.checkEmail(email.trim().toLowerCase());
+      setIsNew(!res.exists);
+      setStep("password");
+    } catch (_) {
+      // If backend unreachable, still proceed
+      setIsNew(true);
+      setStep("password");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleEmail = () => {
-    goToOnboarding();
+  const handleAuth = async () => {
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+    setLoading(true);
+    try {
+      let res;
+      if (isNew) {
+        res = await authApi.register(email.trim().toLowerCase(), password, accountType);
+        toast.success("Account created!");
+      } else {
+        res = await authApi.login(email.trim().toLowerCase(), password);
+      }
+      loginWithToken(res.token, res.account_type, res.onboarding_complete);
+      if (res.onboarding_complete) {
+        navigate(res.account_type === "brand" ? "/brand/dashboard" : "/home");
+      } else {
+        navigate("/onboarding");
+      }
+    } catch (err) {
+      toast.error(err.message || "Something went wrong. Try again.");
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const handleKey = (e, fn) => e.key === "Enter" && fn();
 
   return (
     <div data-testid="login-screen" className="min-h-full bg-[#F9F9F8] flex flex-col">
+      {/* Back */}
       <div className="px-5 py-4 flex items-center">
-        <button data-testid="login-back" onClick={() => navigate(-1)} className="w-10 h-10 rounded-full bg-black/5 flex items-center justify-center">
+        <button
+          onClick={() => step === "password" ? setStep("email") : navigate(-1)}
+          className="w-10 h-10 rounded-full bg-black/5 flex items-center justify-center"
+        >
           <ChevronLeft size={20} />
         </button>
       </div>
 
-      <div className="px-8 pt-6">
+      {/* Header */}
+      <div className="px-8 pt-4">
         <p className="text-xs font-bold tracking-[0.25em] uppercase text-[#E25238] mb-3">
           {accountType === "brand" ? "Brand Account" : "Creator Account"}
         </p>
         <h1 className="font-display font-black text-4xl tracking-tight text-[#0A0A0A] leading-[1.05]">
-          Welcome<br />back!
+          {step === "email"
+            ? <>Welcome<br />back!</>
+            : isNew
+            ? <>Create your<br />account</>
+            : <>Welcome<br />back!</>
+          }
         </h1>
         <p className="text-base text-[#525252] mt-3 font-medium">
-          {step === "phone" ? "Login or sign up to continue." : "Enter the 4-digit code we sent you."}
+          {step === "email"
+            ? "Enter your email to continue."
+            : isNew
+            ? "Choose a password for your new account."
+            : `Signing in as ${email}`
+          }
         </p>
       </div>
 
-      <div className="flex-1 px-6 pt-10">
-        {step === "phone" ? (
-          <div className="bg-white rounded-2xl border border-[#E5E5E5] flex items-center overflow-hidden">
-            <div className="px-4 py-4 border-r border-[#E5E5E5] bg-[#F9F9F8] font-bold text-[#0A0A0A]">+91</div>
+      <div className="flex-1 px-6 pt-10 space-y-4">
+        {/* Email */}
+        <div className={`bg-white rounded-2xl border-2 transition-colors flex items-center overflow-hidden ${step === "email" ? "border-[#0A0A0A]" : "border-[#E5E5E5]"}`}>
+          <div className="pl-4 pr-2 text-[#525252]"><Mail size={18} /></div>
+          <input
+            data-testid="email-input"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            onKeyDown={(e) => handleKey(e, step === "email" ? handleEmail : () => {})}
+            placeholder="your@email.com"
+            disabled={step === "password"}
+            className="flex-1 px-3 py-4 outline-none bg-white text-[#0A0A0A] font-medium disabled:text-[#525252]"
+          />
+        </div>
+
+        {/* Password — slide in */}
+        {step === "password" && (
+          <div className="bg-white rounded-2xl border-2 border-[#0A0A0A] flex items-center overflow-hidden animate-fade-up">
+            <div className="pl-4 pr-2 text-[#525252]"><Lock size={18} /></div>
             <input
-              data-testid="phone-input"
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
-              placeholder="Enter mobile number"
-              className="flex-1 px-4 py-4 outline-none bg-white text-[#0A0A0A] font-medium"
+              data-testid="password-input"
+              type={showPw ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={(e) => handleKey(e, handleAuth)}
+              placeholder={isNew ? "Create a password (min 6 chars)" : "Enter your password"}
+              autoFocus
+              className="flex-1 px-3 py-4 outline-none bg-white text-[#0A0A0A] font-medium"
             />
-          </div>
-        ) : (
-          <div>
-            <input
-              data-testid="otp-input"
-              type="text"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 4))}
-              placeholder="• • • •"
-              className="w-full px-4 py-5 outline-none bg-white border border-[#E5E5E5] rounded-2xl text-[#0A0A0A] font-bold text-2xl tracking-[0.5em] text-center"
-            />
-            <p className="text-xs text-[#525252] mt-3 text-center font-medium">
-              Demo OTP: <span className="font-bold text-[#0A0A0A]">1234</span>
-            </p>
+            <button
+              onClick={() => setShowPw((v) => !v)}
+              className="px-4 text-[#525252] hover:text-[#0A0A0A]"
+            >
+              {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
           </div>
         )}
 
+        {/* CTA */}
         <button
-          data-testid={step === "otp" ? "otp-verify" : "login-continue"}
-          onClick={handleContinue}
-          className="w-full mt-6 bg-[#0A0A0A] text-white rounded-full py-5 font-bold hover:bg-[#E25238] transition-colors"
+          data-testid="login-continue"
+          onClick={step === "email" ? handleEmail : handleAuth}
+          disabled={loading}
+          className="w-full mt-2 bg-[#0A0A0A] text-white rounded-2xl py-4 font-bold hover:bg-[#E25238] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
         >
-          {step === "otp" ? "Verify & Continue" : "Continue"}
+          {loading ? (
+            <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 100 16v-4l-3 3 3 3v-4a8 8 0 01-8-8z"/>
+            </svg>
+          ) : (
+            <>
+              {step === "email" ? "Continue" : isNew ? "Create Account" : "Sign In"}
+              <ArrowRight size={16} />
+            </>
+          )}
         </button>
 
-        {step === "phone" && (
-          <>
-            <div className="flex items-center gap-3 my-6">
-              <div className="flex-1 h-px bg-[#E5E5E5]" />
-              <span className="text-xs font-bold tracking-[0.2em] uppercase text-[#525252]">or</span>
-              <div className="flex-1 h-px bg-[#E5E5E5]" />
-            </div>
-
+        {step === "password" && isNew && (
+          <p className="text-center text-xs text-[#525252] font-medium">
+            Already have an account?{" "}
             <button
-              data-testid="login-email"
-              onClick={handleEmail}
-              className="w-full py-4 rounded-full border-2 border-[#0A0A0A] font-bold flex items-center justify-center gap-2 hover:bg-[#0A0A0A] hover:text-white transition-colors"
+              onClick={() => { setIsNew(false); }}
+              className="font-bold text-[#0A0A0A] hover:text-[#E25238]"
             >
-              <Mail size={18} />
-              Continue with Email
+              Sign in instead
             </button>
-          </>
+          </p>
         )}
       </div>
 
-      <div className="px-8 pb-8 pt-6 text-center">
+      <div className="px-8 pb-8 pt-4 text-center">
         <p className="text-xs text-[#525252] font-medium">
           By continuing, you agree to our{" "}
           <span className="text-[#E25238] font-bold">Terms & Conditions</span>

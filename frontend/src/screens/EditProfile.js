@@ -34,11 +34,27 @@ export default function EditProfile() {
   const [showBrandPicker, setShowBrandPicker] = useState(false);
   const [editingReel, setEditingReel] = useState(null); // null | "new" | reelId
 
-  const save = () => {
+  const save = async () => {
     if (accountType === "brand") {
       setUser({ ...user, brand: { ...user.brand, name, bio } });
+      try {
+        const { profileApi } = await import("@/lib/api");
+        await profileApi.updateBrand({ brand_name: name, bio });
+      } catch (_) {}
     } else {
       setUser({ ...user, creator: { ...user.creator, name, handle, bio, instagramUrl, category: cats, location, language: languages } });
+      try {
+        const { profileApi } = await import("@/lib/api");
+        await profileApi.updateCreator({
+          full_name: name,
+          handle,
+          bio,
+          instagram_url: instagramUrl,
+          categories: cats,
+          location,
+          languages,
+        });
+      } catch (_) {}
     }
     toast.success("Profile updated");
     navigate(-1);

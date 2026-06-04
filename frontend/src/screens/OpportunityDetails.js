@@ -23,7 +23,38 @@ export default function OpportunityDetails() {
   const navigate = useNavigate();
   const { opportunities, isSaved, toggleSave } = useApp();
   const [showApply, setShowApply] = useState(false);
-  const op = opportunities.find((o) => o.id === id) || opportunities[0];
+  const [apiOp, setApiOp] = useState(null);
+
+  // Try to fetch from API if not in context (e.g. direct URL visit)
+  const ctxOp = opportunities.find((o) => o.id === id);
+  const op = apiOp || ctxOp || opportunities[0];
+
+  useState(() => {
+    if (ctxOp) return; // already have it
+    import("@/lib/api").then(({ opportunitiesApi }) => {
+      opportunitiesApi.get(id)
+        .then((o) => setApiOp({
+          id: o.id,
+          brandName: o.brand_name,
+          brandCategory: o.brand_category,
+          title: o.title,
+          pitch: o.pitch,
+          description: o.description,
+          payout: o.payout,
+          needed: o.creators_needed,
+          deadline: o.deadline,
+          category: o.category,
+          cover: o.cover_url,
+          language: o.languages || [],
+          verified: o.verified,
+          applicants: o.applicants_count,
+          requirements: o.requirements || [],
+        }))
+        .catch(() => {});
+    });
+  });
+
+  if (!op) return null;
   const saved = isSaved(op.id);
 
   return (

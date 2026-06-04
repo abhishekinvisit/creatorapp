@@ -106,7 +106,7 @@ export default function BrandPostDetail() {
           </div>
           <button
             data-testid="view-applicants"
-            onClick={() => navigate("/brand/applicants")}
+            onClick={() => navigate("/brand/applicants", { state: { opportunityId: id } })}
             className="text-xs font-bold uppercase tracking-[0.15em] text-[#E25238] flex items-center gap-1.5"
           >
             <Eye size={14} /> {post.applicants} applicants

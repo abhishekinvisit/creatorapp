@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Check, Camera, Building2 } from "lucide-react";
 import { useApp } from "@/context/AppContext";
+import { onboardingApi } from "@/lib/api";
 import { toast } from "sonner";
 
 const TOTAL_STEPS = 3;
@@ -95,17 +96,12 @@ export default function BrandOnboarding() {
     }
     setSaving(true);
     try {
-      const payload = {
+      await onboardingApi.completeBrand({
         brand_name: brandName,
         brand_category: brandCategory,
         gst_number: gstNumber,
         brand_bio: brandBio,
-        logo_data: logoData.length > 500 ? "" : logoData, // skip large base64 to backend
-      };
-      await fetch("/api/onboarding/brand", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        logo_data: logoData.length > 500000 ? "" : logoData,
       });
     } catch (_) {}
     completeOnboarding({

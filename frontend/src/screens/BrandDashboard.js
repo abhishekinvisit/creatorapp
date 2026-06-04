@@ -1,11 +1,41 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, ChevronRight, Bell, Menu } from "lucide-react";
 import { useApp } from "@/context/AppContext";
+import { opportunitiesApi } from "@/lib/api";
 
 export default function BrandDashboard() {
   const navigate = useNavigate();
-  const { user, activePosts } = useApp();
-  const stats = user.brand.stats;
+  const { user, activePosts, setActivePosts } = useApp();
+
+  useEffect(() => {
+    opportunitiesApi.myPosts()
+      .then((posts) => {
+        const mapped = posts.map((p) => ({
+          id: p.id,
+          title: p.title,
+          description: p.pitch || p.description || "",
+          payout: p.payout ? `₹${p.payout}` : "",
+          needed: p.creators_needed || 1,
+          deadline: p.deadline || "",
+          applicants: p.applicants_count || 0,
+          category: p.category || "",
+          status: p.status || "active",
+          requirements: {
+            category: p.category || "",
+            minFollowers: "",
+            age: "",
+            gender: "",
+            location: "",
+            language: p.languages || [],
+          },
+        }));
+        if (mapped.length > 0) setActivePosts(mapped);
+      })
+      .catch(() => {});
+  }, []);
+
+  const totalApplicants = activePosts.reduce((sum, p) => sum + (p.applicants || 0), 0);
 
   return (
     <div data-testid="brand-dashboard" className="min-h-full bg-[#0A0A0A] text-white pb-6">
@@ -28,9 +58,9 @@ export default function BrandDashboard() {
         {/* Stats */}
         <div className="grid grid-cols-3 gap-3 mb-7">
           {[
-            { label: "Active Posts", value: stats.activePosts },
-            { label: "Total Applicants", value: stats.totalApplicants },
-            { label: "Profile Views", value: stats.profileViews },
+            { label: "Active Posts", value: activePosts.filter(p => p.status === "active").length },
+            { label: "Total Applicants", value: totalApplicants },
+            { label: "Profile Views", value: user.brand.stats?.profileViews || 0 },
           ].map((s) => (
             <div key={s.label} className="bg-white/5 border border-white/10 rounded-2xl p-4">
               <p className="font-display font-black text-3xl">{s.value}</p>
@@ -45,6 +75,12 @@ export default function BrandDashboard() {
           <button data-testid="see-all-posts" className="text-xs font-bold text-[#E25238] uppercase tracking-wider">See All</button>
         </div>
         <div className="space-y-3 mb-6">
+          {activePosts.length === 0 && (
+            <div className="text-center py-8 text-neutral-400">
+              <p className="font-medium">No active posts yet.</p>
+              <p className="text-sm mt-1">Post your first opportunity below!</p>
+            </div>
+          )}
           {activePosts.map((p, idx) => (
             <button
               key={p.id}
@@ -75,7 +111,6 @@ export default function BrandDashboard() {
           Post New Opportunity
         </button>
       </div>
-
     </div>
   );
 }

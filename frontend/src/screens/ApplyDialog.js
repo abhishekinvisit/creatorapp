@@ -1,14 +1,31 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import { useApp } from "@/context/AppContext";
+import { applicationsApi } from "@/lib/api";
+import { toast } from "sonner";
 
 export const ApplyDialog = ({ opportunity, onClose, onApplied }) => {
   const { user, addApplication } = useApp();
   const [note, setNote] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleApply = () => {
-    addApplication(opportunity.id, opportunity.brandName);
-    onApplied();
+  const handleApply = async () => {
+    setLoading(true);
+    try {
+      await applicationsApi.apply(opportunity.id, note);
+      addApplication(opportunity.id, opportunity.brandName || opportunity.brand_name);
+      onApplied();
+    } catch (err) {
+      if (err.message?.toLowerCase().includes("already")) {
+        toast.error("You've already applied to this opportunity");
+      } else {
+        // Fallback: still mark as applied locally so UX isn't blocked
+        addApplication(opportunity.id, opportunity.brandName || opportunity.brand_name);
+        onApplied();
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -62,8 +79,13 @@ export const ApplyDialog = ({ opportunity, onClose, onApplied }) => {
           <button data-testid="apply-cancel" onClick={onClose} className="flex-1 py-4 rounded-full border border-[#E5E5E5] font-bold text-sm">
             Cancel
           </button>
-          <button data-testid="apply-submit" onClick={handleApply} className="flex-1 py-4 rounded-full bg-[#0A0A0A] text-white font-bold text-sm hover:bg-[#E25238] transition-colors">
-            Send Profile
+          <button
+            data-testid="apply-submit"
+            onClick={handleApply}
+            disabled={loading}
+            className="flex-1 py-4 rounded-full bg-[#0A0A0A] text-white font-bold text-sm hover:bg-[#E25238] transition-colors disabled:opacity-60"
+          >
+            {loading ? "Sending..." : "Send Profile"}
           </button>
         </div>
       </div>

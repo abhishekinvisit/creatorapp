@@ -1,0 +1,7 @@
+- [Backend stack](backend-stack.md) — FastAPI + asyncpg + PostgreSQL; JWT via python-jose; bcrypt via passlib; 30-day tokens
+- [Auth flow](auth-flow.md) — email/password 2-step UX; token stored as `ollcollab_token` in localStorage; session restored on mount via /api/auth/me
+- [API proxy](api-proxy.md) — frontend uses `/api/...` which craco proxies to localhost:8000; always use relative paths in frontend code
+- [Data shape mapping](data-shape-mapping.md) — API uses snake_case; frontend context uses camelCase; mapApiOpp() in HomeFeed.js bridges the two
+- [Mock data fallback](mock-data-fallback.md) — mock opportunities kept as fallback; mergeOpportunities() merges real DB opps on top; mock IDs start with "op-"
+- [Tailwind version](tailwind-version.md) — must stay at v3.4.17; v4 breaks PostCSS setup
+- [Lucide icons](lucide-icons.md) — Instagram/Youtube icons removed from lucide-react; use inline SVGs instead

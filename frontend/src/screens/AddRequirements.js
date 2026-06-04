@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { useApp } from "@/context/AppContext";
+import { opportunitiesApi } from "@/lib/api";
 import { toast } from "sonner";
 
 const CATS = ["Beauty", "Fashion", "Lifestyle", "Fitness", "Food", "Tech"];
@@ -14,6 +15,7 @@ export default function AddRequirements() {
   const navigate = useNavigate();
   const { draftOpportunity, publishOpportunity } = useApp();
   const [data, setData] = useState({ category: "", minFollowers: "", age: "", gender: "", location: "", language: [], images: [] });
+  const [saving, setSaving] = useState(false);
 
   const toggleLanguage = (lang) => {
     setData((prev) => ({
@@ -24,10 +26,40 @@ export default function AddRequirements() {
     }));
   };
 
-  const handlePublish = () => {
-    publishOpportunity({ ...draftOpportunity, ...data, creatorsNeeded: parseInt(draftOpportunity.creatorsNeeded || 5) });
-    toast.success("Opportunity published successfully");
-    navigate("/brand/dashboard");
+  const handlePublish = async () => {
+    setSaving(true);
+    try {
+      const payload = {
+        title: draftOpportunity.title || "Untitled Campaign",
+        pitch: draftOpportunity.description || draftOpportunity.title || "",
+        description: draftOpportunity.description || "",
+        payout: parseInt(draftOpportunity.payout || 0),
+        creators_needed: parseInt(draftOpportunity.creatorsNeeded || 5),
+        deadline: draftOpportunity.deadline || "",
+        category: data.category || "Lifestyle",
+        requirements: [
+          data.minFollowers ? `Min ${data.minFollowers} followers` : "",
+          data.age ? `Age: ${data.age}` : "",
+          data.gender ? `Gender: ${data.gender}` : "",
+          data.location ? `Location: ${data.location}` : "",
+        ].filter(Boolean),
+        languages: data.language,
+      };
+      const created = await opportunitiesApi.create(payload);
+      // Also add to local context so dashboard updates immediately
+      publishOpportunity({
+        ...draftOpportunity,
+        ...data,
+        id: created.id,
+        creatorsNeeded: parseInt(draftOpportunity.creatorsNeeded || 5),
+      });
+      toast.success("Opportunity published! 🚀");
+      navigate("/brand/dashboard");
+    } catch (err) {
+      toast.error(err.message || "Failed to publish. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -75,7 +107,7 @@ export default function AddRequirements() {
         <Field label="Add Product Images (Optional)">
           <button
             data-testid="req-add-images"
-            onClick={() => toast.info("Image upload demo only")}
+            onClick={() => toast.info("Image upload coming soon")}
             className="w-full bg-white/5 border-2 border-dashed border-white/15 rounded-2xl py-8 flex flex-col items-center justify-center gap-2 hover:border-[#E25238] transition-colors"
           >
             <Plus size={24} />
@@ -89,9 +121,10 @@ export default function AddRequirements() {
           <button
             data-testid="publish-opportunity"
             onClick={handlePublish}
-            className="w-full bg-[#E25238] text-white rounded-full py-5 font-bold hover:bg-[#C9452D] transition-colors"
+            disabled={saving}
+            className="w-full bg-[#E25238] text-white rounded-full py-5 font-bold hover:bg-[#C9452D] transition-colors disabled:opacity-60"
           >
-            Publish Opportunity
+            {saving ? "Publishing..." : "Publish Opportunity"}
           </button>
         </div>
       </div>

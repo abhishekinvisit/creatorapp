@@ -31,9 +31,24 @@ import EditProfile from "@/screens/EditProfile";
 import BrandsList from "@/screens/BrandsList";
 import MyProfile from "@/screens/MyProfile";
 
+// Minimal spinner shown while session is being restored from localStorage
+function AuthLoading() {
+  return (
+    <div className="min-h-full flex items-center justify-center bg-[#F9F9F8]">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-10 h-10 rounded-[14px] bg-gradient-to-br from-[#E25238] to-[#F59E0B] flex items-center justify-center animate-pulse">
+          <div className="w-4 h-4 rounded-full border-2 border-white" />
+        </div>
+        <p className="text-sm font-bold text-[#525252] uppercase tracking-widest">OLLCOLLAB</p>
+      </div>
+    </div>
+  );
+}
+
 // Route guard: must be authed AND have completed onboarding
 function AppRoute({ children }) {
-  const { isAuthed, onboardingComplete } = useApp();
+  const { isAuthed, onboardingComplete, authLoading } = useApp();
+  if (authLoading) return <AuthLoading />;
   if (!isAuthed) return <Navigate to="/" replace />;
   if (!onboardingComplete) return <Navigate to="/onboarding" replace />;
   return children;
@@ -41,7 +56,8 @@ function AppRoute({ children }) {
 
 // Route guard: must be authed but onboarding NOT yet done
 function OnboardingRoute({ children }) {
-  const { isAuthed, onboardingComplete, accountType } = useApp();
+  const { isAuthed, onboardingComplete, accountType, authLoading } = useApp();
+  if (authLoading) return <AuthLoading />;
   if (!isAuthed) return <Navigate to="/" replace />;
   if (onboardingComplete) {
     return <Navigate to={accountType === "brand" ? "/brand/dashboard" : "/home"} replace />;

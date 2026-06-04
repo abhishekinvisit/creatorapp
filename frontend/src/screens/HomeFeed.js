@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, SlidersHorizontal, Wallet, Calendar, Users, BadgeCheck, Bookmark, X, Sparkles, Globe2 } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { BrandLogo } from "@/components/BrandLogo";
 import { CATEGORIES } from "@/data/mockData";
 import { useApp } from "@/context/AppContext";
+import { opportunitiesApi } from "@/lib/api";
 import { toast } from "sonner";
 
 const ALL_LANGUAGES = ["Hindi", "English", "Tamil", "Telugu", "Kannada", "Marathi", "Bengali", "Gujarati", "Punjabi", "Malayalam"];
@@ -15,10 +16,37 @@ const PAYOUT_OPTIONS = [
   { label: "₹1000+", value: 1000 },
 ];
 
+function mapApiOpp(o) {
+  return {
+    id: o.id,
+    brandName: o.brand_name || o.brandName || "",
+    brandCategory: o.brand_category || o.brandCategory || "",
+    title: o.title,
+    pitch: o.pitch || "",
+    description: o.description || "",
+    payout: o.payout || 0,
+    needed: o.creators_needed || o.needed || 1,
+    deadline: o.deadline || "",
+    category: o.category || "",
+    cover: o.cover_url || o.cover || "",
+    language: o.languages || o.language || [],
+    verified: !!o.verified,
+    applicants: o.applicants_count || o.applicants || 0,
+  };
+}
+
 export default function HomeFeed() {
   const navigate = useNavigate();
-  const { opportunities, isSaved, toggleSave, user, accountType } = useApp();
+  const { opportunities, mergeOpportunities, isSaved, toggleSave, user, accountType } = useApp();
   const [activeCat, setActiveCat] = useState("All");
+
+  useEffect(() => {
+    opportunitiesApi.list()
+      .then((opps) => {
+        if (opps.length > 0) mergeOpportunities(opps.map(mapApiOpp));
+      })
+      .catch(() => {});
+  }, []);
   const [search, setSearch] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [discoverAll, setDiscoverAll] = useState(false);

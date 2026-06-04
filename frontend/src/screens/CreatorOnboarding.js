@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Check, Globe } from "lucide-react";
 import { useApp } from "@/context/AppContext";
+import { onboardingApi } from "@/lib/api";
 import { toast } from "sonner";
 
 const TOTAL_STEPS = 4;
@@ -108,7 +109,7 @@ export default function CreatorOnboarding() {
     // Final step — save
     setSaving(true);
     try {
-      const payload = {
+      await onboardingApi.completeCreator({
         full_name: fullName,
         gender,
         age: Number(age),
@@ -119,11 +120,6 @@ export default function CreatorOnboarding() {
         instagram_url: instagramUrl,
         followers_count: Number(followersCount),
         years_experience: Number(yearsExp) || 0,
-      };
-      await fetch("/api/onboarding/creator", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
       });
     } catch (_) {
       // Non-fatal — we still complete onboarding locally
