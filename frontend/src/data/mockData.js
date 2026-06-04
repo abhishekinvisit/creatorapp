@@ -18,6 +18,7 @@ export const OPPORTUNITIES = [
     category: "Beauty",
     description: "We're launching our Vitamin C Serum and looking for authentic creators who can show it in their daily skincare routine.",
     requirements: ["5K+ Followers", "18–35 Age Group", "Good Engagement Rate"],
+    language: ["Hindi", "English"],
     applicants: 24,
   },
   {
@@ -35,6 +36,7 @@ export const OPPORTUNITIES = [
     category: "Fashion",
     description: "Highlight our breezy summer drops in a styled reel — beach, brunch or rooftop vibes welcome.",
     requirements: ["10K+ Followers", "Fashion-focused content", "Reels experience"],
+    language: ["English"],
     applicants: 41,
   },
   {
@@ -52,6 +54,7 @@ export const OPPORTUNITIES = [
     category: "Fitness",
     description: "We want authentic, no-filter morning routines featuring Pure Nutrition's plant protein in a creative way.",
     requirements: ["3K+ Followers", "Fitness/Wellness niche", "Story + Reel combo"],
+    language: ["Hindi", "English", "Tamil"],
     applicants: 18,
   },
   {
@@ -69,6 +72,7 @@ export const OPPORTUNITIES = [
     category: "Fitness",
     description: "Document your 7-day journey using our gear. We're looking for authenticity over polish.",
     requirements: ["5K+ Followers", "Active fitness audience", "Min. 3 reels/week"],
+    language: ["Hindi", "English"],
     applicants: 32,
   },
 ];
