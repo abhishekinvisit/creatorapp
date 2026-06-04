@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, SlidersHorizontal, Wallet, Calendar, Users, BadgeCheck, Bookmark, X, ChevronDown } from "lucide-react";
+import { Search, SlidersHorizontal, Wallet, Calendar, Users, BadgeCheck, Bookmark, X, Sparkles, Globe2 } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { BrandLogo } from "@/components/BrandLogo";
 import { CATEGORIES } from "@/data/mockData";
@@ -17,10 +17,14 @@ const PAYOUT_OPTIONS = [
 
 export default function HomeFeed() {
   const navigate = useNavigate();
-  const { opportunities, isSaved, toggleSave } = useApp();
+  const { opportunities, isSaved, toggleSave, user, accountType } = useApp();
   const [activeCat, setActiveCat] = useState("All");
   const [search, setSearch] = useState("");
   const [showFilters, setShowFilters] = useState(false);
+  const [discoverAll, setDiscoverAll] = useState(false);
+
+  // Creator's chosen niche categories
+  const creatorCats = accountType === "creator" ? (user?.creator?.category || []) : [];
 
   // Filter state
   const [filterLanguages, setFilterLanguages] = useState([]);
@@ -59,7 +63,13 @@ export default function HomeFeed() {
   const activeFilterCount =
     filterLanguages.length + (filterMinPayout > 0 ? 1 : 0) + (filterVerified ? 1 : 0);
 
-  const filtered = opportunities.filter((o) => {
+  // Step 1 — niche gate: if creator and not discovering all, restrict to their categories
+  const nicheFiltered = (!discoverAll && creatorCats.length > 0)
+    ? opportunities.filter((o) => creatorCats.includes(o.category))
+    : opportunities;
+
+  // Step 2 — all other filters on top
+  const filtered = nicheFiltered.filter((o) => {
     const matchCat = activeCat === "All" || o.category === activeCat;
     const matchSearch = !search ||
       o.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -70,6 +80,17 @@ export default function HomeFeed() {
     const matchVerified = !filterVerified || o.verified;
     return matchCat && matchSearch && matchPayout && matchLang && matchVerified;
   });
+
+  // Category pills: in niche mode show only creator's categories, else all
+  const visibleCats = (!discoverAll && creatorCats.length > 0)
+    ? ["All", ...creatorCats.filter((c) => CATEGORIES.includes(c))]
+    : CATEGORIES;
+
+  // When switching modes, reset the active category pill
+  const switchMode = (discover) => {
+    setDiscoverAll(discover);
+    setActiveCat("All");
+  };
 
   return (
     <div data-testid="home-feed" className="min-h-full bg-[#F9F9F8] pb-6">
@@ -89,7 +110,7 @@ export default function HomeFeed() {
 
       <div className="px-5 pb-4 pt-2">
         {/* Search row */}
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 mb-3">
           <div className="flex-1 bg-white rounded-2xl border border-[#E5E5E5] flex items-center px-4 py-3.5">
             <Search size={18} className="text-[#525252] flex-shrink-0" />
             <input
@@ -124,6 +145,45 @@ export default function HomeFeed() {
           </button>
         </div>
 
+        {/* Niche / Discover toggle — only for creators with set categories */}
+        {creatorCats.length > 0 && (
+          <div className="flex items-center gap-2 mb-3">
+            <button
+              onClick={() => switchMode(false)}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-all ${
+                !discoverAll
+                  ? "bg-[#0A0A0A] text-white"
+                  : "bg-white border border-[#E5E5E5] text-[#525252] hover:border-[#0A0A0A]"
+              }`}
+            >
+              <Sparkles size={12} />
+              My Niche
+            </button>
+            <button
+              onClick={() => switchMode(true)}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-all ${
+                discoverAll
+                  ? "bg-[#0A0A0A] text-white"
+                  : "bg-white border border-[#E5E5E5] text-[#525252] hover:border-[#0A0A0A]"
+              }`}
+            >
+              <Globe2 size={12} />
+              Discover All
+            </button>
+
+            {/* Niche badge */}
+            {!discoverAll && (
+              <div className="ml-auto flex items-center gap-1 flex-wrap justify-end">
+                {creatorCats.slice(0, 3).map((c) => (
+                  <span key={c} className="px-2 py-0.5 rounded-full bg-[#E25238]/10 text-[#E25238] text-[9px] font-black uppercase tracking-wider">
+                    {c}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Active filter chips */}
         {activeFilterCount > 0 && (
           <div className="flex items-center gap-2 mb-3 flex-wrap">
@@ -150,7 +210,7 @@ export default function HomeFeed() {
 
         {/* Category pills */}
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-2">
-          {CATEGORIES.map((cat) => (
+          {visibleCats.map((cat) => (
             <button
               key={cat}
               data-testid={`cat-${cat.toLowerCase()}`}
@@ -171,6 +231,9 @@ export default function HomeFeed() {
       <div className="px-5 mb-3 flex items-center justify-between">
         <p className="text-xs font-bold text-[#525252] uppercase tracking-[0.12em]">
           {filtered.length} {filtered.length === 1 ? "result" : "results"}
+          {!discoverAll && creatorCats.length > 0 && (
+            <span className="ml-1 text-[#E25238]">· matched to your niche</span>
+          )}
         </p>
       </div>
 
@@ -262,16 +325,48 @@ export default function HomeFeed() {
 
         {filtered.length === 0 && (
           <div className="text-center py-16">
+            <div className="w-16 h-16 rounded-full bg-[#F0F0F0] flex items-center justify-center mx-auto mb-4">
+              <Sparkles size={24} className="text-[#525252]" />
+            </div>
             <p className="font-display font-bold text-lg text-[#0A0A0A]">No opportunities found</p>
-            <p className="text-sm text-[#525252] mt-1">Try adjusting your filters or search.</p>
-            {activeFilterCount > 0 && (
-              <button
-                onClick={() => { setFilterLanguages([]); setFilterMinPayout(0); setFilterVerified(false); }}
-                className="mt-4 px-5 py-2.5 rounded-full bg-[#0A0A0A] text-white text-xs font-bold uppercase tracking-[0.15em]"
-              >
-                Clear All Filters
-              </button>
+            {!discoverAll && creatorCats.length > 0 ? (
+              <>
+                <p className="text-sm text-[#525252] mt-1">
+                  No current openings in <span className="font-bold text-[#0A0A0A]">{creatorCats.join(", ")}</span>.
+                </p>
+                <button
+                  onClick={() => switchMode(true)}
+                  className="mt-4 px-5 py-2.5 rounded-full bg-[#0A0A0A] text-white text-xs font-bold uppercase tracking-[0.15em] flex items-center gap-2 mx-auto"
+                >
+                  <Globe2 size={13} /> Discover All Categories
+                </button>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-[#525252] mt-1">Try adjusting your filters or search.</p>
+                {activeFilterCount > 0 && (
+                  <button
+                    onClick={() => { setFilterLanguages([]); setFilterMinPayout(0); setFilterVerified(false); }}
+                    className="mt-4 px-5 py-2.5 rounded-full bg-[#0A0A0A] text-white text-xs font-bold uppercase tracking-[0.15em]"
+                  >
+                    Clear All Filters
+                  </button>
+                )}
+              </>
             )}
+          </div>
+        )}
+
+        {/* Discover prompt at bottom of niche list */}
+        {!discoverAll && creatorCats.length > 0 && filtered.length > 0 && (
+          <div className="mt-4 bg-white rounded-2xl border border-[#E5E5E5] p-4 text-center">
+            <p className="text-xs font-bold text-[#525252]">Showing opportunities matched to your niche</p>
+            <button
+              onClick={() => switchMode(true)}
+              className="mt-2 text-xs font-black text-[#E25238] uppercase tracking-[0.15em] flex items-center gap-1.5 mx-auto hover:underline"
+            >
+              <Globe2 size={11} /> Discover All Categories
+            </button>
           </div>
         )}
       </div>
