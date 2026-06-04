@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Settings, BadgeCheck, Pencil, Briefcase, Share2, MapPin } from "lucide-react";
+import { Settings, BadgeCheck, Pencil, Briefcase, Share2, MapPin, Globe } from "lucide-react";
 
 const InstagramIcon = ({ size = 16, className = "", strokeWidth = 2, ...props }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
@@ -144,6 +144,21 @@ export default function MyProfile() {
             </span>
           ))}
         </div>
+
+        {/* Languages */}
+        {c.language && c.language.length > 0 && (
+          <div className="flex items-center gap-2 mt-3 flex-wrap">
+            <Globe size={12} className="text-[#525252] flex-shrink-0" />
+            {c.language.map((lang) => (
+              <span
+                key={lang}
+                className="px-3 py-1 rounded-full bg-[#F9F9F8] border border-[#E5E5E5] text-[10px] font-bold uppercase tracking-[0.12em] text-[#525252]"
+              >
+                {lang}
+              </span>
+            ))}
+          </div>
+        )}
 
         {/* Worked With – small horizontal logo row with names */}
         <div className="mt-6">

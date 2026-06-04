@@ -15,6 +15,7 @@ import { REELS as DEFAULT_REELS, BRANDS } from "@/data/mockData";
 import { toast } from "sonner";
 
 const ALL_CATEGORIES = ["Lifestyle", "Fashion", "Beauty", "Fitness", "Food", "Tech", "Travel", "Skincare"];
+const ALL_LANGUAGES = ["Hindi", "English", "Tamil", "Telugu", "Kannada", "Marathi", "Bengali", "Gujarati", "Punjabi", "Malayalam"];
 
 export default function EditProfile() {
   const navigate = useNavigate();
@@ -28,6 +29,7 @@ export default function EditProfile() {
   const [location, setLocation] = useState(profile.location || "");
   const [instagramUrl, setInstagramUrl] = useState(profile.instagramUrl || `https://instagram.com/${(profile.handle || "").replace("@", "")}`);
   const [cats, setCats] = useState(profile.category);
+  const [languages, setLanguages] = useState(profile.language || []);
   const [reels, setReels] = useState(DEFAULT_REELS);
   const [showBrandPicker, setShowBrandPicker] = useState(false);
   const [editingReel, setEditingReel] = useState(null); // null | "new" | reelId
@@ -36,7 +38,7 @@ export default function EditProfile() {
     if (accountType === "brand") {
       setUser({ ...user, brand: { ...user.brand, name, bio } });
     } else {
-      setUser({ ...user, creator: { ...user.creator, name, handle, bio, instagramUrl, category: cats, location } });
+      setUser({ ...user, creator: { ...user.creator, name, handle, bio, instagramUrl, category: cats, location, language: languages } });
     }
     toast.success("Profile updated");
     navigate(-1);
@@ -44,6 +46,10 @@ export default function EditProfile() {
 
   const toggleCat = (c) => {
     setCats((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]));
+  };
+
+  const toggleLang = (l) => {
+    setLanguages((prev) => (prev.includes(l) ? prev.filter((x) => x !== l) : [...prev, l]));
   };
 
   const removeBrand = (id) => setWorkedWith((prev) => prev.filter((b) => b.id !== id));
@@ -182,6 +188,31 @@ export default function EditProfile() {
                     }`}
                   >
                     {c}
+                  </button>
+                );
+              })}
+            </div>
+          </Section>
+        )}
+
+        {/* Content Languages */}
+        {accountType !== "brand" && (
+          <Section label="Content Languages" hint="Languages you create content in.">
+            <div className="flex flex-wrap gap-2">
+              {ALL_LANGUAGES.map((l) => {
+                const active = languages.includes(l);
+                return (
+                  <button
+                    key={l}
+                    data-testid={`lang-${l.toLowerCase()}`}
+                    onClick={() => toggleLang(l)}
+                    className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-[0.15em] transition-all ${
+                      active
+                        ? "bg-[#0A0A0A] text-white"
+                        : "bg-white border border-[#E5E5E5] text-[#525252] hover:border-[#0A0A0A]"
+                    }`}
+                  >
+                    {l}
                   </button>
                 );
               })}

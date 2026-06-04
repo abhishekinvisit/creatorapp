@@ -223,6 +223,7 @@ export const DEFAULT_USER = {
     handle: "@riya.sharmaa",
     bio: "Lifestyle creator | Skincare & Fashion Lover",
     category: ["Lifestyle", "Fashion", "Beauty"],
+    language: ["Hindi", "English"],
     location: "Delhi, India",
     followers: "124K",
     engagement: "8.2%",
