@@ -6,6 +6,7 @@ const AppContext = createContext(null);
 export const AppProvider = ({ children }) => {
   const [accountType, setAccountType] = useState("creator"); // "creator" | "brand"
   const [isAuthed, setIsAuthed] = useState(false);
+  const [onboardingComplete, setOnboardingComplete] = useState(false);
   const [user, setUser] = useState(DEFAULT_USER);
   const [workedWith, setWorkedWith] = useState(BRANDS.slice(0, 6));
   const [applications, setApplications] = useState(MY_APPLICATIONS);
@@ -17,7 +18,40 @@ export const AppProvider = ({ children }) => {
   const [draftOpportunity, setDraftOpportunity] = useState({});
 
   const switchMode = (mode) => setAccountType(mode);
-  const logout = () => { setIsAuthed(false); };
+  const logout = () => {
+    setIsAuthed(false);
+    setOnboardingComplete(false);
+  };
+
+  // Called at the end of onboarding to commit profile data to context
+  const completeOnboarding = (data) => {
+    if (accountType === "creator") {
+      setUser((prev) => ({
+        ...prev,
+        creator: {
+          ...prev.creator,
+          name: data.fullName || prev.creator.name,
+          location: data.location || prev.creator.location,
+          category: data.categories?.length ? data.categories : prev.creator.category,
+          instagramUrl: data.instagramUrl || prev.creator.instagramUrl,
+          followers: data.followersCount ? `${Number(data.followersCount).toLocaleString("en-IN")}` : prev.creator.followers,
+        },
+      }));
+    } else {
+      setUser((prev) => ({
+        ...prev,
+        brand: {
+          ...prev.brand,
+          name: data.brandName || prev.brand.name,
+          bio: data.brandBio || prev.brand.bio,
+          category: data.brandCategory || prev.brand.category,
+          logo: data.logoData || prev.brand.logo,
+          gstNumber: data.gstNumber || "",
+        },
+      }));
+    }
+    setOnboardingComplete(true);
+  };
 
   const addApplication = (opportunityId, brandName) => {
     const newApp = {
@@ -57,7 +91,11 @@ export const AppProvider = ({ children }) => {
   };
 
   const updatePost = (id, patch) => {
-    setActivePosts((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch, requirements: { ...p.requirements, ...(patch.requirements || {}) } } : p)));
+    setActivePosts((prev) =>
+      prev.map((p) =>
+        p.id === id ? { ...p, ...patch, requirements: { ...p.requirements, ...(patch.requirements || {}) } } : p
+      )
+    );
   };
 
   const deletePost = (id) => {
@@ -74,7 +112,6 @@ export const AppProvider = ({ children }) => {
     setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
   };
 
-  // Returns thread id for a given brand name; creates one if needed.
   const getOrCreateThread = (brandName) => {
     const existing = threads.find((t) => t.name === brandName);
     if (existing) return existing.id;
@@ -99,6 +136,7 @@ export const AppProvider = ({ children }) => {
       value={{
         accountType, setAccountType, switchMode,
         isAuthed, setIsAuthed, logout,
+        onboardingComplete, setOnboardingComplete, completeOnboarding,
         user, setUser,
         workedWith, setWorkedWith,
         applications, addApplication, withdrawApplication,

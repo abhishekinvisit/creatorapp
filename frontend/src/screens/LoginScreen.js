@@ -11,6 +11,11 @@ export default function LoginScreen() {
   const [step, setStep] = useState("phone"); // phone | otp
   const [otp, setOtp] = useState("");
 
+  const goToOnboarding = () => {
+    setIsAuthed(true);
+    navigate("/onboarding");
+  };
+
   const handleContinue = () => {
     if (step === "phone") {
       if (phone.length < 10) {
@@ -24,14 +29,12 @@ export default function LoginScreen() {
         toast.error("Invalid OTP. Use 1234 for demo.");
         return;
       }
-      setIsAuthed(true);
-      navigate(accountType === "brand" ? "/brand/dashboard" : "/home");
+      goToOnboarding();
     }
   };
 
   const handleEmail = () => {
-    setIsAuthed(true);
-    navigate(accountType === "brand" ? "/brand/dashboard" : "/home");
+    goToOnboarding();
   };
 
   return (
