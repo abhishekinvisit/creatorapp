@@ -38,7 +38,7 @@ export default function CreatorProfileBrandView() {
                 data-testid="ig-link"
                 onClick={openInstagram}
                 aria-label="Open Instagram"
-                className="w-6 h-6 rounded-full bg-gradient-to-tr from-[#E25238] via-[#F59E0B] to-[#E25238] flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform"
+                className="w-6 h-6 rounded-[7px] bg-gradient-to-tr from-[#E25238] via-[#F59E0B] to-[#E25238] flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform"
               >
                 <Instagram size={12} className="text-white" strokeWidth={2.6} />
               </button>
@@ -53,7 +53,12 @@ export default function CreatorProfileBrandView() {
             <div className="flex items-center gap-5 mt-3">
               <div data-testid="stat-followers">
                 <p className="font-display font-black text-base text-[#0A0A0A] leading-none">{c.followers}</p>
-                <p className="text-[10px] font-bold tracking-[0.15em] uppercase text-[#525252] mt-1">Followers</p>
+                <div className="flex items-center gap-1 mt-1">
+                  <div className="w-3 h-3 rounded-[3px] bg-gradient-to-tr from-[#E25238] via-[#F59E0B] to-[#E25238] flex items-center justify-center">
+                    <Instagram size={7} className="text-white" strokeWidth={2.8} />
+                  </div>
+                  <p className="text-[10px] font-bold tracking-[0.15em] uppercase text-[#525252]">Followers</p>
+                </div>
               </div>
               <div className="w-px h-7 bg-[#E5E5E5]" />
               <div data-testid="stat-collaborations">
