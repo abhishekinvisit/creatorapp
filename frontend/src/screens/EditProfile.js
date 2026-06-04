@@ -1,6 +1,12 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Camera, Plus, X, Instagram, Link2, Pencil, Upload, MapPin } from "lucide-react";
+import { Camera, Plus, X, Link2, Pencil, Upload, MapPin } from "lucide-react";
+
+const InstagramIcon = ({ size = 16, className = "", ...props }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+    <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+  </svg>
+);
 import { TopBar } from "@/components/TopBar";
 import { BrandLogo } from "@/components/BrandLogo";
 import { WorkedWithItem } from "@/components/WorkedWithItem";
@@ -144,7 +150,7 @@ export default function EditProfile() {
             <Field hint="This URL opens when someone taps the IG icon next to your name.">
               <div className="flex items-center bg-white border border-[#E5E5E5] rounded-2xl overflow-hidden focus-within:border-[#0A0A0A] transition-colors">
                 <div className="px-4 py-4 border-r border-[#E5E5E5] bg-[#F9F9F8]">
-                  <Instagram size={16} className="text-[#E25238]" />
+                  <InstagramIcon size={16} className="text-[#E25238]" />
                 </div>
                 <input
                   data-testid="profile-instagram-url"
@@ -390,7 +396,7 @@ const ReelEditor = ({ reel, onClose, onSave }) => {
         <Field label="Instagram URL">
           <div className="flex items-center bg-white border border-[#E5E5E5] rounded-2xl overflow-hidden focus-within:border-[#0A0A0A] transition-colors">
             <div className="px-4 py-4 border-r border-[#E5E5E5] bg-[#F9F9F8]">
-              <Instagram size={16} className="text-[#E25238]" />
+              <InstagramIcon size={16} className="text-[#E25238]" />
             </div>
             <input
               data-testid="reel-url"

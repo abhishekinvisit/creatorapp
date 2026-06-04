@@ -1,5 +1,11 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { Instagram, MapPin } from "lucide-react";
+import { MapPin } from "lucide-react";
+
+const InstagramIcon = ({ size = 16, className = "", strokeWidth = 2, ...props }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+    <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+  </svg>
+);
 import { TopBar } from "@/components/TopBar";
 import { BrandLogo } from "@/components/BrandLogo";
 import { APPLICANTS, REELS, BRANDS } from "@/data/mockData";
@@ -41,7 +47,7 @@ export default function CreatorProfileBrandView() {
                 aria-label="Open Instagram"
                 className="w-5 h-5 rounded-[6px] bg-gradient-to-tr from-[#E25238] via-[#F59E0B] to-[#E25238] flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform"
               >
-                <Instagram size={10} className="text-white" strokeWidth={2.6} />
+                <InstagramIcon size={10} className="text-white" strokeWidth={2.6} />
               </button>
             </div>
             {c.location && (
@@ -59,7 +65,7 @@ export default function CreatorProfileBrandView() {
             <p className="font-display font-black text-base text-[#0A0A0A] leading-none">{c.followers}</p>
             <div className="flex items-center gap-1 mt-1">
               <div className="w-3 h-3 rounded-[3px] bg-gradient-to-tr from-[#E25238] via-[#F59E0B] to-[#E25238] flex items-center justify-center">
-                <Instagram size={7} className="text-white" strokeWidth={2.8} />
+                <InstagramIcon size={7} className="text-white" strokeWidth={2.8} />
               </div>
               <p className="text-[10px] font-bold tracking-[0.15em] uppercase text-[#525252]">Followers</p>
             </div>
