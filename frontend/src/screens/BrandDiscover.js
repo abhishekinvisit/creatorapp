@@ -7,6 +7,7 @@ import { APPLICANTS } from "@/data/mockData";
 const CATEGORIES = ["All", "Beauty", "Fashion", "Lifestyle", "Fitness", "Food", "Tech", "Travel"];
 const AGES = ["Any", "13-17", "18-24", "25-34", "35+"];
 const GENDERS = ["Any", "Female", "Male", "Non-binary"];
+const LANGUAGES = ["English", "Hindi", "Tamil", "Telugu", "Kannada", "Bengali", "Marathi", "Malayalam", "Punjabi"];
 const FOLLOWER_BUCKETS = [
   { id: "any", label: "Any", min: 0 },
   { id: "1k", label: "1K+", min: 1000 },
@@ -21,6 +22,7 @@ const DEFAULT_FILTERS = {
   gender: "Any",
   location: "",
   followers: "any",
+  language: [],
 };
 
 export default function BrandDiscover() {
@@ -34,7 +36,8 @@ export default function BrandDiscover() {
     (filters.age !== "Any" ? 1 : 0) +
     (filters.gender !== "Any" ? 1 : 0) +
     (filters.location ? 1 : 0) +
-    (filters.followers !== "any" ? 1 : 0);
+    (filters.followers !== "any" ? 1 : 0) +
+    (filters.language.length > 0 ? 1 : 0);
 
   const results = useMemo(() => {
     const minFollowers = FOLLOWER_BUCKETS.find((b) => b.id === filters.followers)?.min || 0;
@@ -46,6 +49,7 @@ export default function BrandDiscover() {
       if (filters.gender !== "Any" && c.gender !== filters.gender) return false;
       if (filters.location && !(c.location || "").toLowerCase().includes(filters.location.toLowerCase())) return false;
       if (c.followersNum < minFollowers) return false;
+      if (filters.language.length > 0 && !filters.language.some((l) => (c.language || []).includes(l))) return false;
       return true;
     });
   }, [q, filters]);
@@ -92,6 +96,9 @@ export default function BrandDiscover() {
             <ActiveChip show={filters.gender !== "Any"} label={filters.gender} onClear={() => setFilters({ ...filters, gender: "Any" })} />
             <ActiveChip show={!!filters.location} label={filters.location} onClear={() => setFilters({ ...filters, location: "" })} />
             <ActiveChip show={filters.followers !== "any"} label={FOLLOWER_BUCKETS.find((b) => b.id === filters.followers)?.label || ""} onClear={() => setFilters({ ...filters, followers: "any" })} />
+            {filters.language.map((l) => (
+              <ActiveChip key={l} show label={l} onClear={() => setFilters({ ...filters, language: filters.language.filter((x) => x !== l) })} />
+            ))}
             <button data-testid="clear-filters" onClick={reset} className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#E25238] whitespace-nowrap px-2">
               Clear all
             </button>
@@ -236,6 +243,22 @@ const FilterSheet = ({ filters, onApply, onClose, onReset }) => {
           </div>
         </FilterBlock>
 
+        <FilterBlock label="Content Language">
+          <MultiPills
+            options={LANGUAGES}
+            value={draft.language}
+            onToggle={(lang) =>
+              setDraft({
+                ...draft,
+                language: draft.language.includes(lang)
+                  ? draft.language.filter((l) => l !== lang)
+                  : [...draft.language, lang],
+              })
+            }
+            testId="filter-lang"
+          />
+        </FilterBlock>
+
         <div className="flex gap-3 pt-3 sticky bottom-0 bg-[#111111]">
           <button
             data-testid="filter-reset"
@@ -278,5 +301,25 @@ const Pills = ({ options, value, onChange, testId }) => (
         {o}
       </button>
     ))}
+  </div>
+);
+
+const MultiPills = ({ options, value, onToggle, testId }) => (
+  <div className="flex flex-wrap gap-2">
+    {options.map((o) => {
+      const active = value.includes(o);
+      return (
+        <button
+          key={o}
+          data-testid={`${testId}-${o.toLowerCase()}`}
+          onClick={() => onToggle(o)}
+          className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
+            active ? "bg-[#E25238] text-white" : "bg-white/5 text-neutral-300 border border-white/10 hover:border-white/30"
+          }`}
+        >
+          {o}
+        </button>
+      );
+    })}
   </div>
 );
