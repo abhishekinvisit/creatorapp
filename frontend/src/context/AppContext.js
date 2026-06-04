@@ -49,6 +49,7 @@ export const AppProvider = ({ children }) => {
         age: data.age || "",
         gender: data.gender || "",
         location: data.location || "",
+        language: data.language || [],
       },
       status: "active",
     };

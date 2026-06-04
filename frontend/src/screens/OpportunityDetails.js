@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Wallet, Calendar, Users, Tag, ListChecks, Instagram, Youtube, Globe, Share2, BadgeCheck } from "lucide-react";
+import { Wallet, Calendar, Users, Tag, ListChecks, Instagram, Youtube, Globe, Share2, BadgeCheck, Languages } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { BrandLogo } from "@/components/BrandLogo";
 import { useApp } from "@/context/AppContext";
@@ -83,6 +83,22 @@ export default function OpportunityDetails() {
               <span className="text-sm font-bold text-[#0A0A0A]">{row.value}</span>
             </div>
           ))}
+
+          {/* Content Language */}
+          {op.language?.length > 0 && (
+            <div className="flex items-start px-5 py-4 gap-3">
+              <div className="w-9 h-9 rounded-full bg-[#F3F3F3] flex items-center justify-center flex-shrink-0">
+                <Languages size={16} className="text-[#E25238]" />
+              </div>
+              <span className="text-sm font-medium text-[#525252] pt-0.5 flex-shrink-0">Language</span>
+              <div className="flex-1 flex flex-wrap gap-1.5 justify-end">
+                {op.language.map((l) => (
+                  <span key={l} className="px-2.5 py-1 rounded-full bg-[#F3F3F3] text-[#0A0A0A] text-xs font-bold">{l}</span>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="px-5 py-4">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-9 h-9 rounded-full bg-[#F3F3F3] flex items-center justify-center">

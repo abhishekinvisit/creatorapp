@@ -247,7 +247,7 @@ export const ACTIVE_POSTS = [
     needed: 10,
     deadline: "2025-06-05",
     applicants: 24,
-    requirements: { category: "Beauty", minFollowers: "5000", age: "18-24", gender: "All", location: "India" },
+    requirements: { category: "Beauty", minFollowers: "5000", age: "18-24", gender: "All", location: "India", language: ["Hindi", "English"] },
     status: "active",
   },
   {
@@ -258,7 +258,7 @@ export const ACTIVE_POSTS = [
     needed: 8,
     deadline: "2025-06-12",
     applicants: 18,
-    requirements: { category: "Beauty", minFollowers: "10000", age: "25-34", gender: "All", location: "India" },
+    requirements: { category: "Beauty", minFollowers: "10000", age: "25-34", gender: "All", location: "India", language: ["English"] },
     status: "active",
   },
   {
@@ -269,7 +269,7 @@ export const ACTIVE_POSTS = [
     needed: 12,
     deadline: "2025-06-20",
     applicants: 32,
-    requirements: { category: "Beauty", minFollowers: "3000", age: "Any Age", gender: "All", location: "India" },
+    requirements: { category: "Beauty", minFollowers: "3000", age: "Any Age", gender: "All", location: "India", language: ["Hindi", "English", "Tamil"] },
     status: "active",
   },
 ];

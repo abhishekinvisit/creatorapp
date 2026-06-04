@@ -8,11 +8,21 @@ import { toast } from "sonner";
 const CATS = ["Beauty", "Fashion", "Lifestyle", "Fitness", "Food", "Tech"];
 const AGES = ["Any Age", "13-17", "18-24", "25-34", "35+"];
 const GENDERS = ["All", "Female", "Male", "Non-binary"];
+const LANGUAGES = ["English", "Hindi", "Tamil", "Telugu", "Kannada", "Bengali", "Marathi", "Malayalam", "Punjabi"];
 
 export default function AddRequirements() {
   const navigate = useNavigate();
   const { draftOpportunity, publishOpportunity } = useApp();
-  const [data, setData] = useState({ category: "", minFollowers: "", age: "", gender: "", location: "", images: [] });
+  const [data, setData] = useState({ category: "", minFollowers: "", age: "", gender: "", location: "", language: [], images: [] });
+
+  const toggleLanguage = (lang) => {
+    setData((prev) => ({
+      ...prev,
+      language: prev.language.includes(lang)
+        ? prev.language.filter((l) => l !== lang)
+        : [...prev.language, lang],
+    }));
+  };
 
   const handlePublish = () => {
     publishOpportunity({ ...draftOpportunity, ...data, creatorsNeeded: parseInt(draftOpportunity.creatorsNeeded || 5) });
@@ -56,6 +66,10 @@ export default function AddRequirements() {
             placeholder="e.g. India, Mumbai"
             className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-4 outline-none text-white placeholder-neutral-500 font-medium focus:border-[#E25238]"
           />
+        </Field>
+
+        <Field label="Content Language">
+          <MultiPills options={LANGUAGES} value={data.language} onToggle={toggleLanguage} testId="req-lang" />
         </Field>
 
         <Field label="Add Product Images (Optional)">
@@ -106,5 +120,25 @@ const Pills = ({ options, value, onChange, testId }) => (
         {o}
       </button>
     ))}
+  </div>
+);
+
+const MultiPills = ({ options, value, onToggle, testId }) => (
+  <div className="flex flex-wrap gap-2">
+    {options.map((o) => {
+      const active = value.includes(o);
+      return (
+        <button
+          key={o}
+          data-testid={`${testId}-${o.toLowerCase()}`}
+          onClick={() => onToggle(o)}
+          className={`px-4 py-2.5 rounded-full text-sm font-bold transition-all ${
+            active ? "bg-[#E25238] text-white" : "bg-white/5 text-neutral-300 border border-white/10 hover:border-white/30"
+          }`}
+        >
+          {o}
+        </button>
+      );
+    })}
   </div>
 );

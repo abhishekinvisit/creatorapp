@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Pencil, Trash2, Users, Wallet, Calendar, Tag, Filter, MapPin, Eye, Check, X } from "lucide-react";
+import { Pencil, Trash2, Users, Wallet, Calendar, Tag, Filter, MapPin, Globe, Eye, Check, X } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { useApp } from "@/context/AppContext";
 import { toast } from "sonner";
@@ -8,6 +8,7 @@ import { toast } from "sonner";
 const CATS = ["Beauty", "Fashion", "Lifestyle", "Fitness", "Food", "Tech"];
 const AGES = ["Any Age", "13-17", "18-24", "25-34", "35+"];
 const GENDERS = ["All", "Female", "Male", "Non-binary"];
+const LANGUAGES = ["English", "Hindi", "Tamil", "Telugu", "Kannada", "Bengali", "Marathi", "Malayalam", "Punjabi"];
 
 export default function BrandPostDetail() {
   const { id } = useParams();
@@ -157,6 +158,7 @@ const ViewBody = ({ post }) => (
         <Row icon={Filter} label="Age Group" value={post.requirements?.age} />
         <Row icon={Filter} label="Gender" value={post.requirements?.gender} />
         <Row icon={MapPin} label="Location" value={post.requirements?.location} />
+        <LanguageRow langs={post.requirements?.language} />
       </div>
     </div>
   </>
@@ -177,6 +179,22 @@ const Row = ({ icon: Icon, label, value }) => (
     </div>
     <span className="flex-1 text-sm font-medium text-neutral-400">{label}</span>
     <span className="text-sm font-bold text-white text-right">{value || "—"}</span>
+  </div>
+);
+
+const LanguageRow = ({ langs }) => (
+  <div className="flex items-start px-5 py-4 gap-3">
+    <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
+      <Globe size={14} className="text-[#E25238]" />
+    </div>
+    <span className="text-sm font-medium text-neutral-400 pt-0.5 flex-shrink-0">Language</span>
+    <div className="flex-1 flex flex-wrap gap-1.5 justify-end">
+      {langs?.length
+        ? langs.map((l) => (
+            <span key={l} className="px-2.5 py-1 rounded-full bg-white/10 text-white text-xs font-bold">{l}</span>
+          ))
+        : <span className="text-sm font-bold text-white">—</span>}
+    </div>
   </div>
 );
 
@@ -259,6 +277,17 @@ const EditForm = ({ form, setForm }) => {
           className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-4 outline-none text-white font-medium focus:border-[#E25238]"
         />
       </Field>
+      <Field label="Content Language">
+        <MultiPills
+          options={LANGUAGES}
+          value={form.requirements?.language || []}
+          onToggle={(lang) => {
+            const cur = form.requirements?.language || [];
+            setReq("language", cur.includes(lang) ? cur.filter((l) => l !== lang) : [...cur, lang]);
+          }}
+          testId="edit-lang"
+        />
+      </Field>
     </div>
   );
 };
@@ -284,5 +313,25 @@ const Pills = ({ options, value, onChange, testId }) => (
         {o}
       </button>
     ))}
+  </div>
+);
+
+const MultiPills = ({ options, value, onToggle, testId }) => (
+  <div className="flex flex-wrap gap-2">
+    {options.map((o) => {
+      const active = value.includes(o);
+      return (
+        <button
+          key={o}
+          data-testid={`${testId}-${o.toLowerCase()}`}
+          onClick={() => onToggle(o)}
+          className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
+            active ? "bg-[#E25238] text-white" : "bg-white/5 text-neutral-300 border border-white/10 hover:border-white/30"
+          }`}
+        >
+          {o}
+        </button>
+      );
+    })}
   </div>
 );
