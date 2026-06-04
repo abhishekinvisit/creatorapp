@@ -75,14 +75,15 @@ export default function MyProfile() {
 
       {/* HEADER */}
       <div className="px-5">
-        <div className="flex items-start gap-4">
+        {/* Avatar + identity */}
+        <div className="flex items-center gap-4">
           <img
             src={c.avatar}
             alt={c.name}
-            className="w-[88px] h-[88px] rounded-[28px] object-cover ring-4 ring-white shadow-md flex-shrink-0"
+            className="w-[72px] h-[72px] rounded-[22px] object-cover ring-4 ring-white shadow-md flex-shrink-0"
           />
-          <div className="flex-1 min-w-0 pt-0.5">
-            <h2 className="font-display font-black text-2xl text-[#0A0A0A] tracking-tight leading-tight">
+          <div className="flex-1 min-w-0">
+            <h2 className="font-display font-black text-xl text-[#0A0A0A] tracking-tight leading-tight">
               {c.name}
             </h2>
             <div className="flex items-center gap-1.5 mt-0.5">
@@ -91,40 +92,40 @@ export default function MyProfile() {
                 data-testid="ig-link"
                 onClick={openInstagram}
                 aria-label="Open Instagram"
-                className="w-6 h-6 rounded-[7px] bg-gradient-to-tr from-[#E25238] via-[#F59E0B] to-[#E25238] flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform"
+                className="w-5 h-5 rounded-[6px] bg-gradient-to-tr from-[#E25238] via-[#F59E0B] to-[#E25238] flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform"
               >
-                <Instagram size={12} className="text-white" strokeWidth={2.6} />
+                <Instagram size={10} className="text-white" strokeWidth={2.6} />
               </button>
             </div>
             {c.location && (
-              <div data-testid="profile-location" className="flex items-center gap-1 mt-1.5 text-xs text-[#525252] font-medium">
-                <MapPin size={12} className="text-[#E25238]" />
+              <div data-testid="profile-location" className="flex items-center gap-1 mt-1 text-xs text-[#525252] font-medium">
+                <MapPin size={11} className="text-[#E25238]" />
                 <span>{c.location}</span>
               </div>
             )}
+          </div>
+        </div>
 
-            {/* Stats row: Followers + Brand Collaborations */}
-            <div className="flex items-center gap-5 mt-3">
-              <div data-testid="stat-followers">
-                <p className="font-display font-black text-base text-[#0A0A0A] leading-none">{c.followers}</p>
-                <div className="flex items-center gap-1 mt-1">
-                  <div className="w-3 h-3 rounded-[3px] bg-gradient-to-tr from-[#E25238] via-[#F59E0B] to-[#E25238] flex items-center justify-center">
-                    <Instagram size={7} className="text-white" strokeWidth={2.8} />
-                  </div>
-                  <p className="text-[10px] font-bold tracking-[0.15em] uppercase text-[#525252]">Followers</p>
-                </div>
+        {/* Stats row — full width, outside the avatar flex */}
+        <div className="flex items-center gap-6 mt-4 pt-4 border-t border-[#EBEBEB]">
+          <div data-testid="stat-followers">
+            <p className="font-display font-black text-base text-[#0A0A0A] leading-none">{c.followers}</p>
+            <div className="flex items-center gap-1 mt-1">
+              <div className="w-3 h-3 rounded-[3px] bg-gradient-to-tr from-[#E25238] via-[#F59E0B] to-[#E25238] flex items-center justify-center">
+                <Instagram size={7} className="text-white" strokeWidth={2.8} />
               </div>
-              <div className="w-px h-7 bg-[#E5E5E5]" />
-              <div data-testid="stat-collaborations">
-                <p className="font-display font-black text-base text-[#0A0A0A] leading-none">{c.collaborations}</p>
-                <p className="text-[10px] font-bold tracking-[0.15em] uppercase text-[#525252] mt-1">Collaborations</p>
-              </div>
+              <p className="text-[10px] font-bold tracking-[0.15em] uppercase text-[#525252]">Followers</p>
             </div>
+          </div>
+          <div className="w-px h-7 bg-[#E5E5E5]" />
+          <div data-testid="stat-collaborations">
+            <p className="font-display font-black text-base text-[#0A0A0A] leading-none">{c.collaborations}</p>
+            <p className="text-[10px] font-bold tracking-[0.15em] uppercase text-[#525252] mt-1">Collaborations</p>
           </div>
         </div>
 
         {/* Bio */}
-        <p className="text-sm font-medium text-[#0A0A0A] mt-5 leading-relaxed">{c.bio}</p>
+        <p className="text-sm font-medium text-[#0A0A0A] mt-4 leading-relaxed">{c.bio}</p>
 
         {/* Categories */}
         <div className="flex flex-wrap gap-2 mt-4">
