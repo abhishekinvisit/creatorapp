@@ -98,3 +98,17 @@ export const reelsApi = {
   update:  (id, data)   => api.put(`/reels/${id}`, data),
   delete:  (id)         => api.delete(`/reels/${id}`),
 };
+
+// ── Creators (public — for Brand Discover) ────────────────────────────────────
+export const creatorsApi = {
+  list: (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return api.get(`/creators${qs ? `?${qs}` : ""}`);
+  },
+  get: (creatorUserId) => api.get(`/creators/${creatorUserId}`),
+};
+
+// ── Brands (public — for creator view) ────────────────────────────────────────
+export const brandsApi = {
+  get: (brandUserId) => api.get(`/brands/${brandUserId}`),
+};

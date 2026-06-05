@@ -1,22 +1,27 @@
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { MessageCircle, Check } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { BrandLogo } from "@/components/BrandLogo";
 import { useApp } from "@/context/AppContext";
+import { applicationsApi, messagesApi } from "@/lib/api";
 import { toast } from "sonner";
 
 const statusMeta = {
-  applied: { label: "Under Review", dot: "bg-[#F59E0B]", chip: "bg-[#F59E0B]/15 text-[#B45309]" },
-  viewed: { label: "Viewed by Brand", dot: "bg-[#3B82F6]", chip: "bg-[#3B82F6]/15 text-[#1D4ED8]" },
-  accepted: { label: "Accepted 🎉", dot: "bg-[#22C55E]", chip: "bg-[#22C55E]/15 text-[#15803D]" },
-  rejected: { label: "Not Selected", dot: "bg-[#EF4444]", chip: "bg-[#EF4444]/15 text-[#B91C1C]" },
+  applied:     { label: "Under Review",      dot: "bg-[#F59E0B]",  chip: "bg-[#F59E0B]/15 text-[#B45309]" },
+  viewed:      { label: "Viewed by Brand",   dot: "bg-[#3B82F6]",  chip: "bg-[#3B82F6]/15 text-[#1D4ED8]" },
+  shortlisted: { label: "Shortlisted ⭐",    dot: "bg-[#F59E0B]",  chip: "bg-[#F59E0B]/15 text-[#B45309]" },
+  accepted:    { label: "Accepted 🎉",        dot: "bg-[#22C55E]",  chip: "bg-[#22C55E]/15 text-[#15803D]" },
+  rejected:    { label: "Not Selected",      dot: "bg-[#EF4444]",  chip: "bg-[#EF4444]/15 text-[#B91C1C]" },
 };
 
 export default function ApplicationStatus() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { applications, withdrawApplication, getOrCreateThread } = useApp();
-  const app = applications.find((a) => a.id === id) || applications[0];
+  const { applications, withdrawApplication } = useApp();
+  const [messaging, setMessaging] = useState(false);
+
+  const app = applications.find((a) => String(a.id) === String(id)) || applications[0];
 
   if (!app) {
     return (
@@ -29,15 +34,29 @@ export default function ApplicationStatus() {
   const meta = statusMeta[app.status] || statusMeta.applied;
   const isAccepted = app.status === "accepted";
 
-  const handleWithdraw = () => {
+  const handleWithdraw = async () => {
+    try {
+      await applicationsApi.withdraw(app.id);
+    } catch (_) {}
     withdrawApplication(app.id);
     toast.success("Application withdrawn");
     navigate("/applications");
   };
 
-  const handleMessage = () => {
-    const tid = getOrCreateThread(app.brandName);
-    navigate(`/chat/${tid}`);
+  const handleMessage = async () => {
+    setMessaging(true);
+    try {
+      if (app.brandId) {
+        const thread = await messagesApi.openWith(app.brandId);
+        navigate(`/chat/${thread.id}`);
+      } else {
+        toast.error("Could not open chat — brand info missing");
+      }
+    } catch (_) {
+      toast.error("Failed to open chat");
+    } finally {
+      setMessaging(false);
+    }
   };
 
   return (
@@ -49,6 +68,9 @@ export default function ApplicationStatus() {
           <BrandLogo name={app.brandName} size={56} />
           <div className="flex-1">
             <h2 className="font-display font-bold text-lg text-[#0A0A0A]">{app.brandName}</h2>
+            {app.opportunityTitle && (
+              <p className="text-xs text-[#525252] font-medium mt-0.5">{app.opportunityTitle}</p>
+            )}
             <p className="text-xs text-[#525252] font-medium">Applied on {app.appliedOn}</p>
             <div className={`inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-full text-xs font-bold ${meta.chip}`}>
               <span className={`w-1.5 h-1.5 rounded-full ${meta.dot}`} />
@@ -85,7 +107,7 @@ export default function ApplicationStatus() {
         <div className="bg-white rounded-3xl border border-[#E5E5E5] p-5 mb-8">
           <p className="text-xs font-bold tracking-[0.2em] uppercase text-[#E25238] mb-2">Cover Note</p>
           <p className="text-sm text-[#0A0A0A] font-medium leading-relaxed">
-            Hi! I'm a skincare creator based in Delhi. I love creating honest and authentic content. I have worked with skincare brands before and would love to collaborate on this campaign.
+            {app.note || "No cover note was included with this application."}
           </p>
         </div>
 
@@ -93,9 +115,11 @@ export default function ApplicationStatus() {
           <button
             data-testid="message-brand-btn"
             onClick={handleMessage}
-            className="w-full py-4 rounded-full bg-[#0A0A0A] text-white font-bold flex items-center justify-center gap-2 hover:bg-[#E25238] transition-colors"
+            disabled={messaging}
+            className="w-full py-4 rounded-full bg-[#0A0A0A] text-white font-bold flex items-center justify-center gap-2 hover:bg-[#E25238] transition-colors disabled:opacity-60"
           >
-            <MessageCircle size={18} /> Message {app.brandName}
+            <MessageCircle size={18} />
+            {messaging ? "Opening chat…" : `Message ${app.brandName}`}
           </button>
         ) : (
           <button

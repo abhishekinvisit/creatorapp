@@ -3,8 +3,8 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from starlette.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
-from typing import List, Optional
-import os, logging
+from typing import List, Optional, Any
+import os, logging, json
 from pathlib import Path
 from database import get_pool, init_db, close_pool
 from auth import hash_password, verify_password, create_access_token, decode_token
@@ -102,15 +102,24 @@ class CreatorProfileIn(BaseModel):
     categories: Optional[List[str]] = None
     languages: Optional[List[str]] = None
     instagram_url: Optional[str] = None
+    youtube_url: Optional[str] = None
+    linkedin_url: Optional[str] = None
+    tiktok_url: Optional[str] = None
+    website_url: Optional[str] = None
     followers_count: Optional[int] = None
+    collaborations_count: Optional[int] = None
     years_experience: Optional[int] = None
     avatar_url: Optional[str] = None
+    worked_with: Optional[Any] = None  # JSON array of brand objects
 
 class BrandProfileIn(BaseModel):
     brand_name: Optional[str] = None
     handle: Optional[str] = None
     bio: Optional[str] = None
     category: Optional[str] = None
+    custom_category: Optional[str] = None
+    instagram_url: Optional[str] = None
+    website_url: Optional[str] = None
     gst_number: Optional[str] = None
     logo_data: Optional[str] = None
 
@@ -234,6 +243,32 @@ async def login(body: LoginIn):
     }
 
 
+def _serialize_profile(profile: dict) -> dict:
+    """Convert asyncpg record fields to JSON-safe types."""
+    d = dict(profile)
+    for k, v in d.items():
+        if hasattr(v, 'isoformat'):
+            d[k] = v.isoformat()
+    if "id" in d:
+        d["id"] = str(d["id"])
+    if "user_id" in d:
+        d["user_id"] = str(d["user_id"])
+    if "categories" in d:
+        d["categories"] = list(d["categories"] or [])
+    if "languages" in d:
+        d["languages"] = list(d["languages"] or [])
+    if "worked_with" in d:
+        ww = d["worked_with"]
+        if isinstance(ww, str):
+            try:
+                d["worked_with"] = json.loads(ww)
+            except Exception:
+                d["worked_with"] = []
+        elif ww is None:
+            d["worked_with"] = []
+    return d
+
+
 @api_router.get("/auth/me")
 async def me(user=Depends(current_user)):
     pool = await get_pool()
@@ -247,7 +282,7 @@ async def me(user=Depends(current_user)):
         "email": user["email"],
         "account_type": user["account_type"],
         "onboarding_complete": user["onboarding_complete"],
-        "profile": dict(profile) if profile else {},
+        "profile": _serialize_profile(dict(profile)) if profile else {},
     }
 
 
@@ -281,7 +316,7 @@ async def onboard_brand(body: BrandOnboardIn, user=Depends(current_user)):
     pool = await get_pool()
     async with pool.acquire() as conn:
         logo = body.logo_data or ""
-        if len(logo) > 500000:  # cap at ~500KB base64
+        if len(logo) > 500000:
             logo = ""
         await conn.execute("""
             INSERT INTO brand_profiles(user_id,brand_name,category,gst_number,bio,logo_data)
@@ -304,16 +339,21 @@ async def get_creator_profile(user=Depends(current_user)):
         row = await conn.fetchrow("SELECT * FROM creator_profiles WHERE user_id=$1::uuid", user["id"])
     if not row:
         raise HTTPException(status_code=404, detail="Profile not found")
-    d = dict(row)
-    d["user_id"] = str(d["user_id"])
-    d["id"] = str(d["id"])
-    return d
+    return _serialize_profile(dict(row))
 
 
 @api_router.put("/profile/creator")
 async def update_creator_profile(body: CreatorProfileIn, user=Depends(current_user)):
     pool = await get_pool()
-    updates = {k: v for k, v in body.model_dump().items() if v is not None}
+    raw = body.model_dump()
+    updates = {}
+    for k, v in raw.items():
+        if v is None:
+            continue
+        if k == "worked_with":
+            updates[k] = json.dumps(v) if not isinstance(v, str) else v
+        else:
+            updates[k] = v
     if not updates:
         return {"success": True}
     cols = ", ".join(f"{k}=${i+2}" for i, k in enumerate(updates))
@@ -333,16 +373,15 @@ async def get_brand_profile(user=Depends(current_user)):
         row = await conn.fetchrow("SELECT * FROM brand_profiles WHERE user_id=$1::uuid", user["id"])
     if not row:
         raise HTTPException(status_code=404, detail="Profile not found")
-    d = dict(row)
-    d["user_id"] = str(d["user_id"])
-    d["id"] = str(d["id"])
-    return d
+    return _serialize_profile(dict(row))
 
 
 @api_router.put("/profile/brand")
 async def update_brand_profile(body: BrandProfileIn, user=Depends(current_user)):
     pool = await get_pool()
     updates = {k: v for k, v in body.model_dump().items() if v is not None}
+    if "logo_data" in updates and len(updates["logo_data"]) > 500000:
+        del updates["logo_data"]
     if not updates:
         return {"success": True}
     cols = ", ".join(f"{k}=${i+2}" for i, k in enumerate(updates))
@@ -356,6 +395,105 @@ async def update_brand_profile(body: BrandProfileIn, user=Depends(current_user))
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# PUBLIC CREATOR / BRAND PROFILE ROUTES
+# ─────────────────────────────────────────────────────────────────────────────
+
+@api_router.get("/creators")
+async def list_creators(
+    search: Optional[str] = None,
+    category: Optional[str] = None,
+    language: Optional[str] = None,
+    min_followers: Optional[int] = None,
+    sort_by: Optional[str] = "followers",
+    user=Depends(optional_user),
+):
+    """Public: list/search creators for the Brand Discover screen."""
+    pool = await get_pool()
+    conditions = []
+    params = []
+    i = 1
+    if search:
+        conditions.append(f"(cp.full_name ILIKE ${i} OR cp.handle ILIKE ${i})")
+        params.append(f"%{search}%"); i += 1
+    if category and category != "All":
+        conditions.append(f"${i}=ANY(cp.categories)")
+        params.append(category); i += 1
+    if language:
+        conditions.append(f"${i}=ANY(cp.languages)")
+        params.append(language); i += 1
+    if min_followers:
+        conditions.append(f"cp.followers_count >= ${i}")
+        params.append(min_followers); i += 1
+
+    order_map = {
+        "followers": "cp.followers_count DESC NULLS LAST",
+        "recent": "cp.updated_at DESC NULLS LAST",
+        "collaborations": "cp.collaborations_count DESC NULLS LAST",
+        "name": "cp.full_name ASC",
+    }
+    order = order_map.get(sort_by, "cp.followers_count DESC NULLS LAST")
+    where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
+
+    async with pool.acquire() as conn:
+        rows = await conn.fetch(f"""
+            SELECT cp.*, u.id as uid
+            FROM creator_profiles cp
+            JOIN users u ON u.id = cp.user_id
+            {where}
+            ORDER BY {order}
+            LIMIT 200
+        """, *params)
+
+    result = []
+    for r in rows:
+        d = _serialize_profile(dict(r))
+        d["creator_user_id"] = str(r["uid"])
+        result.append(d)
+    return result
+
+
+@api_router.get("/creators/{creator_user_id}")
+async def get_creator_public(creator_user_id: str, user=Depends(optional_user)):
+    """Public: get a creator profile by their user_id (for brand view)."""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        cp = await conn.fetchrow(
+            "SELECT * FROM creator_profiles WHERE user_id=$1::uuid", creator_user_id
+        )
+        reels = await conn.fetch(
+            "SELECT * FROM creator_reels WHERE creator_id=$1::uuid ORDER BY sort_order, created_at DESC",
+            creator_user_id,
+        )
+    if not cp:
+        raise HTTPException(status_code=404, detail="Creator not found")
+    profile = _serialize_profile(dict(cp))
+    profile["reels"] = [
+        {
+            "id": str(r["id"]),
+            "brand": r["brand"],
+            "title": r["title"],
+            "instagram_url": r["instagram_url"],
+            "thumbnail": r["thumbnail"],
+        }
+        for r in reels
+    ]
+    return profile
+
+
+@api_router.get("/brands/{brand_user_id}")
+async def get_brand_public(brand_user_id: str, user=Depends(optional_user)):
+    """Public: get a brand profile by their user_id (for creator view)."""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        bp = await conn.fetchrow(
+            "SELECT * FROM brand_profiles WHERE user_id=$1::uuid", brand_user_id
+        )
+    if not bp:
+        raise HTTPException(status_code=404, detail="Brand not found")
+    return _serialize_profile(dict(bp))
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # OPPORTUNITIES ROUTES
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -365,6 +503,8 @@ def _opp_row(row):
     d["brand_id"] = str(d["brand_id"])
     d["requirements"] = list(d.get("requirements") or [])
     d["languages"] = list(d.get("languages") or [])
+    if "created_at" in d and hasattr(d["created_at"], "isoformat"):
+        d["created_at"] = d["created_at"].isoformat()
     return d
 
 
@@ -381,7 +521,7 @@ async def list_opportunities(
     filters = ["status='active'"]
     params = []
     i = 1
-    if category:
+    if category and category != "All":
         filters.append(f"category=${i}"); params.append(category); i += 1
     if verified is not None:
         filters.append(f"verified=${i}"); params.append(verified); i += 1
@@ -529,7 +669,8 @@ async def apps_for_opportunity(opp_id: str, user=Depends(current_user)):
     async with pool.acquire() as conn:
         rows = await conn.fetch("""
             SELECT a.*, cp.full_name, cp.handle, cp.avatar_url, cp.followers_count,
-                   cp.categories, cp.languages, cp.location, cp.instagram_url
+                   cp.categories, cp.languages, cp.location, cp.instagram_url, cp.bio,
+                   cp.collaborations_count, cp.worked_with
             FROM applications a
             LEFT JOIN creator_profiles cp ON cp.user_id = a.creator_id
             WHERE a.opportunity_id=$1::uuid
@@ -545,6 +686,8 @@ async def apps_for_opportunity(opp_id: str, user=Depends(current_user)):
         d["creator_categories"] = list(r["categories"] or [])
         d["creator_languages"] = list(r["languages"] or [])
         d["creator_location"] = r["location"] or ""
+        d["creator_bio"] = r["bio"] or ""
+        d["creator_collaborations"] = r["collaborations_count"] or 0
         result.append(d)
     return result
 
@@ -559,9 +702,17 @@ async def update_application(app_id: str, body: ApplicationStatusIn, user=Depend
         if str(app_row["brand_id"]) != str(user["id"]):
             raise HTTPException(status_code=403, detail="Not your listing")
         await conn.execute("UPDATE applications SET status=$1 WHERE id=$2::uuid", body.status, app_id)
-    status_text = {"accepted": "accepted 🎉", "rejected": "rejected", "shortlisted": "shortlisted ⭐"}.get(body.status, body.status)
-    await create_notification(app_row["creator_id"], "status", "Briefcase",
-        f"{app_row['brand_name']} {status_text} your application for '{app_row['opportunity_title']}'")
+    status_text = {
+        "accepted": "accepted 🎉",
+        "rejected": "did not select",
+        "shortlisted": "shortlisted ⭐",
+    }.get(body.status, body.status)
+    brand_name = app_row["brand_name"] or "A brand"
+    opp_title = app_row["opportunity_title"] or "your application"
+    await create_notification(
+        app_row["creator_id"], "status", "Briefcase",
+        f"{brand_name} has {status_text} you for '{opp_title}'"
+    )
     return {"success": True}
 
 
@@ -655,6 +806,13 @@ async def get_thread(thread_id: str, user=Depends(current_user)):
 async def get_messages(thread_id: str, user=Depends(current_user)):
     pool = await get_pool()
     async with pool.acquire() as conn:
+        # Mark messages as read for current user
+        thread = await conn.fetchrow("SELECT * FROM threads WHERE id=$1::uuid", thread_id)
+        if thread:
+            if user["account_type"] == "creator" and str(thread["creator_id"]) == str(user["id"]):
+                await conn.execute("UPDATE threads SET unread_creator=0 WHERE id=$1::uuid", thread_id)
+            elif user["account_type"] == "brand" and str(thread["brand_id"]) == str(user["id"]):
+                await conn.execute("UPDATE threads SET unread_brand=0 WHERE id=$1::uuid", thread_id)
         rows = await conn.fetch(
             "SELECT * FROM messages WHERE thread_id=$1::uuid ORDER BY sent_at ASC",
             thread_id,
@@ -674,9 +832,17 @@ async def send_message(thread_id: str, body: MessageIn, user=Depends(current_use
             INSERT INTO messages(thread_id,sender_id,from_role,text)
             VALUES($1::uuid,$2::uuid,$3,$4) RETURNING *
         """, thread_id, user["id"], from_role, body.text)
-        await conn.execute("""
-            UPDATE threads SET last_message=$1, updated_at=NOW() WHERE id=$2::uuid
-        """, body.text[:100], thread_id)
+        # Update thread's last message + increment unread for other party
+        if from_role == "creator":
+            await conn.execute("""
+                UPDATE threads SET last_message=$1, updated_at=NOW(),
+                unread_brand=unread_brand+1 WHERE id=$2::uuid
+            """, body.text[:100], thread_id)
+        else:
+            await conn.execute("""
+                UPDATE threads SET last_message=$1, updated_at=NOW(),
+                unread_creator=unread_creator+1 WHERE id=$2::uuid
+            """, body.text[:100], thread_id)
     # Notify the other party
     recipient_id = thread["brand_id"] if from_role == "creator" else thread["creator_id"]
     sender_name = thread["creator_name"] if from_role == "creator" else thread["brand_name"]
@@ -738,6 +904,8 @@ def _reel_row(row):
     d = dict(row)
     d["id"] = str(d["id"])
     d["creator_id"] = str(d["creator_id"])
+    if "created_at" in d and hasattr(d["created_at"], "isoformat"):
+        d["created_at"] = d["created_at"].isoformat()
     return d
 
 
@@ -808,7 +976,7 @@ async def delete_reel(reel_id: str, user=Depends(current_user)):
 
 @api_router.get("/")
 async def root():
-    return {"message": "OLLCOLLAB API v2"}
+    return {"message": "OLLCOLLAB API v3"}
 
 
 app.include_router(api_router)

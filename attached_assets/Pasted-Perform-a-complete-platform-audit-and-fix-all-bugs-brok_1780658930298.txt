@@ -1,0 +1,55 @@
+Perform a complete platform audit and fix all bugs, broken flows, database sync issues, role issues, routing issues, upload issues, and UI inconsistencies across both Creator and Brand experiences.
+
+**Creator Fixes**
+
+* Allow creators to edit Followers Count and Brand Collaborations count.
+* Show only opportunities matching the creator's selected categories.
+* Change label "Deadline" to "Application Deadline".
+* Fix missing post thumbnails on Home feed.
+* Fix error when opening brand opportunities/posts.
+* Allow creators to add and edit additional social links (YouTube, LinkedIn, TikTok, Website).
+* Disable switching between Creator and Brand modes after account creation.
+* Fix Share Profile button.
+* Show actual cover note submitted by the creator instead of dummy text.
+* Notify creators when applications are shortlisted, accepted, or rejected.
+* Allow creators to open and view the actual brand profile by clicking the brand name.
+* Fix "Worked With" brands not saving to database and reverting after refresh/logout.
+* Show success confirmation after profile updates.
+
+**Brand Fixes**
+
+* If category = "Other", show a custom category input field.
+* Change label "Deadline" to "Application Deadline".
+* Allow brands to add Instagram and Website links to their profile.
+* Fix creator search and ensure all creators are searchable using filters.
+* Add Sort By options to search results.
+* Change the state of the Shortlist button after a creator has been shortlisted.
+* Fix profile picture upload and ensure it persists across sessions.
+* Remove duplicate image upload field while posting opportunities.
+* Show the real creator profile when reviewing applicants instead of dummy profiles.
+* Show success confirmation after profile updates and opportunity edits.
+
+**Chat & Messaging**
+
+* Fix broken chat UI for both creators and brands.
+* Verify message delivery, loading, scrolling, timestamps, and unread states.
+
+**Role & Navigation Issues**
+
+* Prevent pages from randomly switching between Creator and Brand modes.
+* Verify role-based access on every screen.
+* Fix incorrect redirects and navigation issues.
+* Ensure clicking any opportunity opens the correct opportunity every time.
+
+**Data & Persistence**
+
+* Remove all dummy/sample content across the platform except test IDs needed for development.
+* Ensure all edits, uploads, profile changes, reels, brands worked with, opportunities, and applications are permanently saved to the database.
+* Ensure updates instantly reflect across all pages and persist after refresh, logout, and login.
+* Review caching, state management, API calls, storage buckets, and database relationships.
+
+**QA & Testing**
+
+* Perform a complete end-to-end audit of every Creator and Brand flow.
+* Test all Create, Read, Update, Delete (CRUD) actions.
+* Test authentication, uploads, notifications, search, chat, profiles, applications, opportunities, and navigation.

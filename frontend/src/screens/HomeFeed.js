@@ -308,7 +308,7 @@ export default function HomeFeed() {
                     </span>
                     <span className="flex items-center gap-1">
                       <Users size={11} className="text-[#E25238]" />
-                      <span className="font-medium">{op.creatorsNeeded}</span>
+                      <span className="font-medium">{op.needed}</span>
                     </span>
                     <span className="flex items-center gap-1">
                       <Calendar size={11} className="text-[#E25238]" />

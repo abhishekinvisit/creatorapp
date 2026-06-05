@@ -4,7 +4,7 @@ import { MessageCircle } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { BrandLogo } from "@/components/BrandLogo";
 import { useApp } from "@/context/AppContext";
-import { applicationsApi } from "@/lib/api";
+import { applicationsApi, messagesApi } from "@/lib/api";
 
 const TABS = ["Applied", "Shortlisted", "Accepted", "Rejected"];
 
@@ -27,7 +27,7 @@ function formatDate(isoStr) {
 
 export default function MyApplications() {
   const navigate = useNavigate();
-  const { applications, setApplications, getOrCreateThread } = useApp();
+  const { applications, setApplications } = useApp();
   const [tab, setTab] = useState("Applied");
   const [loading, setLoading] = useState(true);
 
@@ -52,8 +52,23 @@ export default function MyApplications() {
 
   const filtered = applications.filter((a) => {
     const s = (a.status || "applied").toLowerCase();
-    return tab.toLowerCase() === s || (tab === "Applied" && s === "applied");
+    if (tab === "Applied") return s === "applied";
+    if (tab === "Shortlisted") return s === "shortlisted" || s === "viewed";
+    return tab.toLowerCase() === s;
   });
+
+  const handleMessage = async (a) => {
+    try {
+      if (a.brandId) {
+        const thread = await messagesApi.openWith(a.brandId);
+        navigate(`/chat/${thread.id}`);
+      } else {
+        navigate("/messages");
+      }
+    } catch (_) {
+      navigate("/messages");
+    }
+  };
 
   return (
     <div data-testid="my-applications" className="min-h-full bg-[#F9F9F8] pb-6">
@@ -110,10 +125,7 @@ export default function MyApplications() {
                   {isAccepted && (
                     <button
                       data-testid={`row-message-${a.id}`}
-                      onClick={() => {
-                        const tid = getOrCreateThread(a.brandName);
-                        navigate(`/chat/${tid}`);
-                      }}
+                      onClick={() => handleMessage(a)}
                       aria-label={`Message ${a.brandName}`}
                       className="w-10 h-10 rounded-full bg-[#0A0A0A] text-white flex items-center justify-center hover:bg-[#E25238] transition-colors flex-shrink-0"
                     >

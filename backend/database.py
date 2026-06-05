@@ -50,11 +50,16 @@ CREATE TABLE IF NOT EXISTS creator_profiles (
     categories TEXT[] DEFAULT '{}',
     languages TEXT[] DEFAULT '{}',
     instagram_url VARCHAR(500) DEFAULT '',
+    youtube_url VARCHAR(500) DEFAULT '',
+    linkedin_url VARCHAR(500) DEFAULT '',
+    tiktok_url VARCHAR(500) DEFAULT '',
+    website_url VARCHAR(500) DEFAULT '',
     followers_count INTEGER DEFAULT 0,
     years_experience INTEGER DEFAULT 0,
     avatar_url TEXT DEFAULT '',
     engagement_rate DECIMAL(5,2) DEFAULT 0,
     collaborations_count INTEGER DEFAULT 0,
+    worked_with JSONB DEFAULT '[]',
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -65,6 +70,9 @@ CREATE TABLE IF NOT EXISTS brand_profiles (
     handle VARCHAR(100) DEFAULT '',
     bio TEXT DEFAULT '',
     category VARCHAR(100) DEFAULT '',
+    custom_category VARCHAR(100) DEFAULT '',
+    instagram_url VARCHAR(500) DEFAULT '',
+    website_url VARCHAR(500) DEFAULT '',
     gst_number VARCHAR(30) DEFAULT '',
     logo_data TEXT DEFAULT '',
     verified BOOLEAN DEFAULT FALSE,
@@ -161,9 +169,26 @@ CREATE INDEX IF NOT EXISTS idx_messages_thread_id ON messages(thread_id);
 CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications(user_id);
 """
 
+# Migrations for columns added after initial schema deployment
+MIGRATIONS = [
+    "ALTER TABLE creator_profiles ADD COLUMN IF NOT EXISTS youtube_url VARCHAR(500) DEFAULT ''",
+    "ALTER TABLE creator_profiles ADD COLUMN IF NOT EXISTS linkedin_url VARCHAR(500) DEFAULT ''",
+    "ALTER TABLE creator_profiles ADD COLUMN IF NOT EXISTS tiktok_url VARCHAR(500) DEFAULT ''",
+    "ALTER TABLE creator_profiles ADD COLUMN IF NOT EXISTS website_url VARCHAR(500) DEFAULT ''",
+    "ALTER TABLE creator_profiles ADD COLUMN IF NOT EXISTS worked_with JSONB DEFAULT '[]'",
+    "ALTER TABLE brand_profiles ADD COLUMN IF NOT EXISTS instagram_url VARCHAR(500) DEFAULT ''",
+    "ALTER TABLE brand_profiles ADD COLUMN IF NOT EXISTS website_url VARCHAR(500) DEFAULT ''",
+    "ALTER TABLE brand_profiles ADD COLUMN IF NOT EXISTS custom_category VARCHAR(100) DEFAULT ''",
+]
+
 
 async def init_db():
     pool = await get_pool()
     async with pool.acquire() as conn:
         await conn.execute(SCHEMA)
+        for migration in MIGRATIONS:
+            try:
+                await conn.execute(migration)
+            except Exception as e:
+                logger.warning(f"Migration skipped: {migration[:60]} — {e}")
     logger.info("Database schema initialised")

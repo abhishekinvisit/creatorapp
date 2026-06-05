@@ -1,28 +1,21 @@
 import { useNavigate } from "react-router-dom";
-import { User, Lock, Bell, ShieldCheck, UserX, HelpCircle, LogOut, ChevronRight, Repeat } from "lucide-react";
+import { User, Lock, Bell, ShieldCheck, UserX, HelpCircle, LogOut, ChevronRight } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { useApp } from "@/context/AppContext";
 import { toast } from "sonner";
 
 export default function Settings() {
   const navigate = useNavigate();
-  const { accountType, switchMode, logout } = useApp();
+  const { accountType, logout } = useApp();
   const dark = accountType === "brand";
 
   const rows = [
-    { id: "edit", icon: User, label: "Edit Profile", action: () => navigate("/profile/edit") },
-    { id: "switch", icon: Repeat, label: `Switch to ${accountType === "creator" ? "Brand" : "Creator"} Mode`, action: () => {
-        const next = accountType === "creator" ? "brand" : "creator";
-        switchMode(next);
-        toast.success(`Switched to ${next} mode`);
-        navigate(next === "brand" ? "/brand/dashboard" : "/home");
-      }
-    },
-    { id: "account", icon: Lock, label: "Account Settings", action: () => toast.info("Coming soon") },
-    { id: "notif", icon: Bell, label: "Notifications", action: () => navigate("/notifications") },
-    { id: "privacy", icon: ShieldCheck, label: "Privacy & Security", action: () => toast.info("Coming soon") },
-    { id: "blocked", icon: UserX, label: "Blocked Users", action: () => toast.info("No blocked users") },
-    { id: "help", icon: HelpCircle, label: "Help & Support", action: () => toast.info("Support: hello@ollcollab.com") },
+    { id: "edit",    icon: User,        label: "Edit Profile",          action: () => navigate("/profile/edit") },
+    { id: "account", icon: Lock,        label: "Account Settings",      action: () => toast.info("Coming soon") },
+    { id: "notif",   icon: Bell,        label: "Notifications",         action: () => navigate("/notifications") },
+    { id: "privacy", icon: ShieldCheck, label: "Privacy & Security",    action: () => toast.info("Coming soon") },
+    { id: "blocked", icon: UserX,       label: "Blocked Users",         action: () => toast.info("No blocked users") },
+    { id: "help",    icon: HelpCircle,  label: "Help & Support",        action: () => toast.info("Support: hello@ollcollab.com") },
   ];
 
   return (

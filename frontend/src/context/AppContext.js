@@ -1,18 +1,72 @@
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { DEFAULT_USER, MY_APPLICATIONS, OPPORTUNITIES, MESSAGES_THREADS, NOTIFICATIONS, ACTIVE_POSTS, BRANDS } from "@/data/mockData";
+import { DEFAULT_USER, MY_APPLICATIONS, OPPORTUNITIES, MESSAGES_THREADS, NOTIFICATIONS, ACTIVE_POSTS } from "@/data/mockData";
 import { authApi, TOKEN_KEY, clearToken, setToken, getToken } from "@/lib/api";
 
 const AppContext = createContext(null);
+
+function formatFollowers(n) {
+  if (!n) return "0";
+  return Number(n).toLocaleString("en-IN");
+}
+
+function mapCreatorProfile(prev, p) {
+  let workedWith = [];
+  if (Array.isArray(p.worked_with)) workedWith = p.worked_with;
+  else if (typeof p.worked_with === "string") {
+    try { workedWith = JSON.parse(p.worked_with); } catch (_) {}
+  }
+  return {
+    ...prev,
+    creator: {
+      ...prev.creator,
+      name:             p.full_name    || prev.creator.name,
+      handle:           p.handle       || prev.creator.handle,
+      bio:              p.bio          || prev.creator.bio,
+      location:         p.location     || prev.creator.location,
+      gender:           p.gender       || prev.creator.gender,
+      age:              p.age          || prev.creator.age,
+      category:         p.categories?.length ? p.categories : prev.creator.category,
+      language:         p.languages?.length  ? p.languages  : prev.creator.language,
+      instagramUrl:     p.instagram_url || prev.creator.instagramUrl,
+      youtubeUrl:       p.youtube_url   || prev.creator.youtubeUrl  || "",
+      linkedinUrl:      p.linkedin_url  || prev.creator.linkedinUrl || "",
+      tiktokUrl:        p.tiktok_url    || prev.creator.tiktokUrl   || "",
+      websiteUrl:       p.website_url   || prev.creator.websiteUrl  || "",
+      followers:        formatFollowers(p.followers_count) || prev.creator.followers,
+      followersCount:   p.followers_count || prev.creator.followersCount || 0,
+      collaborations:   p.collaborations_count != null ? p.collaborations_count : (prev.creator.collaborations || 0),
+      avatar:           p.avatar_url    || prev.creator.avatar,
+    },
+    workedWith: workedWith.length ? workedWith : prev.workedWith,
+  };
+}
+
+function mapBrandProfile(prev, p) {
+  return {
+    ...prev,
+    brand: {
+      ...prev.brand,
+      name:         p.brand_name    || prev.brand.name,
+      bio:          p.bio           || prev.brand.bio,
+      category:     p.category ? [p.category] : prev.brand.category,
+      customCategory: p.custom_category || prev.brand.customCategory || "",
+      instagramUrl: p.instagram_url || prev.brand.instagramUrl || "",
+      websiteUrl:   p.website_url   || prev.brand.websiteUrl   || "",
+      logo:         p.logo_data     || prev.brand.logo,
+      gstNumber:    p.gst_number    || "",
+    },
+  };
+}
 
 export const AppProvider = ({ children }) => {
   const [accountType, setAccountType] = useState("creator");
   const [isAuthed, setIsAuthed] = useState(false);
   const [onboardingComplete, setOnboardingComplete] = useState(false);
-  const [authLoading, setAuthLoading] = useState(true); // true while restoring session
+  const [authLoading, setAuthLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState(null);
 
-  const [user, setUser] = useState(DEFAULT_USER);
-  const [workedWith, setWorkedWith] = useState(BRANDS.slice(0, 6));
+  const [user, setUser] = useState({ ...DEFAULT_USER, workedWith: [] });
+  const [workedWith, setWorkedWith] = useState([]);
   const [applications, setApplications] = useState(MY_APPLICATIONS);
   const [opportunities, setOpportunities] = useState(OPPORTUNITIES);
   const [threads, setThreads] = useState(MESSAGES_THREADS);
@@ -31,37 +85,12 @@ export const AppProvider = ({ children }) => {
       setAccountType(data.account_type);
       setOnboardingComplete(data.onboarding_complete);
       setIsAuthed(true);
-      // Map API profile to user context shape
       if (data.account_type === "creator" && data.profile) {
-        const p = data.profile;
-        setUser((prev) => ({
-          ...prev,
-          creator: {
-            ...prev.creator,
-            name: p.full_name || prev.creator.name,
-            handle: p.handle || prev.creator.handle,
-            bio: p.bio || prev.creator.bio,
-            location: p.location || prev.creator.location,
-            category: p.categories?.length ? p.categories : prev.creator.category,
-            language: p.languages?.length ? p.languages : prev.creator.language,
-            instagramUrl: p.instagram_url || prev.creator.instagramUrl,
-            followers: p.followers_count ? `${Number(p.followers_count).toLocaleString("en-IN")}` : prev.creator.followers,
-            avatar: p.avatar_url || prev.creator.avatar,
-          },
-        }));
+        const mapped = mapCreatorProfile({ ...DEFAULT_USER, workedWith: [] }, data.profile);
+        setUser((prev) => mapCreatorProfile(prev, data.profile));
+        if (mapped.workedWith?.length) setWorkedWith(mapped.workedWith);
       } else if (data.account_type === "brand" && data.profile) {
-        const p = data.profile;
-        setUser((prev) => ({
-          ...prev,
-          brand: {
-            ...prev.brand,
-            name: p.brand_name || prev.brand.name,
-            bio: p.bio || prev.brand.bio,
-            category: p.category ? [p.category] : prev.brand.category,
-            logo: p.logo_data || prev.brand.logo,
-            gstNumber: p.gst_number || "",
-          },
-        }));
+        setUser((prev) => mapBrandProfile(prev, data.profile));
       }
     } catch (_) {
       clearToken();
@@ -78,37 +107,13 @@ export const AppProvider = ({ children }) => {
       const data = await authApi.me();
       if (data.id) setCurrentUserId(data.id);
       if (data.account_type === "creator" && data.profile) {
-        const p = data.profile;
-        setUser((prev) => ({
-          ...prev,
-          creator: {
-            ...prev.creator,
-            name: p.full_name || prev.creator.name,
-            handle: p.handle || prev.creator.handle,
-            bio: p.bio || prev.creator.bio,
-            location: p.location || prev.creator.location,
-            category: p.categories?.length ? p.categories : prev.creator.category,
-            language: p.languages?.length ? p.languages : prev.creator.language,
-            instagramUrl: p.instagram_url || prev.creator.instagramUrl,
-            followers: p.followers_count
-              ? `${Number(p.followers_count).toLocaleString("en-IN")}`
-              : prev.creator.followers,
-            avatar: p.avatar_url || prev.creator.avatar,
-          },
-        }));
+        setUser((prev) => {
+          const mapped = mapCreatorProfile(prev, data.profile);
+          if (mapped.workedWith?.length) setWorkedWith(mapped.workedWith);
+          return mapped;
+        });
       } else if (data.account_type === "brand" && data.profile) {
-        const p = data.profile;
-        setUser((prev) => ({
-          ...prev,
-          brand: {
-            ...prev.brand,
-            name: p.brand_name || prev.brand.name,
-            bio: p.bio || prev.brand.bio,
-            category: p.category ? [p.category] : prev.brand.category,
-            logo: p.logo_data || prev.brand.logo,
-            gstNumber: p.gst_number || "",
-          },
-        }));
+        setUser((prev) => mapBrandProfile(prev, data.profile));
       }
     } catch (_) {}
   }, []);
@@ -119,42 +124,17 @@ export const AppProvider = ({ children }) => {
     setAccountType(acctType);
     setOnboardingComplete(onboarded);
     setIsAuthed(true);
-    // Immediately load the real profile so screens show correct data
     try {
       const data = await authApi.me();
       if (data.id) setCurrentUserId(data.id);
       if (data.account_type === "creator" && data.profile) {
-        const p = data.profile;
-        setUser((prev) => ({
-          ...prev,
-          creator: {
-            ...prev.creator,
-            name: p.full_name || prev.creator.name,
-            handle: p.handle || prev.creator.handle,
-            bio: p.bio || prev.creator.bio,
-            location: p.location || prev.creator.location,
-            category: p.categories?.length ? p.categories : prev.creator.category,
-            language: p.languages?.length ? p.languages : prev.creator.language,
-            instagramUrl: p.instagram_url || prev.creator.instagramUrl,
-            followers: p.followers_count
-              ? `${Number(p.followers_count).toLocaleString("en-IN")}`
-              : prev.creator.followers,
-            avatar: p.avatar_url || prev.creator.avatar,
-          },
-        }));
+        setUser((prev) => {
+          const mapped = mapCreatorProfile(prev, data.profile);
+          if (mapped.workedWith?.length) setWorkedWith(mapped.workedWith);
+          return mapped;
+        });
       } else if (data.account_type === "brand" && data.profile) {
-        const p = data.profile;
-        setUser((prev) => ({
-          ...prev,
-          brand: {
-            ...prev.brand,
-            name: p.brand_name || prev.brand.name,
-            bio: p.bio || prev.brand.bio,
-            category: p.category ? [p.category] : prev.brand.category,
-            logo: p.logo_data || prev.brand.logo,
-            gstNumber: p.gst_number || "",
-          },
-        }));
+        setUser((prev) => mapBrandProfile(prev, data.profile));
       }
     } catch (_) {}
   }, []);
@@ -165,6 +145,7 @@ export const AppProvider = ({ children }) => {
     setOnboardingComplete(false);
     setCurrentUserId(null);
     setUser(DEFAULT_USER);
+    setWorkedWith([]);
     setApplications(MY_APPLICATIONS);
     setOpportunities(OPPORTUNITIES);
     setActivePosts(ACTIVE_POSTS);
@@ -172,8 +153,6 @@ export const AppProvider = ({ children }) => {
     setThreads(MESSAGES_THREADS);
     setSavedIds([]);
   };
-
-  const switchMode = (mode) => setAccountType(mode);
 
   // ── Onboarding ────────────────────────────────────────────────────────────
   const completeOnboarding = (data) => {
@@ -187,8 +166,9 @@ export const AppProvider = ({ children }) => {
           category: data.categories?.length ? data.categories : prev.creator.category,
           instagramUrl: data.instagramUrl || prev.creator.instagramUrl,
           followers: data.followersCount
-            ? `${Number(data.followersCount).toLocaleString("en-IN")}`
+            ? formatFollowers(data.followersCount)
             : prev.creator.followers,
+          followersCount: data.followersCount || 0,
         },
       }));
     } else {
@@ -224,6 +204,7 @@ export const AppProvider = ({ children }) => {
       brandName,
       appliedOn: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
       status: "applied",
+      note: "",
     };
     setApplications((prev) => [newApp, ...prev]);
   };
@@ -242,14 +223,6 @@ export const AppProvider = ({ children }) => {
       needed: parseInt(data.creatorsNeeded || data.needed || 5),
       deadline: data.deadline || "",
       applicants: 0,
-      requirements: data.requirements || {
-        category: data.category || "",
-        minFollowers: data.minFollowers || "",
-        age: data.age || "",
-        gender: data.gender || "",
-        location: data.location || "",
-        language: data.language || [],
-      },
       status: "active",
     };
     setActivePosts((prev) => [newPost, ...prev]);
@@ -257,7 +230,7 @@ export const AppProvider = ({ children }) => {
 
   const updatePost = (id, patch) => {
     setActivePosts((prev) =>
-      prev.map((p) => p.id === id ? { ...p, ...patch, requirements: { ...p.requirements, ...(patch.requirements || {}) } } : p)
+      prev.map((p) => p.id === id ? { ...p, ...patch } : p)
     );
   };
 
@@ -278,7 +251,6 @@ export const AppProvider = ({ children }) => {
     const newThread = {
       id: `t-${Date.now()}`,
       name: brandName,
-      avatar: brandName.slice(0, 4).toUpperCase(),
       online: false,
       lastMessage: "Conversation started",
       time: "now",
@@ -291,7 +263,7 @@ export const AppProvider = ({ children }) => {
 
   return (
     <AppContext.Provider value={{
-      accountType, setAccountType, switchMode,
+      accountType, setAccountType,
       isAuthed, setIsAuthed, logout,
       onboardingComplete, setOnboardingComplete, completeOnboarding,
       authLoading,

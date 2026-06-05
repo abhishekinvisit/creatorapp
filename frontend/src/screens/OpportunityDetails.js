@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Wallet, Calendar, Users, Tag, ListChecks, Globe, Share2, BadgeCheck, Languages } from "lucide-react";
 
@@ -25,16 +25,16 @@ export default function OpportunityDetails() {
   const [showApply, setShowApply] = useState(false);
   const [apiOp, setApiOp] = useState(null);
 
-  // Try to fetch from API if not in context (e.g. direct URL visit)
-  const ctxOp = opportunities.find((o) => o.id === id);
-  const op = apiOp || ctxOp || opportunities[0];
+  const ctxOp = opportunities.find((o) => String(o.id) === String(id));
+  const op = apiOp || ctxOp;
 
-  useState(() => {
-    if (ctxOp) return; // already have it
+  useEffect(() => {
+    if (ctxOp) return;
     import("@/lib/api").then(({ opportunitiesApi }) => {
       opportunitiesApi.get(id)
         .then((o) => setApiOp({
           id: o.id,
+          brandId: o.brand_id,
           brandName: o.brand_name,
           brandCategory: o.brand_category,
           title: o.title,
@@ -52,10 +52,24 @@ export default function OpportunityDetails() {
         }))
         .catch(() => {});
     });
-  });
+  }, [id, ctxOp]);
 
-  if (!op) return null;
+  if (!op) return (
+    <div className="min-h-full bg-[#F9F9F8] flex items-center justify-center">
+      <div className="w-8 h-8 border-4 border-[#E5E5E5] border-t-[#E25238] rounded-full animate-spin" />
+    </div>
+  );
+
   const saved = isSaved(op.id);
+
+  const handleShare = () => {
+    const url = window.location.href;
+    if (navigator.share) {
+      navigator.share({ title: `${op.brandName} – ${op.title}`, url }).catch(() => {});
+    } else {
+      navigator.clipboard?.writeText(url).then(() => toast.success("Link copied!")).catch(() => toast.info(url));
+    }
+  };
 
   return (
     <div data-testid="opportunity-details" className="min-h-full bg-[#F9F9F8] flex flex-col pb-2">
@@ -84,15 +98,17 @@ export default function OpportunityDetails() {
         </div>
 
         {/* Cover */}
-        <div className="mt-5 mb-6 rounded-3xl overflow-hidden h-44">
-          <img src={op.cover} alt={op.title} className="w-full h-full object-cover" />
-        </div>
+        {op.cover && (
+          <div className="mt-5 mb-6 rounded-3xl overflow-hidden h-44">
+            <img src={op.cover} alt={op.title} className="w-full h-full object-cover" />
+          </div>
+        )}
 
         {/* About brand */}
         <div className="mb-6">
           <p className="text-xs font-bold tracking-[0.2em] uppercase text-[#E25238] mb-2">About Brand</p>
           <p className="text-sm text-[#0A0A0A] leading-relaxed font-medium">
-            {op.brandName} is trusted by 1M+ customers. We create clean, effective & safe products.
+            {op.brandName} is a trusted brand creating quality products for our community.
           </p>
           <div className="flex items-center gap-3 mt-4">
             {[InstagramIcon, YoutubeIcon, Globe].map((Icon, i) => (
@@ -106,16 +122,16 @@ export default function OpportunityDetails() {
         {/* Campaign */}
         <div className="mb-6">
           <p className="text-xs font-bold tracking-[0.2em] uppercase text-[#E25238] mb-2">Campaign Details</p>
-          <p className="text-sm text-[#0A0A0A] leading-relaxed font-medium">{op.description}</p>
+          <p className="text-sm text-[#0A0A0A] leading-relaxed font-medium">{op.description || op.pitch}</p>
         </div>
 
         {/* Details list */}
         <div className="bg-white rounded-3xl border border-[#E5E5E5] divide-y divide-[#F3F3F3] mb-6">
           {[
-            { icon: Wallet, label: "Payout", value: `₹${op.payout} per reel` },
-            { icon: Calendar, label: "Deadline", value: op.deadline },
-            { icon: Users, label: "Creators", value: `${op.creatorsNeeded}` },
-            { icon: Tag, label: "Category", value: op.category },
+            { icon: Wallet,   label: "Payout",                value: `₹${op.payout} per reel` },
+            { icon: Calendar, label: "Application Deadline",  value: op.deadline },
+            { icon: Users,    label: "Creators Needed",       value: `${op.needed}` },
+            { icon: Tag,      label: "Category",              value: op.category },
           ].map((row) => (
             <div key={row.label} className="flex items-center px-5 py-4 gap-3">
               <div className="w-9 h-9 rounded-full bg-[#F3F3F3] flex items-center justify-center">
@@ -141,22 +157,24 @@ export default function OpportunityDetails() {
             </div>
           )}
 
-          <div className="px-5 py-4">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-9 h-9 rounded-full bg-[#F3F3F3] flex items-center justify-center">
-                <ListChecks size={16} className="text-[#E25238]" />
+          {op.requirements?.length > 0 && (
+            <div className="px-5 py-4">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-9 h-9 rounded-full bg-[#F3F3F3] flex items-center justify-center">
+                  <ListChecks size={16} className="text-[#E25238]" />
+                </div>
+                <span className="text-sm font-medium text-[#525252]">Requirements</span>
               </div>
-              <span className="text-sm font-medium text-[#525252]">Requirements</span>
+              <ul className="pl-12 space-y-1.5">
+                {op.requirements.map((r) => (
+                  <li key={r} className="text-sm font-bold text-[#0A0A0A] flex items-start gap-2">
+                    <span className="w-1 h-1 rounded-full bg-[#E25238] mt-2 flex-shrink-0" />
+                    {r}
+                  </li>
+                ))}
+              </ul>
             </div>
-            <ul className="pl-12 space-y-1.5">
-              {op.requirements.map((r) => (
-                <li key={r} className="text-sm font-bold text-[#0A0A0A] flex items-start gap-2">
-                  <span className="w-1 h-1 rounded-full bg-[#E25238] mt-2 flex-shrink-0" />
-                  {r}
-                </li>
-              ))}
-            </ul>
-          </div>
+          )}
         </div>
       </div>
 
@@ -170,13 +188,23 @@ export default function OpportunityDetails() {
           >
             Send My Profile
           </button>
-          <button data-testid="share-btn" className="w-full mt-3 py-3 rounded-full border border-[#E5E5E5] font-bold text-sm flex items-center justify-center gap-2 bg-white hover:bg-black hover:text-white transition-colors">
+          <button
+            data-testid="share-btn"
+            onClick={handleShare}
+            className="w-full mt-3 py-3 rounded-full border border-[#E5E5E5] font-bold text-sm flex items-center justify-center gap-2 bg-white hover:bg-black hover:text-white transition-colors"
+          >
             <Share2 size={16} /> Share
           </button>
         </div>
       </div>
 
-      {showApply && <ApplyDialog opportunity={op} onClose={() => setShowApply(false)} onApplied={() => { setShowApply(false); navigate("/application-submitted"); }} />}
+      {showApply && (
+        <ApplyDialog
+          opportunity={op}
+          onClose={() => setShowApply(false)}
+          onApplied={() => { setShowApply(false); navigate("/application-submitted"); }}
+        />
+      )}
     </div>
   );
 }

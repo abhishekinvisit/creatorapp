@@ -7,11 +7,31 @@ const InstagramIcon = ({ size = 16, className = "", ...props }) => (
     <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
   </svg>
 );
+const YoutubeIcon = ({ size = 16, className = "", ...props }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+    <path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/>
+  </svg>
+);
+const LinkedInIcon = ({ size = 16, className = "", ...props }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/>
+  </svg>
+);
+const TikTokIcon = ({ size = 16, className = "", ...props }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className} {...props}>
+    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.75a8.16 8.16 0 0 0 4.76 1.51V6.8a4.85 4.85 0 0 1-1-.11z"/>
+  </svg>
+);
+const GlobeIcon = ({ size = 16, className = "", ...props }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+    <circle cx="12" cy="12" r="10"/><line x1="2" x2="22" y1="12" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+  </svg>
+);
+
 import { TopBar } from "@/components/TopBar";
 import { BrandLogo } from "@/components/BrandLogo";
 import { WorkedWithItem } from "@/components/WorkedWithItem";
 import { useApp } from "@/context/AppContext";
-import { BRANDS } from "@/data/mockData";
 import { profileApi, reelsApi } from "@/lib/api";
 import { toast } from "sonner";
 
@@ -23,15 +43,27 @@ export default function EditProfile() {
   const { user, setUser, accountType, workedWith, setWorkedWith, refreshProfile } = useApp();
   const profile = accountType === "brand" ? user.brand : user.creator;
 
-  // Form state
+  // Form state — shared
   const [name, setName] = useState(profile.name || "");
-  const [handle, setHandle] = useState(profile.handle || "");
   const [bio, setBio] = useState(profile.bio || "");
+  const [avatar, setAvatar] = useState(accountType === "brand" ? (user.brand.logo || "") : (user.creator.avatar || ""));
+
+  // Creator-only form state
+  const [handle, setHandle] = useState(profile.handle || "");
   const [location, setLocation] = useState(profile.location || "");
-  const [instagramUrl, setInstagramUrl] = useState(profile.instagramUrl || `https://instagram.com/${(profile.handle || "").replace("@", "")}`);
+  const [instagramUrl, setInstagramUrl] = useState(profile.instagramUrl || "");
+  const [youtubeUrl, setYoutubeUrl] = useState(profile.youtubeUrl || "");
+  const [linkedinUrl, setLinkedinUrl] = useState(profile.linkedinUrl || "");
+  const [tiktokUrl, setTiktokUrl] = useState(profile.tiktokUrl || "");
+  const [websiteUrl, setWebsiteUrl] = useState(profile.websiteUrl || "");
+  const [followersCount, setFollowersCount] = useState(String(profile.followersCount || ""));
+  const [collaborations, setCollaborations] = useState(String(profile.collaborations || ""));
   const [cats, setCats] = useState(profile.category || []);
   const [languages, setLanguages] = useState(profile.language || []);
-  const [avatar, setAvatar] = useState(accountType === "brand" ? (user.brand.logo || "") : (user.creator.avatar || ""));
+
+  // Brand-only form state
+  const [brandInstagramUrl, setBrandInstagramUrl] = useState(profile.instagramUrl || "");
+  const [brandWebsiteUrl, setBrandWebsiteUrl] = useState(profile.websiteUrl || "");
 
   // Reels
   const [reels, setReels] = useState([]);
@@ -41,7 +73,6 @@ export default function EditProfile() {
 
   const avatarRef = useRef(null);
 
-  // Load reels from API on mount
   useEffect(() => {
     if (accountType !== "creator") { setReelsLoading(false); return; }
     reelsApi.list()
@@ -50,7 +81,6 @@ export default function EditProfile() {
       .finally(() => setReelsLoading(false));
   }, [accountType]);
 
-  // Avatar upload handler
   const handleAvatarFile = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -63,15 +93,38 @@ export default function EditProfile() {
 
   const save = async () => {
     if (accountType === "brand") {
-      setUser((prev) => ({ ...prev, brand: { ...prev.brand, name, bio } }));
+      setUser((prev) => ({
+        ...prev,
+        brand: { ...prev.brand, name, bio, instagramUrl: brandInstagramUrl, websiteUrl: brandWebsiteUrl },
+      }));
       try {
-        await profileApi.updateBrand({ brand_name: name, bio, logo_data: avatar });
+        await profileApi.updateBrand({
+          brand_name: name,
+          bio,
+          logo_data: avatar,
+          instagram_url: brandInstagramUrl,
+          website_url: brandWebsiteUrl,
+        });
         await refreshProfile();
       } catch (_) {}
     } else {
+      const workedWithPayload = workedWith.map((b) => ({
+        id: b.id || String(Math.random()),
+        name: b.name || b.brand_name || "",
+        logo: b.logo || b.logo_data || "",
+      }));
       setUser((prev) => ({
         ...prev,
-        creator: { ...prev.creator, name, handle, bio, instagramUrl, category: cats, location, language: languages, avatar },
+        creator: {
+          ...prev.creator,
+          name, handle, bio, instagramUrl, youtubeUrl, linkedinUrl, tiktokUrl, websiteUrl,
+          category: cats, location, language: languages, avatar,
+          followersCount: Number(followersCount) || prev.creator.followersCount,
+          followers: followersCount
+            ? Number(followersCount).toLocaleString("en-IN")
+            : prev.creator.followers,
+          collaborations: Number(collaborations) || prev.creator.collaborations,
+        },
       }));
       try {
         await profileApi.updateCreator({
@@ -79,10 +132,17 @@ export default function EditProfile() {
           handle,
           bio,
           instagram_url: instagramUrl,
+          youtube_url: youtubeUrl,
+          linkedin_url: linkedinUrl,
+          tiktok_url: tiktokUrl,
+          website_url: websiteUrl,
           categories: cats,
           location,
           languages,
           avatar_url: avatar,
+          followers_count: Number(followersCount) || undefined,
+          collaborations_count: Number(collaborations) || undefined,
+          worked_with: workedWithPayload,
         });
         await refreshProfile();
       } catch (_) {}
@@ -93,6 +153,7 @@ export default function EditProfile() {
 
   const toggleCat = (c) => setCats((prev) => prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]);
   const toggleLang = (l) => setLanguages((prev) => prev.includes(l) ? prev.filter((x) => x !== l) : [...prev, l]);
+
   const removeBrand = (id) => setWorkedWith((prev) => prev.filter((b) => b.id !== id));
   const addBrand = (b) => {
     if (workedWith.find((w) => w.id === b.id)) return;
@@ -167,13 +228,7 @@ export default function EditProfile() {
           >
             <Camera size={16} />
           </button>
-          <input
-            ref={avatarRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleAvatarFile}
-          />
+          <input ref={avatarRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarFile} />
         </div>
       </div>
 
@@ -181,7 +236,7 @@ export default function EditProfile() {
         {/* Identity */}
         <Section label="Identity">
           <Field label="Full Name">
-            <Input testId="profile-name" value={name} onChange={setName} />
+            <Input testId="profile-name" value={name} onChange={setName} placeholder="Your name" />
           </Field>
           {accountType !== "brand" && (
             <Field label="Username">
@@ -203,7 +258,7 @@ export default function EditProfile() {
               rows={3}
               value={bio}
               onChange={(e) => setBio(e.target.value.slice(0, 160))}
-              placeholder="Tell brands what makes you you."
+              placeholder={accountType === "brand" ? "Tell creators about your brand." : "Tell brands what makes you you."}
               className="w-full bg-white border border-[#E5E5E5] rounded-2xl px-4 py-4 outline-none font-medium resize-none focus:border-[#0A0A0A] transition-colors"
             />
           </Field>
@@ -225,29 +280,100 @@ export default function EditProfile() {
           )}
         </Section>
 
-        {/* Instagram link */}
+        {/* Creator stats */}
         {accountType !== "brand" && (
-          <Section label="Instagram Link">
-            <Field hint="This URL opens when someone taps the IG icon next to your name.">
-              <div className="flex items-center bg-white border border-[#E5E5E5] rounded-2xl overflow-hidden focus-within:border-[#0A0A0A] transition-colors">
-                <div className="px-4 py-4 border-r border-[#E5E5E5] bg-[#F9F9F8]">
-                  <InstagramIcon size={16} className="text-[#E25238]" />
-                </div>
+          <Section label="Stats">
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Instagram Followers">
                 <input
-                  data-testid="profile-instagram-url"
-                  value={instagramUrl}
-                  onChange={(e) => setInstagramUrl(e.target.value)}
-                  placeholder="https://instagram.com/your.handle"
-                  className="flex-1 px-3 py-4 outline-none font-medium bg-transparent text-sm"
+                  data-testid="profile-followers"
+                  type="number"
+                  min="0"
+                  value={followersCount}
+                  onChange={(e) => setFollowersCount(e.target.value)}
+                  placeholder="e.g. 15000"
+                  className="w-full bg-white border border-[#E5E5E5] rounded-2xl px-4 py-4 outline-none font-medium focus:border-[#0A0A0A] transition-colors"
                 />
-              </div>
-            </Field>
+              </Field>
+              <Field label="Brand Collaborations">
+                <input
+                  data-testid="profile-collaborations"
+                  type="number"
+                  min="0"
+                  value={collaborations}
+                  onChange={(e) => setCollaborations(e.target.value)}
+                  placeholder="e.g. 12"
+                  className="w-full bg-white border border-[#E5E5E5] rounded-2xl px-4 py-4 outline-none font-medium focus:border-[#0A0A0A] transition-colors"
+                />
+              </Field>
+            </div>
+          </Section>
+        )}
+
+        {/* Social links — creator */}
+        {accountType !== "brand" && (
+          <Section label="Social Links">
+            <SocialField
+              icon={<InstagramIcon size={16} className="text-[#E25238]" />}
+              testId="profile-instagram-url"
+              value={instagramUrl}
+              onChange={setInstagramUrl}
+              placeholder="https://instagram.com/your.handle"
+            />
+            <SocialField
+              icon={<YoutubeIcon size={16} className="text-[#E25238]" />}
+              testId="profile-youtube-url"
+              value={youtubeUrl}
+              onChange={setYoutubeUrl}
+              placeholder="https://youtube.com/@channel"
+            />
+            <SocialField
+              icon={<TikTokIcon size={16} className="text-[#E25238]" />}
+              testId="profile-tiktok-url"
+              value={tiktokUrl}
+              onChange={setTiktokUrl}
+              placeholder="https://tiktok.com/@handle"
+            />
+            <SocialField
+              icon={<LinkedInIcon size={16} className="text-[#E25238]" />}
+              testId="profile-linkedin-url"
+              value={linkedinUrl}
+              onChange={setLinkedinUrl}
+              placeholder="https://linkedin.com/in/name"
+            />
+            <SocialField
+              icon={<GlobeIcon size={16} className="text-[#E25238]" />}
+              testId="profile-website-url"
+              value={websiteUrl}
+              onChange={setWebsiteUrl}
+              placeholder="https://yourwebsite.com"
+            />
+          </Section>
+        )}
+
+        {/* Social links — brand */}
+        {accountType === "brand" && (
+          <Section label="Online Presence">
+            <SocialField
+              icon={<InstagramIcon size={16} className="text-[#E25238]" />}
+              testId="profile-brand-instagram"
+              value={brandInstagramUrl}
+              onChange={setBrandInstagramUrl}
+              placeholder="https://instagram.com/yourbrand"
+            />
+            <SocialField
+              icon={<GlobeIcon size={16} className="text-[#E25238]" />}
+              testId="profile-brand-website"
+              value={brandWebsiteUrl}
+              onChange={setBrandWebsiteUrl}
+              placeholder="https://yourbrand.com"
+            />
           </Section>
         )}
 
         {/* Categories */}
         {accountType !== "brand" && (
-          <Section label="Categories" hint="Pick 3 that describe you best.">
+          <Section label="Categories" hint="Pick up to 3 that describe you best.">
             <div className="flex flex-wrap gap-2">
               {ALL_CATEGORIES.map((c) => {
                 const active = cats.includes(c);
@@ -396,7 +522,6 @@ export default function EditProfile() {
         )}
       </div>
 
-      {/* Brand picker modal */}
       {showBrandPicker && (
         <BrandPickerModal
           existing={workedWith}
@@ -405,7 +530,6 @@ export default function EditProfile() {
         />
       )}
 
-      {/* Reel edit modal */}
       {editingReel !== null && (
         <ReelEditor
           reel={editingReel === "new" ? null : reels.find((r) => r.id === editingReel)}
@@ -446,6 +570,21 @@ const Input = ({ value, onChange, placeholder, testId }) => (
   />
 );
 
+const SocialField = ({ icon, testId, value, onChange, placeholder }) => (
+  <div className="flex items-center bg-white border border-[#E5E5E5] rounded-2xl overflow-hidden focus-within:border-[#0A0A0A] transition-colors">
+    <div className="px-4 py-4 border-r border-[#E5E5E5] bg-[#F9F9F8] flex items-center justify-center w-[52px]">
+      {icon}
+    </div>
+    <input
+      data-testid={testId}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      className="flex-1 px-3 py-4 outline-none font-medium bg-transparent text-sm"
+    />
+  </div>
+);
+
 const PickerModal = ({ title, onClose, children }) => (
   <div
     className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-up"
@@ -462,6 +601,84 @@ const PickerModal = ({ title, onClose, children }) => (
     </div>
   </div>
 );
+
+const BRAND_SUGGESTIONS = [
+  { id: "b-s1", name: "Mamaearth",   logo: "" },
+  { id: "b-s2", name: "Nykaa",       logo: "" },
+  { id: "b-s3", name: "Bewakoof",    logo: "" },
+  { id: "b-s4", name: "Myntra",      logo: "" },
+  { id: "b-s5", name: "Sugar",       logo: "" },
+  { id: "b-s6", name: "WOW Skin",    logo: "" },
+  { id: "b-s7", name: "Plum",        logo: "" },
+  { id: "b-s8", name: "MCaffeine",   logo: "" },
+  { id: "b-s9", name: "Minimalist",  logo: "" },
+  { id: "b-s10", name: "Dot & Key",  logo: "" },
+  { id: "b-s11", name: "The Derma Co", logo: "" },
+  { id: "b-s12", name: "boAt",       logo: "" },
+];
+
+const BrandPickerModal = ({ existing, onClose, onPick }) => {
+  const [q, setQ] = useState("");
+  const [customName, setCustomName] = useState("");
+  const filtered = BRAND_SUGGESTIONS.filter((b) =>
+    !existing.find((e) => e.id === b.id) &&
+    b.name.toLowerCase().includes(q.toLowerCase())
+  );
+
+  return (
+    <PickerModal title="Add Brand" onClose={onClose}>
+      <div className="flex items-center bg-[#F9F9F8] border border-[#E5E5E5] rounded-2xl overflow-hidden mb-4 focus-within:border-[#0A0A0A] transition-colors">
+        <input
+          data-testid="brand-search"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Search brands..."
+          className="flex-1 px-4 py-3.5 outline-none font-medium bg-transparent text-sm"
+        />
+      </div>
+
+      {/* Custom brand entry */}
+      {q.trim() && !filtered.length && (
+        <div className="mb-4">
+          <p className="text-xs text-[#525252] font-medium mb-2">Not listed? Add it manually:</p>
+          <div className="flex gap-2">
+            <input
+              value={customName}
+              onChange={(e) => setCustomName(e.target.value)}
+              placeholder="Brand name"
+              className="flex-1 bg-[#F9F9F8] border border-[#E5E5E5] rounded-2xl px-4 py-3 outline-none font-medium text-sm focus:border-[#0A0A0A] transition-colors"
+            />
+            <button
+              onClick={() => {
+                if (!customName.trim()) return;
+                onPick({ id: `custom-${Date.now()}`, name: customName.trim(), logo: "" });
+              }}
+              className="px-5 py-3 bg-[#0A0A0A] text-white rounded-2xl font-bold text-sm"
+            >
+              Add
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="space-y-2">
+        {filtered.map((b) => (
+          <button
+            key={b.id}
+            data-testid={`brand-pick-${b.id}`}
+            onClick={() => onPick(b)}
+            className="w-full text-left px-4 py-3.5 rounded-2xl bg-[#F9F9F8] border border-[#E5E5E5] hover:border-[#0A0A0A] font-bold text-sm transition-all"
+          >
+            {b.name}
+          </button>
+        ))}
+        {!filtered.length && !q.trim() && (
+          <p className="text-center text-sm text-[#525252] py-6 font-medium">Search for a brand above.</p>
+        )}
+      </div>
+    </PickerModal>
+  );
+};
 
 const ReelEditor = ({ reel, onClose, onSave }) => {
   const thumbRef = useRef(null);
@@ -551,108 +768,6 @@ const ReelEditor = ({ reel, onClose, onSave }) => {
           </button>
         </div>
       </div>
-    </PickerModal>
-  );
-};
-
-const BrandPickerModal = ({ existing, onClose, onPick }) => {
-  const [tab, setTab] = useState("listed");
-  const [name, setName] = useState("");
-  const [logoSrc, setLogoSrc] = useState(null);
-  const fileRef = useRef(null);
-
-  const handleFile = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith("image/")) { toast.error("Please upload an image file"); return; }
-    if (file.size > 2 * 1024 * 1024) { toast.error("Logo must be under 2MB"); return; }
-    const reader = new FileReader();
-    reader.onload = () => setLogoSrc(reader.result);
-    reader.readAsDataURL(file);
-  };
-
-  const addCustom = () => {
-    const trimmed = name.trim();
-    if (!trimmed) { toast.error("Brand name is required"); return; }
-    onPick({
-      id: `custom-${Date.now()}`,
-      name: trimmed,
-      category: "Custom",
-      verified: false,
-      logo: trimmed.slice(0, 4).toUpperCase(),
-      customLogo: logoSrc || undefined,
-    });
-    toast.success(`${trimmed} added`);
-  };
-
-  return (
-    <PickerModal title="Add Brand" onClose={onClose}>
-      <div className="flex gap-1 mb-5 bg-[#F3F3F3] rounded-full p-1">
-        <button
-          data-testid="picker-tab-listed"
-          onClick={() => setTab("listed")}
-          className={`flex-1 py-2 rounded-full text-xs font-bold uppercase tracking-[0.15em] transition-all ${tab === "listed" ? "bg-white text-[#0A0A0A] shadow-sm" : "text-[#525252]"}`}
-        >
-          Listed
-        </button>
-        <button
-          data-testid="picker-tab-custom"
-          onClick={() => setTab("custom")}
-          className={`flex-1 py-2 rounded-full text-xs font-bold uppercase tracking-[0.15em] transition-all ${tab === "custom" ? "bg-white text-[#0A0A0A] shadow-sm" : "text-[#525252]"}`}
-        >
-          Add Custom
-        </button>
-      </div>
-
-      {tab === "listed" ? (
-        <div className="grid grid-cols-3 gap-3">
-          {BRANDS.map((b) => {
-            const added = existing.find((w) => w.id === b.id);
-            return (
-              <button
-                key={b.id}
-                data-testid={`pick-brand-${b.id}`}
-                onClick={() => !added && onPick(b)}
-                disabled={!!added}
-                className={`flex flex-col items-center gap-2 p-3 rounded-2xl transition-all ${added ? "opacity-40 cursor-not-allowed" : "hover:bg-[#F3F3F3]"}`}
-              >
-                <BrandLogo name={b.name} size={48} />
-                <span className="text-[11px] font-bold text-[#0A0A0A] truncate w-full text-center">{b.name}</span>
-                {added && <span className="text-[9px] font-bold uppercase tracking-wider text-[#525252]">Added</span>}
-              </button>
-            );
-          })}
-        </div>
-      ) : (
-        <div className="space-y-4">
-          <p className="text-xs text-[#525252] font-medium">Can't find the brand? Add it manually below.</p>
-          <div className="flex flex-col items-center gap-2">
-            <button
-              data-testid="custom-logo-upload"
-              onClick={() => fileRef.current?.click()}
-              className="relative w-24 h-24 rounded-3xl border-2 border-dashed border-[#0A0A0A] bg-[#F9F9F8] flex items-center justify-center overflow-hidden hover:border-[#E25238] transition-colors"
-            >
-              {logoSrc ? (
-                <img src={logoSrc} alt="logo" className="w-full h-full object-cover" />
-              ) : (
-                <Camera size={28} className="text-[#525252]" />
-              )}
-            </button>
-            <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
-            <p className="text-xs text-[#525252] font-medium">Upload logo (optional)</p>
-          </div>
-          <Field label="Brand Name">
-            <Input testId="custom-brand-name" value={name} onChange={setName} placeholder="e.g. MyBrand Co." />
-          </Field>
-          <button
-            data-testid="add-custom-brand"
-            onClick={addCustom}
-            className="w-full py-4 rounded-full bg-[#0A0A0A] text-white font-bold text-sm hover:bg-[#E25238] transition-colors"
-          >
-            Add Brand
-          </button>
-        </div>
-      )}
     </PickerModal>
   );
 };

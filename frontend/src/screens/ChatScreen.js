@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams } from "react-router-dom";
-import { Send, Paperclip, MoreVertical } from "lucide-react";
-import { TopBar } from "@/components/TopBar";
+import { Send, Paperclip, MoreVertical, ChevronLeft } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { useApp } from "@/context/AppContext";
 import { messagesApi } from "@/lib/api";
@@ -88,18 +87,25 @@ export default function ChatScreen() {
 
   return (
     <div data-testid="chat-screen" className={`min-h-full flex flex-col ${dark ? "bg-[#0A0A0A] text-white" : "bg-[#F9F9F8]"}`}>
-      <div className={`sticky top-0 z-30 px-5 py-3 flex items-center gap-3 ${dark ? "bg-[#0A0A0A] border-b border-white/10" : "bg-[#F9F9F8] border-b border-[#E5E5E5]"}`}>
-        <TopBar title="" dark={dark} rightSlot={<MoreVertical size={18} className={dark ? "text-white" : ""} />} />
-      </div>
-
-      <div className="flex items-center gap-3 px-5 -mt-2 pb-3">
-        <BrandLogo name={threadName} size={42} dark={dark} />
-        <div>
-          <h3 className="font-display font-bold">{threadName}</h3>
-          <p className={`text-xs font-medium ${dark ? "text-neutral-500" : "text-[#525252]"}`}>
+      {/* Single unified sticky header */}
+      <div className={`sticky top-0 z-30 px-5 py-3 flex items-center gap-3 border-b ${dark ? "bg-[#0A0A0A] border-white/10" : "bg-[#F9F9F8] border-[#E5E5E5]"}`}>
+        <button
+          data-testid="chat-back"
+          onClick={() => window.history.back()}
+          className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${dark ? "bg-white/10 hover:bg-white/20" : "bg-black/5 hover:bg-black/10"} transition-colors`}
+        >
+          <ChevronLeft size={20} />
+        </button>
+        <BrandLogo name={threadName} size={38} dark={dark} />
+        <div className="flex-1 min-w-0">
+          <h3 className="font-display font-bold text-base leading-tight truncate">{threadName}</h3>
+          <p className={`text-[11px] font-medium ${dark ? "text-neutral-500" : "text-[#525252]"}`}>
             {accountType === "brand" ? "Creator" : "Brand"}
           </p>
         </div>
+        <button className={`w-10 h-10 rounded-full flex items-center justify-center ${dark ? "bg-white/10 hover:bg-white/20" : "bg-black/5 hover:bg-black/10"} transition-colors`}>
+          <MoreVertical size={18} />
+        </button>
       </div>
 
       <div className="flex-1 px-5 py-3 space-y-3 overflow-y-auto">

@@ -1,19 +1,25 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, SlidersHorizontal, X, BadgeCheck, MapPin, Users, Check } from "lucide-react";
+import { Search, SlidersHorizontal, X, MapPin, Users, Check, ChevronDown } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
-import { APPLICANTS } from "@/data/mockData";
+import { creatorsApi } from "@/lib/api";
 
 const CATEGORIES = ["All", "Beauty", "Fashion", "Lifestyle", "Fitness", "Food", "Tech", "Travel"];
 const AGES = ["Any", "13-17", "18-24", "25-34", "35+"];
 const GENDERS = ["Any", "Female", "Male", "Non-binary"];
 const LANGUAGES = ["English", "Hindi", "Tamil", "Telugu", "Kannada", "Bengali", "Marathi", "Malayalam", "Punjabi"];
 const FOLLOWER_BUCKETS = [
-  { id: "any", label: "Any", min: 0 },
-  { id: "1k", label: "1K+", min: 1000 },
-  { id: "10k", label: "10K+", min: 10000 },
-  { id: "50k", label: "50K+", min: 50000 },
+  { id: "any",  label: "Any",   min: 0 },
+  { id: "1k",   label: "1K+",   min: 1000 },
+  { id: "10k",  label: "10K+",  min: 10000 },
+  { id: "50k",  label: "50K+",  min: 50000 },
   { id: "100k", label: "100K+", min: 100000 },
+];
+const SORT_OPTIONS = [
+  { id: "followers",      label: "Most Followers" },
+  { id: "recent",        label: "Recently Updated" },
+  { id: "collaborations", label: "Most Collabs" },
+  { id: "name",          label: "Name (A–Z)" },
 ];
 
 const DEFAULT_FILTERS = {
@@ -25,11 +31,56 @@ const DEFAULT_FILTERS = {
   language: [],
 };
 
+function formatFollowers(n) {
+  if (!n) return "0";
+  if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
+  return String(n);
+}
+
+function mapCreator(c) {
+  return {
+    id: c.user_id || c.creator_user_id,
+    name: c.full_name || "Creator",
+    handle: c.handle || "",
+    avatar: c.avatar_url || "",
+    location: c.location || "",
+    followers: formatFollowers(c.followers_count),
+    followersNum: c.followers_count || 0,
+    collaborations: c.collaborations_count || 0,
+    categories: c.categories || [],
+    languages: c.languages || [],
+    age: c.age || "",
+    gender: c.gender || "",
+    bio: c.bio || "",
+  };
+}
+
 export default function BrandDiscover() {
   const navigate = useNavigate();
   const [q, setQ] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [sortBy, setSortBy] = useState("followers");
+  const [showSort, setShowSort] = useState(false);
+  const [creators, setCreators] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch creators from API
+  useEffect(() => {
+    setLoading(true);
+    const params = { sort_by: sortBy };
+    if (filters.category !== "All") params.category = filters.category;
+    if (filters.followers !== "any") {
+      const bucket = FOLLOWER_BUCKETS.find((b) => b.id === filters.followers);
+      if (bucket) params.min_followers = bucket.min;
+    }
+    if (filters.language.length === 1) params.language = filters.language[0];
+    creatorsApi.list(params)
+      .then((data) => setCreators(data.map(mapCreator)))
+      .catch(() => setCreators([]))
+      .finally(() => setLoading(false));
+  }, [sortBy, filters.category, filters.followers]);
 
   const activeCount =
     (filters.category !== "All" ? 1 : 0) +
@@ -39,22 +90,21 @@ export default function BrandDiscover() {
     (filters.followers !== "any" ? 1 : 0) +
     (filters.language.length > 0 ? 1 : 0);
 
+  // Client-side filtering for fields not passed to API (age, gender, location, languages[multi])
   const results = useMemo(() => {
-    const minFollowers = FOLLOWER_BUCKETS.find((b) => b.id === filters.followers)?.min || 0;
     const term = q.trim().toLowerCase();
-    return APPLICANTS.filter((c) => {
+    return creators.filter((c) => {
       if (term && !c.name.toLowerCase().includes(term) && !c.handle.toLowerCase().includes(term)) return false;
-      if (filters.category !== "All" && !(c.categories || []).includes(filters.category)) return false;
-      if (filters.age !== "Any" && c.age !== filters.age) return false;
+      if (filters.age !== "Any" && String(c.age) !== filters.age) return false;
       if (filters.gender !== "Any" && c.gender !== filters.gender) return false;
       if (filters.location && !(c.location || "").toLowerCase().includes(filters.location.toLowerCase())) return false;
-      if (c.followersNum < minFollowers) return false;
-      if (filters.language.length > 0 && !filters.language.some((l) => (c.language || []).includes(l))) return false;
+      if (filters.language.length > 1 && !filters.language.some((l) => (c.languages || []).includes(l))) return false;
       return true;
     });
-  }, [q, filters]);
+  }, [creators, q, filters.age, filters.gender, filters.location, filters.language]);
 
   const reset = () => setFilters(DEFAULT_FILTERS);
+  const currentSort = SORT_OPTIONS.find((s) => s.id === sortBy) || SORT_OPTIONS[0];
 
   return (
     <div data-testid="brand-discover" className="min-h-full bg-[#0A0A0A] text-white pb-8">
@@ -62,7 +112,7 @@ export default function BrandDiscover() {
 
       <div className="px-5">
         {/* Search + filter */}
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 mb-3">
           <div className="flex-1 bg-white/5 border border-white/10 rounded-2xl flex items-center px-4 py-3.5">
             <Search size={16} className="text-neutral-400" />
             <input
@@ -72,6 +122,11 @@ export default function BrandDiscover() {
               placeholder="Search creators..."
               className="flex-1 outline-none px-3 text-sm font-medium bg-transparent text-white placeholder-neutral-500"
             />
+            {q && (
+              <button onClick={() => setQ("")} className="text-neutral-400 hover:text-white">
+                <X size={15} />
+              </button>
+            )}
           </div>
           <button
             data-testid="open-filters"
@@ -86,6 +141,38 @@ export default function BrandDiscover() {
               </span>
             )}
           </button>
+        </div>
+
+        {/* Sort + results count row */}
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-neutral-400">
+            {loading ? "Loading…" : `${results.length} creator${results.length === 1 ? "" : "s"}`}
+          </p>
+          <div className="relative">
+            <button
+              data-testid="sort-btn"
+              onClick={() => setShowSort((s) => !s)}
+              className="flex items-center gap-1.5 text-xs font-bold text-neutral-300 hover:text-white"
+            >
+              {currentSort.label} <ChevronDown size={13} />
+            </button>
+            {showSort && (
+              <div className="absolute right-0 top-6 z-30 bg-[#1A1A1A] border border-white/10 rounded-2xl overflow-hidden shadow-xl min-w-[160px]">
+                {SORT_OPTIONS.map((s) => (
+                  <button
+                    key={s.id}
+                    data-testid={`sort-${s.id}`}
+                    onClick={() => { setSortBy(s.id); setShowSort(false); }}
+                    className={`w-full text-left px-4 py-3 text-sm font-bold transition-colors ${
+                      sortBy === s.id ? "bg-[#E25238] text-white" : "text-neutral-300 hover:bg-white/5"
+                    }`}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Active filter chips */}
@@ -106,59 +193,75 @@ export default function BrandDiscover() {
         )}
 
         {/* Results */}
-        <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-neutral-400 mb-3">
-          {results.length} creator{results.length === 1 ? "" : "s"}
-        </p>
-
-        <div className="space-y-3">
-          {results.map((c, idx) => (
-            <button
-              key={c.id}
-              data-testid={`creator-${c.id}`}
-              onClick={() => navigate(`/brand/creator/${c.id}`)}
-              className="w-full text-left bg-white/5 border border-white/10 rounded-3xl p-4 flex items-start gap-4 hover:bg-white/10 transition-all animate-fade-up"
-              style={{ animationDelay: `${idx * 50}ms` }}
-            >
-              <img src={c.avatar} alt={c.name} className="w-16 h-16 rounded-2xl object-cover flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1">
-                  <h4 className="font-display font-bold text-white truncate">{c.name}</h4>
-                  <BadgeCheck size={14} className="text-[#E25238] flex-shrink-0" fill="#E25238" stroke="#0A0A0A" />
-                </div>
-                <p className="text-xs text-neutral-400 font-medium truncate">{c.handle}</p>
-                <div className="flex items-center gap-3 mt-2 text-xs">
-                  <span className="flex items-center gap-1 text-neutral-300 font-medium">
-                    <Users size={11} className="text-[#E25238]" />
-                    <span className="font-bold text-white">{c.followers}</span>
-                  </span>
-                  <span className="flex items-center gap-1 text-neutral-300 font-medium">
-                    <MapPin size={11} className="text-[#E25238]" />
-                    {c.location}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-                  {(c.categories || []).slice(0, 3).map((cat) => (
-                    <span key={cat} className="px-2 py-0.5 rounded-full bg-white/10 text-[10px] font-bold uppercase tracking-wider text-neutral-300">
-                      {cat}
+        {loading ? (
+          <div className="pt-16 flex justify-center">
+            <div className="w-8 h-8 border-4 border-white/10 border-t-[#E25238] rounded-full animate-spin" />
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {results.map((c, idx) => (
+              <button
+                key={c.id}
+                data-testid={`creator-${c.id}`}
+                onClick={() => navigate(`/brand/creator/${c.id}`)}
+                className="w-full text-left bg-white/5 border border-white/10 rounded-3xl p-4 flex items-start gap-4 hover:bg-white/10 transition-all animate-fade-up"
+                style={{ animationDelay: `${idx * 50}ms` }}
+              >
+                {c.avatar ? (
+                  <img src={c.avatar} alt={c.name} className="w-16 h-16 rounded-2xl object-cover flex-shrink-0" />
+                ) : (
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#E25238] to-[#F59E0B] flex items-center justify-center flex-shrink-0">
+                    <span className="text-white font-black text-2xl">{c.name[0]}</span>
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1">
+                    <h4 className="font-display font-bold text-white truncate">{c.name}</h4>
+                  </div>
+                  <p className="text-xs text-neutral-400 font-medium truncate">{c.handle}</p>
+                  <div className="flex items-center gap-3 mt-2 text-xs">
+                    <span className="flex items-center gap-1 text-neutral-300 font-medium">
+                      <Users size={11} className="text-[#E25238]" />
+                      <span className="font-bold text-white">{c.followers}</span>
                     </span>
-                  ))}
-                  <span className="text-[10px] font-medium text-neutral-500">· {c.age} · {c.gender}</span>
+                    {c.location && (
+                      <span className="flex items-center gap-1 text-neutral-300 font-medium">
+                        <MapPin size={11} className="text-[#E25238]" />
+                        {c.location}
+                      </span>
+                    )}
+                  </div>
+                  {c.categories.length > 0 && (
+                    <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+                      {c.categories.slice(0, 3).map((cat) => (
+                        <span key={cat} className="px-2 py-0.5 rounded-full bg-white/10 text-[10px] font-bold uppercase tracking-wider text-neutral-300">
+                          {cat}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              </div>
-            </button>
-          ))}
-
-          {results.length === 0 && (
-            <div className="text-center py-16">
-              <p className="font-display font-bold text-lg text-white">No creators match these filters</p>
-              <p className="text-sm text-neutral-400 mt-1 font-medium">Try relaxing your filters or search term.</p>
-              <button data-testid="reset-empty" onClick={reset} className="mt-5 px-6 py-3 bg-[#E25238] text-white rounded-full font-bold text-sm">
-                Clear filters
               </button>
-            </div>
-          )}
-        </div>
+            ))}
+
+            {results.length === 0 && !loading && (
+              <div className="text-center py-16">
+                <p className="font-display font-bold text-lg text-white">No creators found</p>
+                <p className="text-sm text-neutral-400 mt-1 font-medium">Try relaxing your filters or search term.</p>
+                {activeCount > 0 && (
+                  <button data-testid="reset-empty" onClick={reset} className="mt-5 px-6 py-3 bg-[#E25238] text-white rounded-full font-bold text-sm">
+                    Clear filters
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
+
+      {showSort && (
+        <div className="fixed inset-0 z-20" onClick={() => setShowSort(false)} />
+      )}
 
       {showFilters && (
         <FilterSheet
