@@ -1,8 +1,10 @@
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { DEFAULT_USER, MY_APPLICATIONS, OPPORTUNITIES, MESSAGES_THREADS, NOTIFICATIONS, ACTIVE_POSTS } from "@/data/mockData";
+import { DEFAULT_USER } from "@/data/mockData";
 import { authApi, TOKEN_KEY, clearToken, setToken, getToken } from "@/lib/api";
 
 const AppContext = createContext(null);
+
+const SAVED_KEY = "ollcollab_saved";
 
 function formatFollowers(n) {
   if (!n) return "0";
@@ -58,6 +60,10 @@ function mapBrandProfile(prev, p) {
   };
 }
 
+function loadSavedIds() {
+  try { return JSON.parse(localStorage.getItem(SAVED_KEY) || "[]"); } catch (_) { return []; }
+}
+
 export const AppProvider = ({ children }) => {
   const [accountType, setAccountType] = useState("creator");
   const [isAuthed, setIsAuthed] = useState(false);
@@ -67,12 +73,12 @@ export const AppProvider = ({ children }) => {
 
   const [user, setUser] = useState({ ...DEFAULT_USER, workedWith: [] });
   const [workedWith, setWorkedWith] = useState([]);
-  const [applications, setApplications] = useState(MY_APPLICATIONS);
-  const [opportunities, setOpportunities] = useState(OPPORTUNITIES);
-  const [threads, setThreads] = useState(MESSAGES_THREADS);
-  const [notifications, setNotifications] = useState(NOTIFICATIONS);
-  const [activePosts, setActivePosts] = useState(ACTIVE_POSTS);
-  const [savedIds, setSavedIds] = useState([]);
+  const [applications, setApplications] = useState([]);
+  const [opportunities, setOpportunities] = useState([]);
+  const [threads, setThreads] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [activePosts, setActivePosts] = useState([]);
+  const [savedIds, setSavedIds] = useState(loadSavedIds);
   const [draftOpportunity, setDraftOpportunity] = useState({});
 
   // ── Session restoration ───────────────────────────────────────────────────
@@ -146,12 +152,13 @@ export const AppProvider = ({ children }) => {
     setCurrentUserId(null);
     setUser(DEFAULT_USER);
     setWorkedWith([]);
-    setApplications(MY_APPLICATIONS);
-    setOpportunities(OPPORTUNITIES);
-    setActivePosts(ACTIVE_POSTS);
-    setNotifications(NOTIFICATIONS);
-    setThreads(MESSAGES_THREADS);
+    setApplications([]);
+    setOpportunities([]);
+    setActivePosts([]);
+    setNotifications([]);
+    setThreads([]);
     setSavedIds([]);
+    localStorage.removeItem(SAVED_KEY);
   };
 
   // ── Onboarding ────────────────────────────────────────────────────────────
@@ -187,13 +194,9 @@ export const AppProvider = ({ children }) => {
     setOnboardingComplete(true);
   };
 
-  // ── Opportunities (local fallback + real data merged) ─────────────────────
+  // ── Opportunities — always replace with real data ─────────────────────────
   const mergeOpportunities = (realOpps) => {
-    setOpportunities((prev) => {
-      const realIds = new Set(realOpps.map((o) => o.id));
-      const mocks = prev.filter((o) => !realIds.has(o.id) && o.id.startsWith("op-"));
-      return [...realOpps, ...mocks];
-    });
+    setOpportunities(realOpps);
   };
 
   // ── Applications ──────────────────────────────────────────────────────────
@@ -236,9 +239,13 @@ export const AppProvider = ({ children }) => {
 
   const deletePost = (id) => setActivePosts((prev) => prev.filter((p) => p.id !== id));
 
-  // ── Saved ─────────────────────────────────────────────────────────────────
+  // ── Saved — persisted to localStorage ────────────────────────────────────
   const isSaved = (id) => savedIds.includes(id);
-  const toggleSave = (id) => setSavedIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [id, ...prev]);
+  const toggleSave = (id) => setSavedIds((prev) => {
+    const next = prev.includes(id) ? prev.filter((x) => x !== id) : [id, ...prev];
+    try { localStorage.setItem(SAVED_KEY, JSON.stringify(next)); } catch (_) {}
+    return next;
+  });
   const savedOpportunities = opportunities.filter((o) => savedIds.includes(o.id));
 
   // ── Notifications ─────────────────────────────────────────────────────────
@@ -255,7 +262,7 @@ export const AppProvider = ({ children }) => {
       lastMessage: "Conversation started",
       time: "now",
       unread: 0,
-      messages: [{ from: "brand", text: `Hi! Welcome — excited to collaborate with you. 🎉`, time: "now" }],
+      messages: [],
     };
     setThreads((prev) => [newThread, ...prev]);
     return newThread.id;

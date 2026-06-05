@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Settings, BadgeCheck, Pencil, Briefcase, Share2, MapPin, Globe } from "lucide-react";
+import { toast } from "sonner";
 
 const InstagramIcon = ({ size = 16, className = "", strokeWidth = 2, ...props }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
@@ -14,9 +15,21 @@ import { WorkedWithItem } from "@/components/WorkedWithItem";
 import { ReelCard } from "@/components/ReelCard";
 import { reelsApi } from "@/lib/api";
 
+async function shareProfile(url, name) {
+  if (navigator.share) {
+    try { await navigator.share({ title: `${name} on OllCollab`, url }); return; } catch (_) {}
+  }
+  try {
+    await navigator.clipboard.writeText(url);
+    toast.success("Profile link copied!");
+  } catch (_) {
+    toast.error("Could not copy link");
+  }
+}
+
 export default function MyProfile() {
   const navigate = useNavigate();
-  const { user, accountType, workedWith } = useApp();
+  const { user, accountType, workedWith, currentUserId } = useApp();
   const [reels, setReels] = useState([]);
 
   useEffect(() => {
@@ -193,6 +206,7 @@ export default function MyProfile() {
           </button>
           <button
             data-testid="share-profile-btn"
+            onClick={() => shareProfile(`${window.location.origin}/brand/creator/${currentUserId}`, c.name)}
             className="px-5 py-3 rounded-full bg-[#0A0A0A] text-white font-bold text-sm flex items-center justify-center gap-2"
           >
             <Share2 size={14} /> Share

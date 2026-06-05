@@ -26,7 +26,6 @@ export default function Messages() {
   useEffect(() => {
     messagesApi.threads()
       .then((data) => {
-        if (!data.length) return;
         const mapped = data.map((t) => ({
           id: t.id,
           name: accountType === "creator" ? (t.brand_name || "Brand") : (t.creator_name || "Creator"),
@@ -42,7 +41,7 @@ export default function Messages() {
         setThreads(mapped);
       })
       .catch(() => {});
-  }, [accountType]);
+  }, [accountType, setThreads]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div data-testid="messages-list" className={`min-h-full pb-6 ${dark ? "bg-[#0A0A0A] text-white" : "bg-[#F9F9F8]"}`}>

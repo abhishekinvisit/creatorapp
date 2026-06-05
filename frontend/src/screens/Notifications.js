@@ -41,7 +41,6 @@ export default function Notifications() {
   useEffect(() => {
     notificationsApi.list()
       .then((data) => {
-        if (!data.length) return;
         const mapped = data.map((n) => ({
           id: n.id,
           type: n.type || "info",
@@ -54,7 +53,7 @@ export default function Notifications() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+  }, [setNotifications]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleMarkAll = async () => {
     markAllNotificationsRead();

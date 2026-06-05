@@ -95,9 +95,17 @@ export default function BrandPostDetail() {
         creators_needed: parseInt(form.needed) || 1,
         deadline: form.deadline,
         cover_url: form.cover_url || "",
+        category: form.category || "",
         languages: form.languages || [],
+        requirements: form.requirements || [],
       });
-      const updated = { ...post, ...form, payout: parseInt(form.payout) || 0, needed: parseInt(form.needed) || 1 };
+      const updated = {
+        ...post, ...form,
+        payout: parseInt(form.payout) || 0,
+        needed: parseInt(form.needed) || 1,
+        category: form.category || "",
+        requirements: form.requirements || [],
+      };
       setPost(updated);
       setActivePosts((prev) => prev.map((p) => p.id === id ? updated : p));
       setEditing(false);
@@ -213,7 +221,9 @@ function buildForm(post) {
     needed: post.needed || "",
     deadline: post.deadline || "",
     cover_url: post.cover_url || "",
+    category: post.category || "",
     languages: post.languages || [],
+    requirements: post.requirements || [],
   };
 }
 
@@ -375,6 +385,59 @@ const EditForm = ({ form, setForm }) => {
         />
       </Field>
 
+      <Field label="Category">
+        <div className="flex flex-wrap gap-2">
+          {CATS.map((cat) => {
+            const active = form.category === cat;
+            return (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setForm({ ...form, category: active ? "" : cat })}
+                className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
+                  active ? "bg-[#E25238] text-white" : "bg-white/5 text-neutral-300 border border-white/10 hover:border-white/30"
+                }`}
+              >
+                {cat}
+              </button>
+            );
+          })}
+        </div>
+      </Field>
+
+      <Field label="Requirements">
+        <div className="space-y-2">
+          {(form.requirements || []).map((req, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <input
+                value={req}
+                onChange={(e) => {
+                  const next = [...form.requirements];
+                  next[i] = e.target.value;
+                  setForm({ ...form, requirements: next });
+                }}
+                className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 outline-none text-white text-sm font-medium focus:border-[#E25238]"
+                placeholder="e.g. Min 10K followers"
+              />
+              <button
+                type="button"
+                onClick={() => setForm({ ...form, requirements: form.requirements.filter((_, j) => j !== i) })}
+                className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-neutral-400 hover:text-[#EF4444] flex-shrink-0"
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={() => setForm({ ...form, requirements: [...(form.requirements || []), ""] })}
+            className="text-xs font-bold text-[#E25238] uppercase tracking-[0.15em] px-1"
+          >
+            + Add Requirement
+          </button>
+        </div>
+      </Field>
+
       <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#E25238] pt-2">Content Language</p>
       <div className="flex flex-wrap gap-2">
         {LANGUAGES.map((l) => {
@@ -382,6 +445,7 @@ const EditForm = ({ form, setForm }) => {
           return (
             <button
               key={l}
+              type="button"
               onClick={() => {
                 const cur = form.languages || [];
                 setForm({ ...form, languages: active ? cur.filter((x) => x !== l) : [...cur, l] });
