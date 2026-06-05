@@ -1,4 +1,8 @@
 - [Backend stack](backend-stack.md) — FastAPI + asyncpg + PostgreSQL; JWT via python-jose; bcrypt via passlib; 30-day tokens
+- [Reels persistence](reels-persistence.md) — creator_reels table; reelsApi in api.js; EditProfile/MyProfile load from API not mock
+- [Login profile mapping](login-profile-mapping.md) — loginWithToken is async; calls /me after setting token; refreshProfile() in AppContext for post-save refresh
+- [Image upload pattern](image-upload-pattern.md) — FileReader base64 → stored as TEXT in DB; 3MB client limit; avatar_url / logo_data / cover_url / thumbnail columns
+- [Brand post data shape](brand-post-data-shape.md) — activePosts stores payout as raw number (not "₹N"); BrandPostDetail fetches from API if not in context; save/delete call opportunitiesApi
 - [Auth flow](auth-flow.md) — email/password 2-step UX; token stored as `ollcollab_token` in localStorage; session restored on mount via /api/auth/me
 - [API proxy](api-proxy.md) — frontend uses `/api/...` which craco proxies to localhost:8000; always use relative paths in frontend code
 - [Data shape mapping](data-shape-mapping.md) — API uses snake_case; frontend context uses camelCase; mapApiOpp() in HomeFeed.js bridges the two

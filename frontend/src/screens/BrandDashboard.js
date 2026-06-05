@@ -14,23 +14,19 @@ export default function BrandDashboard() {
         const mapped = posts.map((p) => ({
           id: p.id,
           title: p.title,
-          description: p.pitch || p.description || "",
-          payout: p.payout ? `₹${p.payout}` : "",
+          description: p.description || p.pitch || "",
+          pitch: p.pitch || p.description || "",
+          payout: p.payout || 0,
           needed: p.creators_needed || 1,
           deadline: p.deadline || "",
-          applicants: p.applicants_count || 0,
           category: p.category || "",
+          cover_url: p.cover_url || "",
+          applicants: p.applicants_count || 0,
           status: p.status || "active",
-          requirements: {
-            category: p.category || "",
-            minFollowers: "",
-            age: "",
-            gender: "",
-            location: "",
-            language: p.languages || [],
-          },
+          languages: p.languages || [],
+          requirements: p.requirements || [],
         }));
-        if (mapped.length > 0) setActivePosts(mapped);
+        setActivePosts(mapped);
       })
       .catch(() => {});
   }, []);

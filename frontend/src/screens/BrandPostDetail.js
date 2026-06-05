@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Pencil, Trash2, Users, Wallet, Calendar, Tag, Filter, MapPin, Globe, Eye, Check, X } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { useApp } from "@/context/AppContext";
+import { opportunitiesApi } from "@/lib/api";
 import { toast } from "sonner";
 
 const CATS = ["Beauty", "Fashion", "Lifestyle", "Fitness", "Food", "Tech"];
@@ -13,10 +14,60 @@ const LANGUAGES = ["English", "Hindi", "Tamil", "Telugu", "Kannada", "Bengali", 
 export default function BrandPostDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { activePosts, updatePost, deletePost } = useApp();
-  const post = activePosts.find((p) => p.id === id);
+  const { activePosts, setActivePosts } = useApp();
+  const [post, setPost] = useState(() => activePosts.find((p) => p.id === id) || null);
+  const [loading, setLoading] = useState(!post);
   const [editing, setEditing] = useState(false);
-  const [form, setForm] = useState(() => post ? { ...post, requirements: { ...post.requirements } } : null);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState(null);
+
+  // Fetch from API if not in context
+  useEffect(() => {
+    if (post) {
+      setForm(buildForm(post));
+      return;
+    }
+    setLoading(true);
+    opportunitiesApi.get(id)
+      .then((p) => {
+        const mapped = {
+          id: p.id,
+          title: p.title,
+          description: p.description || p.pitch || "",
+          pitch: p.pitch || p.description || "",
+          payout: p.payout || 0,
+          needed: p.creators_needed || 1,
+          deadline: p.deadline || "",
+          category: p.category || "",
+          cover_url: p.cover_url || "",
+          applicants: p.applicants_count || 0,
+          status: p.status || "active",
+          languages: p.languages || [],
+          requirements: p.requirements || [],
+        };
+        setPost(mapped);
+        setForm(buildForm(mapped));
+      })
+      .catch(() => setPost(null))
+      .finally(() => setLoading(false));
+  }, [id]); // eslint-disable-line
+
+  // Sync form when post updates from context
+  useEffect(() => {
+    const ctx = activePosts.find((p) => p.id === id);
+    if (ctx && !post) {
+      setPost(ctx);
+      setForm(buildForm(ctx));
+    }
+  }, [activePosts, id]); // eslint-disable-line
+
+  if (loading) {
+    return (
+      <div className="min-h-full bg-[#0A0A0A] text-white flex items-center justify-center">
+        <p className="text-neutral-400 font-medium">Loading…</p>
+      </div>
+    );
+  }
 
   if (!post || !form) {
     return (
@@ -32,32 +83,46 @@ export default function BrandPostDetail() {
     );
   }
 
-  const handleSave = () => {
-    if (!form.title?.trim()) {
-      toast.error("Campaign title is required");
-      return;
+  const handleSave = async () => {
+    if (!form.title?.trim()) { toast.error("Campaign title is required"); return; }
+    setSaving(true);
+    try {
+      await opportunitiesApi.update(id, {
+        title: form.title,
+        pitch: form.description,
+        description: form.description,
+        payout: parseInt(form.payout) || 0,
+        creators_needed: parseInt(form.needed) || 1,
+        deadline: form.deadline,
+        cover_url: form.cover_url || "",
+        languages: form.languages || [],
+      });
+      const updated = { ...post, ...form, payout: parseInt(form.payout) || 0, needed: parseInt(form.needed) || 1 };
+      setPost(updated);
+      setActivePosts((prev) => prev.map((p) => p.id === id ? updated : p));
+      setEditing(false);
+      toast.success("Post updated");
+    } catch (err) {
+      toast.error(err.message || "Failed to update");
+    } finally {
+      setSaving(false);
     }
-    updatePost(post.id, {
-      title: form.title,
-      description: form.description,
-      payout: form.payout,
-      needed: parseInt(form.needed) || 0,
-      deadline: form.deadline,
-      requirements: form.requirements,
-    });
-    setEditing(false);
-    toast.success("Post updated");
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!window.confirm("Delete this post permanently?")) return;
-    deletePost(post.id);
-    toast.success("Post deleted");
-    navigate("/brand/dashboard");
+    try {
+      await opportunitiesApi.delete(id);
+      setActivePosts((prev) => prev.filter((p) => p.id !== id));
+      toast.success("Post deleted");
+      navigate("/brand/dashboard");
+    } catch (err) {
+      toast.error(err.message || "Failed to delete");
+    }
   };
 
   const handleCancel = () => {
-    setForm({ ...post, requirements: { ...post.requirements } });
+    setForm(buildForm(post));
     setEditing(false);
   };
 
@@ -73,16 +138,16 @@ export default function BrandPostDetail() {
                 data-testid="cancel-edit"
                 onClick={handleCancel}
                 className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"
-                aria-label="Cancel edit"
               >
                 <X size={18} />
               </button>
               <button
                 data-testid="save-post"
                 onClick={handleSave}
-                className="px-4 py-2 bg-[#E25238] rounded-full text-xs font-bold uppercase tracking-[0.15em] flex items-center gap-1.5"
+                disabled={saving}
+                className="px-4 py-2 bg-[#E25238] rounded-full text-xs font-bold uppercase tracking-[0.15em] flex items-center gap-1.5 disabled:opacity-60"
               >
-                <Check size={14} strokeWidth={2.8} /> Save
+                <Check size={14} strokeWidth={2.8} /> {saving ? "Saving…" : "Save"}
               </button>
             </div>
           ) : (
@@ -98,6 +163,13 @@ export default function BrandPostDetail() {
       />
 
       <div className="px-5">
+        {/* Cover image */}
+        {post.cover_url && !editing && (
+          <div className="w-full h-40 rounded-2xl overflow-hidden mb-4">
+            <img src={post.cover_url} alt="cover" className="w-full h-full object-cover" />
+          </div>
+        )}
+
         {/* Status banner */}
         <div className="flex items-center justify-between mb-4">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#22C55E]/15 text-[#22C55E] text-xs font-bold uppercase tracking-[0.15em]">
@@ -113,14 +185,12 @@ export default function BrandPostDetail() {
           </button>
         </div>
 
-        {/* Body */}
         {editing ? (
           <EditForm form={form} setForm={setForm} />
         ) : (
           <ViewBody post={post} />
         )}
 
-        {/* Danger zone */}
         {!editing && (
           <button
             data-testid="delete-post"
@@ -135,6 +205,18 @@ export default function BrandPostDetail() {
   );
 }
 
+function buildForm(post) {
+  return {
+    title: post.title || "",
+    description: post.description || post.pitch || "",
+    payout: post.payout || "",
+    needed: post.needed || "",
+    deadline: post.deadline || "",
+    cover_url: post.cover_url || "",
+    languages: post.languages || [],
+  };
+}
+
 const ViewBody = ({ post }) => (
   <>
     <h1 className="font-display font-black text-3xl tracking-tight leading-tight">{post.title}</h1>
@@ -142,25 +224,33 @@ const ViewBody = ({ post }) => (
       <p className="text-sm text-neutral-400 font-medium leading-relaxed mt-3">{post.description}</p>
     )}
 
-    {/* Stats */}
     <div className="grid grid-cols-3 gap-3 mt-6">
       <Stat icon={Wallet} label="Payout" value={post.payout ? `₹${post.payout}` : "—"} />
-      <Stat icon={Users} label="Needed" value={post.needed} />
+      <Stat icon={Users} label="Needed" value={post.needed || "—"} />
       <Stat icon={Calendar} label="Deadline" value={post.deadline || "—"} />
     </div>
 
-    {/* Requirements */}
     <div className="mt-7">
-      <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#E25238] mb-3">Requirements</p>
+      <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#E25238] mb-3">Details</p>
       <div className="bg-white/5 border border-white/10 rounded-3xl divide-y divide-white/10">
-        <Row icon={Tag} label="Category" value={post.requirements?.category} />
-        <Row icon={Users} label="Min Followers" value={post.requirements?.minFollowers} />
-        <Row icon={Filter} label="Age Group" value={post.requirements?.age} />
-        <Row icon={Filter} label="Gender" value={post.requirements?.gender} />
-        <Row icon={MapPin} label="Location" value={post.requirements?.location} />
-        <LanguageRow langs={post.requirements?.language} />
+        <Row icon={Tag} label="Category" value={post.category} />
+        <LanguageRow langs={post.languages} />
       </div>
     </div>
+
+    {post.requirements?.length > 0 && (
+      <div className="mt-5">
+        <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#E25238] mb-3">Requirements</p>
+        <div className="bg-white/5 border border-white/10 rounded-3xl divide-y divide-white/10">
+          {post.requirements.map((req, i) => (
+            <div key={i} className="flex items-center px-5 py-4 gap-3">
+              <Filter size={14} className="text-[#E25238] flex-shrink-0" />
+              <span className="text-sm font-medium text-white">{req}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
   </>
 );
 
@@ -199,13 +289,49 @@ const LanguageRow = ({ langs }) => (
 );
 
 const EditForm = ({ form, setForm }) => {
-  const setReq = (k, v) => setForm({ ...form, requirements: { ...form.requirements, [k]: v } });
+  const coverRef = useState(null)[0];
+  const inputRef = { current: null };
+
+  const handleCoverFile = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { toast.error("Please select an image"); return; }
+    if (file.size > 3 * 1024 * 1024) { toast.error("Image must be under 3MB"); return; }
+    const reader = new FileReader();
+    reader.onload = () => setForm((f) => ({ ...f, cover_url: reader.result }));
+    reader.readAsDataURL(file);
+  };
+
   return (
     <div className="space-y-5">
+      {/* Cover image upload */}
+      <Field label="Cover Image">
+        <div
+          className="w-full h-36 rounded-2xl overflow-hidden border-2 border-dashed border-white/20 flex items-center justify-center cursor-pointer hover:border-[#E25238] transition-colors relative"
+          onClick={() => document.getElementById("cover-file-input")?.click()}
+        >
+          {form.cover_url ? (
+            <img src={form.cover_url} alt="cover" className="w-full h-full object-cover" />
+          ) : (
+            <div className="flex flex-col items-center gap-2 text-neutral-400">
+              <Wallet size={24} />
+              <span className="text-xs font-bold">Tap to upload cover image</span>
+            </div>
+          )}
+          <input
+            id="cover-file-input"
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleCoverFile}
+          />
+        </div>
+      </Field>
+
       <Field label="Campaign Title">
         <input
           data-testid="edit-title"
-          value={form.title || ""}
+          value={form.title}
           onChange={(e) => setForm({ ...form, title: e.target.value })}
           className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-4 outline-none text-white font-medium focus:border-[#E25238]"
         />
@@ -214,7 +340,7 @@ const EditForm = ({ form, setForm }) => {
         <textarea
           data-testid="edit-desc"
           rows={3}
-          value={form.description || ""}
+          value={form.description}
           onChange={(e) => setForm({ ...form, description: e.target.value })}
           className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-4 outline-none text-white font-medium resize-none focus:border-[#E25238]"
         />
@@ -224,7 +350,7 @@ const EditForm = ({ form, setForm }) => {
           <input
             data-testid="edit-payout"
             type="number"
-            value={form.payout || ""}
+            value={form.payout}
             onChange={(e) => setForm({ ...form, payout: e.target.value })}
             className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-4 outline-none text-white font-medium focus:border-[#E25238]"
           />
@@ -233,7 +359,7 @@ const EditForm = ({ form, setForm }) => {
           <input
             data-testid="edit-needed"
             type="number"
-            value={form.needed || ""}
+            value={form.needed}
             onChange={(e) => setForm({ ...form, needed: e.target.value })}
             className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-4 outline-none text-white font-medium focus:border-[#E25238]"
           />
@@ -243,51 +369,32 @@ const EditForm = ({ form, setForm }) => {
         <input
           data-testid="edit-deadline"
           type="date"
-          value={form.deadline || ""}
+          value={form.deadline}
           onChange={(e) => setForm({ ...form, deadline: e.target.value })}
           className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-4 outline-none text-white font-medium focus:border-[#E25238]"
         />
       </Field>
 
-      <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#E25238] pt-2">Requirements</p>
-
-      <Field label="Category">
-        <Pills options={CATS} value={form.requirements?.category} onChange={(v) => setReq("category", v)} testId="edit-cat" />
-      </Field>
-      <Field label="Min Followers">
-        <input
-          data-testid="edit-min-followers"
-          type="number"
-          value={form.requirements?.minFollowers || ""}
-          onChange={(e) => setReq("minFollowers", e.target.value)}
-          className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-4 outline-none text-white font-medium focus:border-[#E25238]"
-        />
-      </Field>
-      <Field label="Age Group">
-        <Pills options={AGES} value={form.requirements?.age} onChange={(v) => setReq("age", v)} testId="edit-age" />
-      </Field>
-      <Field label="Gender">
-        <Pills options={GENDERS} value={form.requirements?.gender} onChange={(v) => setReq("gender", v)} testId="edit-gender" />
-      </Field>
-      <Field label="Location">
-        <input
-          data-testid="edit-location"
-          value={form.requirements?.location || ""}
-          onChange={(e) => setReq("location", e.target.value)}
-          className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-4 outline-none text-white font-medium focus:border-[#E25238]"
-        />
-      </Field>
-      <Field label="Content Language">
-        <MultiPills
-          options={LANGUAGES}
-          value={form.requirements?.language || []}
-          onToggle={(lang) => {
-            const cur = form.requirements?.language || [];
-            setReq("language", cur.includes(lang) ? cur.filter((l) => l !== lang) : [...cur, lang]);
-          }}
-          testId="edit-lang"
-        />
-      </Field>
+      <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#E25238] pt-2">Content Language</p>
+      <div className="flex flex-wrap gap-2">
+        {LANGUAGES.map((l) => {
+          const active = (form.languages || []).includes(l);
+          return (
+            <button
+              key={l}
+              onClick={() => {
+                const cur = form.languages || [];
+                setForm({ ...form, languages: active ? cur.filter((x) => x !== l) : [...cur, l] });
+              }}
+              className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
+                active ? "bg-[#E25238] text-white" : "bg-white/5 text-neutral-300 border border-white/10 hover:border-white/30"
+              }`}
+            >
+              {l}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 };
@@ -296,42 +403,5 @@ const Field = ({ label, children }) => (
   <div>
     <p className="text-xs font-bold tracking-[0.2em] uppercase text-neutral-400 mb-2">{label}</p>
     {children}
-  </div>
-);
-
-const Pills = ({ options, value, onChange, testId }) => (
-  <div className="flex flex-wrap gap-2">
-    {options.map((o) => (
-      <button
-        key={o}
-        data-testid={`${testId}-${o.toLowerCase().replace(/\s+/g, "-")}`}
-        onClick={() => onChange(o)}
-        className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
-          value === o ? "bg-[#E25238] text-white" : "bg-white/5 text-neutral-300 border border-white/10 hover:border-white/30"
-        }`}
-      >
-        {o}
-      </button>
-    ))}
-  </div>
-);
-
-const MultiPills = ({ options, value, onToggle, testId }) => (
-  <div className="flex flex-wrap gap-2">
-    {options.map((o) => {
-      const active = value.includes(o);
-      return (
-        <button
-          key={o}
-          data-testid={`${testId}-${o.toLowerCase()}`}
-          onClick={() => onToggle(o)}
-          className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
-            active ? "bg-[#E25238] text-white" : "bg-white/5 text-neutral-300 border border-white/10 hover:border-white/30"
-          }`}
-        >
-          {o}
-        </button>
-      );
-    })}
   </div>
 );

@@ -90,3 +90,11 @@ export const notificationsApi = {
   markRead:  (id)  => api.patch(`/notifications/${id}/read`),
   markAll:   ()    => api.patch("/notifications/read-all"),
 };
+
+// ── Reels ─────────────────────────────────────────────────────────────────────
+export const reelsApi = {
+  list:    ()           => api.get("/reels"),
+  create:  (data)       => api.post("/reels", data),
+  update:  (id, data)   => api.put(`/reels/${id}`, data),
+  delete:  (id)         => api.delete(`/reels/${id}`),
+};

@@ -153,9 +153,24 @@ class OpportunityUpdate(BaseModel):
     creators_needed: Optional[int] = None
     deadline: Optional[str] = None
     category: Optional[str] = None
+    cover_url: Optional[str] = None
     requirements: Optional[List[str]] = None
     languages: Optional[List[str]] = None
     status: Optional[str] = None
+
+class ReelIn(BaseModel):
+    brand: str
+    title: str
+    instagram_url: str
+    thumbnail: Optional[str] = ""
+    sort_order: Optional[int] = 0
+
+class ReelUpdate(BaseModel):
+    brand: Optional[str] = None
+    title: Optional[str] = None
+    instagram_url: Optional[str] = None
+    thumbnail: Optional[str] = None
+    sort_order: Optional[int] = None
 
 class ApplyIn(BaseModel):
     opportunity_id: str
@@ -712,6 +727,78 @@ async def mark_all_read(user=Depends(current_user)):
             "UPDATE notifications SET is_read=TRUE WHERE user_id=$1::uuid",
             user["id"],
         )
+    return {"success": True}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# REELS ROUTES
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _reel_row(row):
+    d = dict(row)
+    d["id"] = str(d["id"])
+    d["creator_id"] = str(d["creator_id"])
+    return d
+
+
+@api_router.get("/reels")
+async def list_reels(user=Depends(current_user)):
+    if user["account_type"] != "creator":
+        raise HTTPException(status_code=403, detail="Creators only")
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        rows = await conn.fetch(
+            "SELECT * FROM creator_reels WHERE creator_id=$1::uuid ORDER BY sort_order, created_at DESC",
+            user["id"],
+        )
+    return [_reel_row(r) for r in rows]
+
+
+@api_router.post("/reels")
+async def create_reel(body: ReelIn, user=Depends(current_user)):
+    if user["account_type"] != "creator":
+        raise HTTPException(status_code=403, detail="Creators only")
+    thumb = body.thumbnail or ""
+    if len(thumb) > 2000000:
+        thumb = ""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow(
+            """INSERT INTO creator_reels(creator_id, brand, title, instagram_url, thumbnail, sort_order)
+               VALUES($1::uuid,$2,$3,$4,$5,$6) RETURNING *""",
+            user["id"], body.brand, body.title, body.instagram_url, thumb, body.sort_order,
+        )
+    return _reel_row(row)
+
+
+@api_router.put("/reels/{reel_id}")
+async def update_reel(reel_id: str, body: ReelUpdate, user=Depends(current_user)):
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        reel = await conn.fetchrow("SELECT creator_id FROM creator_reels WHERE id=$1::uuid", reel_id)
+        if not reel or str(reel["creator_id"]) != str(user["id"]):
+            raise HTTPException(status_code=403, detail="Not your reel")
+        updates = {k: v for k, v in body.model_dump().items() if v is not None}
+        if not updates:
+            return {"success": True}
+        if "thumbnail" in updates and len(updates["thumbnail"]) > 2000000:
+            updates["thumbnail"] = ""
+        cols = ", ".join(f"{k}=${i+2}" for i, k in enumerate(updates))
+        await conn.execute(
+            f"UPDATE creator_reels SET {cols} WHERE id=$1::uuid",
+            reel_id, *list(updates.values()),
+        )
+    return {"success": True}
+
+
+@api_router.delete("/reels/{reel_id}")
+async def delete_reel(reel_id: str, user=Depends(current_user)):
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        reel = await conn.fetchrow("SELECT creator_id FROM creator_reels WHERE id=$1::uuid", reel_id)
+        if not reel or str(reel["creator_id"]) != str(user["id"]):
+            raise HTTPException(status_code=403, detail="Not your reel")
+        await conn.execute("DELETE FROM creator_reels WHERE id=$1::uuid", reel_id)
     return {"success": True}
 
 

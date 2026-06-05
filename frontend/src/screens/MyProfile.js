@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { Settings, BadgeCheck, Pencil, Briefcase, Share2, MapPin, Globe } from "lucide-react";
 
 const InstagramIcon = ({ size = 16, className = "", strokeWidth = 2, ...props }) => (
@@ -8,14 +9,20 @@ const InstagramIcon = ({ size = 16, className = "", strokeWidth = 2, ...props })
 );
 import { TopBar } from "@/components/TopBar";
 import { useApp } from "@/context/AppContext";
-import { REELS, BRANDS } from "@/data/mockData";
 import { BrandLogo } from "@/components/BrandLogo";
 import { WorkedWithItem } from "@/components/WorkedWithItem";
 import { ReelCard } from "@/components/ReelCard";
+import { reelsApi } from "@/lib/api";
 
 export default function MyProfile() {
   const navigate = useNavigate();
   const { user, accountType, workedWith } = useApp();
+  const [reels, setReels] = useState([]);
+
+  useEffect(() => {
+    if (accountType !== "creator") return;
+    reelsApi.list().then(setReels).catch(() => setReels([]));
+  }, [accountType]);
 
   if (accountType === "brand") {
     const b = user.brand;
@@ -203,14 +210,26 @@ export default function MyProfile() {
             </h3>
           </div>
           <span className="text-xs font-bold uppercase tracking-wider text-[#525252]">
-            {REELS.length} reels
+            {reels.length} reels
           </span>
         </div>
 
         <div data-testid="reels-grid" className="px-5 grid grid-cols-2 gap-3">
-          {REELS.map((r, i) => (
-            <ReelCard key={r.id} reel={r} testId={`reel-${r.id}`} delay={i * 70} />
-          ))}
+          {reels.length === 0 ? (
+            <div className="col-span-2 py-8 text-center">
+              <p className="text-sm font-medium text-[#525252]">No reels yet.</p>
+              <p className="text-xs text-[#525252] mt-1">Add featured reels from Edit Profile.</p>
+            </div>
+          ) : (
+            reels.map((r, i) => (
+              <ReelCard
+                key={r.id}
+                reel={{ ...r, instagramUrl: r.instagram_url || r.instagramUrl }}
+                testId={`reel-${r.id}`}
+                delay={i * 70}
+              />
+            ))
+          )}
         </div>
       </div>
     </div>

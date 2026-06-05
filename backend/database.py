@@ -138,6 +138,18 @@ CREATE TABLE IF NOT EXISTS notifications (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS creator_reels (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    creator_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    brand VARCHAR(255) DEFAULT '',
+    title VARCHAR(500) DEFAULT '',
+    instagram_url VARCHAR(500) DEFAULT '',
+    thumbnail TEXT DEFAULT '',
+    sort_order INTEGER DEFAULT 0,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_creator_reels_creator_id ON creator_reels(creator_id);
 CREATE INDEX IF NOT EXISTS idx_creator_profiles_user_id ON creator_profiles(user_id);
 CREATE INDEX IF NOT EXISTS idx_brand_profiles_user_id ON brand_profiles(user_id);
 CREATE INDEX IF NOT EXISTS idx_opportunities_brand_id ON opportunities(brand_id);

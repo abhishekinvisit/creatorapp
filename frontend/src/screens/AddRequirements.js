@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus } from "lucide-react";
+import { Camera } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { useApp } from "@/context/AppContext";
 import { opportunitiesApi } from "@/lib/api";
@@ -14,8 +14,10 @@ const LANGUAGES = ["English", "Hindi", "Tamil", "Telugu", "Kannada", "Bengali", 
 export default function AddRequirements() {
   const navigate = useNavigate();
   const { draftOpportunity, publishOpportunity } = useApp();
-  const [data, setData] = useState({ category: "", minFollowers: "", age: "", gender: "", location: "", language: [], images: [] });
+  const [data, setData] = useState({ category: "", minFollowers: "", age: "", gender: "", location: "", language: [] });
+  const [coverUrl, setCoverUrl] = useState("");
   const [saving, setSaving] = useState(false);
+  const coverRef = useRef(null);
 
   const toggleLanguage = (lang) => {
     setData((prev) => ({
@@ -24,6 +26,16 @@ export default function AddRequirements() {
         ? prev.language.filter((l) => l !== lang)
         : [...prev.language, lang],
     }));
+  };
+
+  const handleCoverFile = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { toast.error("Please select an image"); return; }
+    if (file.size > 3 * 1024 * 1024) { toast.error("Image must be under 3MB"); return; }
+    const reader = new FileReader();
+    reader.onload = () => setCoverUrl(reader.result);
+    reader.readAsDataURL(file);
   };
 
   const handlePublish = async () => {
@@ -37,6 +49,7 @@ export default function AddRequirements() {
         creators_needed: parseInt(draftOpportunity.creatorsNeeded || 5),
         deadline: draftOpportunity.deadline || "",
         category: data.category || "Lifestyle",
+        cover_url: coverUrl || draftOpportunity.coverUrl || "",
         requirements: [
           data.minFollowers ? `Min ${data.minFollowers} followers` : "",
           data.age ? `Age: ${data.age}` : "",
@@ -46,12 +59,20 @@ export default function AddRequirements() {
         languages: data.language,
       };
       const created = await opportunitiesApi.create(payload);
-      // Also add to local context so dashboard updates immediately
       publishOpportunity({
-        ...draftOpportunity,
-        ...data,
         id: created.id,
-        creatorsNeeded: parseInt(draftOpportunity.creatorsNeeded || 5),
+        title: created.title,
+        description: created.description || created.pitch || "",
+        pitch: created.pitch || "",
+        payout: created.payout || 0,
+        needed: created.creators_needed || 1,
+        deadline: created.deadline || "",
+        category: created.category || "",
+        cover_url: created.cover_url || "",
+        applicants: 0,
+        status: "active",
+        languages: created.languages || [],
+        requirements: created.requirements || [],
       });
       toast.success("Opportunity published! 🚀");
       navigate("/brand/dashboard");
@@ -104,15 +125,38 @@ export default function AddRequirements() {
           <MultiPills options={LANGUAGES} value={data.language} onToggle={toggleLanguage} testId="req-lang" />
         </Field>
 
-        <Field label="Add Product Images (Optional)">
-          <button
-            data-testid="req-add-images"
-            onClick={() => toast.info("Image upload coming soon")}
-            className="w-full bg-white/5 border-2 border-dashed border-white/15 rounded-2xl py-8 flex flex-col items-center justify-center gap-2 hover:border-[#E25238] transition-colors"
+        <Field label="Cover Image (Optional)">
+          <div
+            data-testid="cover-upload-area"
+            onClick={() => coverRef.current?.click()}
+            className="w-full rounded-2xl overflow-hidden border-2 border-dashed border-white/15 cursor-pointer hover:border-[#E25238] transition-colors"
           >
-            <Plus size={24} />
-            <span className="font-bold text-sm">Add Images</span>
-          </button>
+            {coverUrl ? (
+              <div className="relative">
+                <img src={coverUrl} alt="cover" className="w-full h-40 object-cover" />
+                <button
+                  onClick={(e) => { e.stopPropagation(); setCoverUrl(""); }}
+                  className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/70 text-white flex items-center justify-center hover:bg-[#EF4444] transition-colors"
+                >
+                  <span className="text-xs font-bold">✕</span>
+                </button>
+              </div>
+            ) : (
+              <div className="py-8 flex flex-col items-center justify-center gap-2 text-neutral-400">
+                <Camera size={24} />
+                <span className="font-bold text-sm">Upload Cover Image</span>
+                <span className="text-xs">JPG, PNG up to 3MB</span>
+              </div>
+            )}
+          </div>
+          <input
+            ref={coverRef}
+            data-testid="req-cover-input"
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleCoverFile}
+          />
         </Field>
       </div>
 

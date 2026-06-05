@@ -72,14 +72,92 @@ export const AppProvider = ({ children }) => {
 
   useEffect(() => { restoreSession(); }, [restoreSession]);
 
+  // ── Profile refresh (called after login or save) ──────────────────────────
+  const refreshProfile = useCallback(async () => {
+    try {
+      const data = await authApi.me();
+      if (data.id) setCurrentUserId(data.id);
+      if (data.account_type === "creator" && data.profile) {
+        const p = data.profile;
+        setUser((prev) => ({
+          ...prev,
+          creator: {
+            ...prev.creator,
+            name: p.full_name || prev.creator.name,
+            handle: p.handle || prev.creator.handle,
+            bio: p.bio || prev.creator.bio,
+            location: p.location || prev.creator.location,
+            category: p.categories?.length ? p.categories : prev.creator.category,
+            language: p.languages?.length ? p.languages : prev.creator.language,
+            instagramUrl: p.instagram_url || prev.creator.instagramUrl,
+            followers: p.followers_count
+              ? `${Number(p.followers_count).toLocaleString("en-IN")}`
+              : prev.creator.followers,
+            avatar: p.avatar_url || prev.creator.avatar,
+          },
+        }));
+      } else if (data.account_type === "brand" && data.profile) {
+        const p = data.profile;
+        setUser((prev) => ({
+          ...prev,
+          brand: {
+            ...prev.brand,
+            name: p.brand_name || prev.brand.name,
+            bio: p.bio || prev.brand.bio,
+            category: p.category ? [p.category] : prev.brand.category,
+            logo: p.logo_data || prev.brand.logo,
+            gstNumber: p.gst_number || "",
+          },
+        }));
+      }
+    } catch (_) {}
+  }, []);
+
   // ── Auth actions ──────────────────────────────────────────────────────────
-  const loginWithToken = (token, acctType, onboarded, profile = {}) => {
+  const loginWithToken = useCallback(async (token, acctType, onboarded) => {
     setToken(token);
     setAccountType(acctType);
     setOnboardingComplete(onboarded);
     setIsAuthed(true);
-    if (profile.id) setCurrentUserId(profile.id);
-  };
+    // Immediately load the real profile so screens show correct data
+    try {
+      const data = await authApi.me();
+      if (data.id) setCurrentUserId(data.id);
+      if (data.account_type === "creator" && data.profile) {
+        const p = data.profile;
+        setUser((prev) => ({
+          ...prev,
+          creator: {
+            ...prev.creator,
+            name: p.full_name || prev.creator.name,
+            handle: p.handle || prev.creator.handle,
+            bio: p.bio || prev.creator.bio,
+            location: p.location || prev.creator.location,
+            category: p.categories?.length ? p.categories : prev.creator.category,
+            language: p.languages?.length ? p.languages : prev.creator.language,
+            instagramUrl: p.instagram_url || prev.creator.instagramUrl,
+            followers: p.followers_count
+              ? `${Number(p.followers_count).toLocaleString("en-IN")}`
+              : prev.creator.followers,
+            avatar: p.avatar_url || prev.creator.avatar,
+          },
+        }));
+      } else if (data.account_type === "brand" && data.profile) {
+        const p = data.profile;
+        setUser((prev) => ({
+          ...prev,
+          brand: {
+            ...prev.brand,
+            name: p.brand_name || prev.brand.name,
+            bio: p.bio || prev.brand.bio,
+            category: p.category ? [p.category] : prev.brand.category,
+            logo: p.logo_data || prev.brand.logo,
+            gstNumber: p.gst_number || "",
+          },
+        }));
+      }
+    } catch (_) {}
+  }, []);
 
   const logout = () => {
     clearToken();
@@ -218,7 +296,7 @@ export const AppProvider = ({ children }) => {
       onboardingComplete, setOnboardingComplete, completeOnboarding,
       authLoading,
       currentUserId,
-      loginWithToken,
+      loginWithToken, refreshProfile,
       user, setUser,
       workedWith, setWorkedWith,
       applications, setApplications, addApplication, withdrawApplication,
