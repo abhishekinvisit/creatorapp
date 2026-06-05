@@ -95,7 +95,7 @@ export default function EditProfile() {
     if (accountType === "brand") {
       setUser((prev) => ({
         ...prev,
-        brand: { ...prev.brand, name, bio, instagramUrl: brandInstagramUrl, websiteUrl: brandWebsiteUrl },
+        brand: { ...prev.brand, name, bio, logo: avatar, instagramUrl: brandInstagramUrl, websiteUrl: brandWebsiteUrl },
       }));
       try {
         await profileApi.updateBrand({
@@ -213,7 +213,15 @@ export default function EditProfile() {
       <div className="flex justify-center mb-7">
         <div className="relative">
           {accountType === "brand" ? (
-            <BrandLogo name={name} size={112} />
+            avatar ? (
+              <img
+                src={avatar}
+                alt={name}
+                className="w-28 h-28 rounded-[32px] object-cover ring-4 ring-white shadow-lg"
+              />
+            ) : (
+              <BrandLogo name={name} size={112} />
+            )
           ) : (
             <img
               src={avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=240&q=80"}
@@ -620,10 +628,22 @@ const BRAND_SUGGESTIONS = [
 const BrandPickerModal = ({ existing, onClose, onPick }) => {
   const [q, setQ] = useState("");
   const [customName, setCustomName] = useState("");
+  const [customLogo, setCustomLogo] = useState("");
+  const customLogoRef = useRef(null);
   const filtered = BRAND_SUGGESTIONS.filter((b) =>
     !existing.find((e) => e.id === b.id) &&
     b.name.toLowerCase().includes(q.toLowerCase())
   );
+
+  const handleCustomLogo = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) return;
+    if (file.size > 3 * 1024 * 1024) { toast.error("Image must be under 3MB"); return; }
+    const reader = new FileReader();
+    reader.onload = () => setCustomLogo(reader.result);
+    reader.readAsDataURL(file);
+  };
 
   return (
     <PickerModal title="Add Brand" onClose={onClose}>
@@ -641,7 +661,20 @@ const BrandPickerModal = ({ existing, onClose, onPick }) => {
       {q.trim() && !filtered.length && (
         <div className="mb-4">
           <p className="text-xs text-[#525252] font-medium mb-2">Not listed? Add it manually:</p>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2 mb-2">
+            <button
+              data-testid="custom-brand-logo"
+              onClick={() => customLogoRef.current?.click()}
+              className="w-12 h-12 rounded-xl bg-[#F3F3F3] border border-[#E5E5E5] flex items-center justify-center flex-shrink-0 hover:border-[#0A0A0A] transition-colors overflow-hidden"
+              title="Upload logo"
+            >
+              {customLogo ? (
+                <img src={customLogo} alt="logo" className="w-full h-full object-cover" />
+              ) : (
+                <Camera size={16} className="text-[#525252]" />
+              )}
+            </button>
+            <input ref={customLogoRef} type="file" accept="image/*" className="hidden" onChange={handleCustomLogo} />
             <input
               value={customName}
               onChange={(e) => setCustomName(e.target.value)}
@@ -651,7 +684,7 @@ const BrandPickerModal = ({ existing, onClose, onPick }) => {
             <button
               onClick={() => {
                 if (!customName.trim()) return;
-                onPick({ id: `custom-${Date.now()}`, name: customName.trim(), logo: "" });
+                onPick({ id: `custom-${Date.now()}`, name: customName.trim(), logo: customLogo });
               }}
               className="px-5 py-3 bg-[#0A0A0A] text-white rounded-2xl font-bold text-sm"
             >

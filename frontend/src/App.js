@@ -30,6 +30,7 @@ import Settings from "@/screens/Settings";
 import EditProfile from "@/screens/EditProfile";
 import BrandsList from "@/screens/BrandsList";
 import MyProfile from "@/screens/MyProfile";
+import SavedCreatorsScreen from "@/screens/SavedCreatorsScreen";
 
 // Minimal spinner shown while session is being restored from localStorage
 function AuthLoading() {
@@ -112,6 +113,7 @@ function AppRoutes() {
         <Route path="/brand/post/:id" element={<AppRoute><BrandPostDetail /></AppRoute>} />
         <Route path="/brand/requirements" element={<AppRoute><AddRequirements /></AppRoute>} />
         <Route path="/brand/creator/:id" element={<AppRoute><CreatorProfileBrandView /></AppRoute>} />
+        <Route path="/brand/saved-creators" element={<AppRoute><SavedCreatorsScreen /></AppRoute>} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>

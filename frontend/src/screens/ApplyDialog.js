@@ -12,16 +12,24 @@ export const ApplyDialog = ({ opportunity, onClose, onApplied }) => {
   const handleApply = async () => {
     setLoading(true);
     try {
-      await applicationsApi.apply(opportunity.id, note);
-      addApplication(opportunity.id, opportunity.brandName || opportunity.brand_name);
+      const appRow = await applicationsApi.apply(opportunity.id, note);
+      addApplication({
+        id: appRow.id,
+        opportunityId: appRow.opportunity_id,
+        brandName: appRow.brand_name || opportunity.brandName || opportunity.brand_name || "",
+        opportunityTitle: appRow.opportunity_title || opportunity.title || "",
+        appliedOn: new Date(appRow.applied_at || Date.now()).toLocaleDateString("en-GB", {
+          day: "numeric", month: "short", year: "numeric",
+        }),
+        status: "applied",
+        note: appRow.note || note || "",
+      });
       onApplied();
     } catch (err) {
       if (err.message?.toLowerCase().includes("already")) {
         toast.error("You've already applied to this opportunity");
       } else {
-        // Fallback: still mark as applied locally so UX isn't blocked
-        addApplication(opportunity.id, opportunity.brandName || opportunity.brand_name);
-        onApplied();
+        toast.error(err.message || "Failed to apply");
       }
     } finally {
       setLoading(false);

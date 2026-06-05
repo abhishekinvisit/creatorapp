@@ -112,3 +112,10 @@ export const creatorsApi = {
 export const brandsApi = {
   get: (brandUserId) => api.get(`/brands/${brandUserId}`),
 };
+
+// ── Saved Creators (Brand feature) ────────────────────────────────────────────
+export const savedCreatorsApi = {
+  list:   ()           => api.get("/saved-creators"),
+  save:   (creatorId)  => api.post("/saved-creators", { creator_id: creatorId }),
+  unsave: (creatorId)  => api.delete(`/saved-creators/${creatorId}`),
+};

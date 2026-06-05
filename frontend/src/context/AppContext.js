@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { DEFAULT_USER } from "@/data/mockData";
-import { authApi, TOKEN_KEY, clearToken, setToken, getToken } from "@/lib/api";
+import { authApi, TOKEN_KEY, clearToken, setToken, getToken, savedCreatorsApi } from "@/lib/api";
 
 const AppContext = createContext(null);
 
@@ -48,14 +48,15 @@ function mapBrandProfile(prev, p) {
     ...prev,
     brand: {
       ...prev.brand,
-      name:         p.brand_name    || prev.brand.name,
-      bio:          p.bio           || prev.brand.bio,
-      category:     p.category ? [p.category] : prev.brand.category,
+      name:           p.brand_name    || prev.brand.name,
+      handle:         p.handle        || "",
+      bio:            p.bio           || prev.brand.bio,
+      category:       p.category ? [p.category] : prev.brand.category,
       customCategory: p.custom_category || prev.brand.customCategory || "",
-      instagramUrl: p.instagram_url || prev.brand.instagramUrl || "",
-      websiteUrl:   p.website_url   || prev.brand.websiteUrl   || "",
-      logo:         p.logo_data     || prev.brand.logo,
-      gstNumber:    p.gst_number    || "",
+      instagramUrl:   p.instagram_url || prev.brand.instagramUrl || "",
+      websiteUrl:     p.website_url   || prev.brand.websiteUrl   || "",
+      logo:           p.logo_data     || prev.brand.logo,
+      gstNumber:      p.gst_number    || "",
     },
   };
 }
@@ -79,7 +80,15 @@ export const AppProvider = ({ children }) => {
   const [notifications, setNotifications] = useState([]);
   const [activePosts, setActivePosts] = useState([]);
   const [savedIds, setSavedIds] = useState(loadSavedIds);
+  const [savedCreatorIds, setSavedCreatorIds] = useState(new Set());
   const [draftOpportunity, setDraftOpportunity] = useState({});
+
+  const loadSavedCreators = useCallback(async () => {
+    try {
+      const list = await savedCreatorsApi.list();
+      setSavedCreatorIds(new Set(list.map((c) => c.creator_id)));
+    } catch (_) {}
+  }, []);
 
   // ── Session restoration ───────────────────────────────────────────────────
   const restoreSession = useCallback(async () => {
@@ -97,13 +106,14 @@ export const AppProvider = ({ children }) => {
         if (mapped.workedWith?.length) setWorkedWith(mapped.workedWith);
       } else if (data.account_type === "brand" && data.profile) {
         setUser((prev) => mapBrandProfile(prev, data.profile));
+        loadSavedCreators();
       }
     } catch (_) {
       clearToken();
     } finally {
       setAuthLoading(false);
     }
-  }, []);
+  }, [loadSavedCreators]);
 
   useEffect(() => { restoreSession(); }, [restoreSession]);
 
@@ -141,9 +151,10 @@ export const AppProvider = ({ children }) => {
         });
       } else if (data.account_type === "brand" && data.profile) {
         setUser((prev) => mapBrandProfile(prev, data.profile));
+        loadSavedCreators();
       }
     } catch (_) {}
-  }, []);
+  }, [loadSavedCreators]);
 
   const logout = () => {
     clearToken();
@@ -157,8 +168,8 @@ export const AppProvider = ({ children }) => {
     setActivePosts([]);
     setNotifications([]);
     setThreads([]);
-    setSavedIds([]);
-    localStorage.removeItem(SAVED_KEY);
+    setSavedCreatorIds(new Set());
+    // savedIds (saved opportunities) intentionally kept across logout for UX continuity
   };
 
   // ── Onboarding ────────────────────────────────────────────────────────────
@@ -200,16 +211,11 @@ export const AppProvider = ({ children }) => {
   };
 
   // ── Applications ──────────────────────────────────────────────────────────
-  const addApplication = (opportunityId, brandName) => {
-    const newApp = {
-      id: `a-${Date.now()}`,
-      opportunityId,
-      brandName,
-      appliedOn: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
-      status: "applied",
-      note: "",
-    };
-    setApplications((prev) => [newApp, ...prev]);
+  const addApplication = (appData) => {
+    setApplications((prev) => {
+      if (prev.find((a) => a.opportunityId === appData.opportunityId)) return prev;
+      return [appData, ...prev];
+    });
   };
 
   const withdrawApplication = (appId) => {
@@ -239,7 +245,7 @@ export const AppProvider = ({ children }) => {
 
   const deletePost = (id) => setActivePosts((prev) => prev.filter((p) => p.id !== id));
 
-  // ── Saved — persisted to localStorage ────────────────────────────────────
+  // ── Saved opportunities — persisted to localStorage ───────────────────────
   const isSaved = (id) => savedIds.includes(id);
   const toggleSave = (id) => setSavedIds((prev) => {
     const next = prev.includes(id) ? prev.filter((x) => x !== id) : [id, ...prev];
@@ -247,6 +253,24 @@ export const AppProvider = ({ children }) => {
     return next;
   });
   const savedOpportunities = opportunities.filter((o) => savedIds.includes(o.id));
+
+  // ── Saved creators (brand feature) ────────────────────────────────────────
+  const isCreatorSaved = (creatorId) => savedCreatorIds.has(creatorId);
+  const savedCreatorsCount = savedCreatorIds.size;
+
+  const saveCreator = async (creatorId) => {
+    setSavedCreatorIds((prev) => new Set([...prev, creatorId]));
+    try { await savedCreatorsApi.save(creatorId); } catch (_) {}
+  };
+
+  const unsaveCreator = async (creatorId) => {
+    setSavedCreatorIds((prev) => {
+      const next = new Set(prev);
+      next.delete(creatorId);
+      return next;
+    });
+    try { await savedCreatorsApi.unsave(creatorId); } catch (_) {}
+  };
 
   // ── Notifications ─────────────────────────────────────────────────────────
   const markAllNotificationsRead = () => setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
@@ -285,6 +309,7 @@ export const AppProvider = ({ children }) => {
       notifications, setNotifications, markAllNotificationsRead,
       activePosts, setActivePosts, publishOpportunity, updatePost, deletePost,
       savedIds, isSaved, toggleSave, savedOpportunities,
+      savedCreatorIds, isCreatorSaved, savedCreatorsCount, saveCreator, unsaveCreator,
       draftOpportunity, setDraftOpportunity,
     }}>
       {children}

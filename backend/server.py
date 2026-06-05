@@ -173,8 +173,12 @@ class ReelIn(BaseModel):
     brand: str
     title: str
     instagram_url: str
+
     thumbnail: Optional[str] = ""
     sort_order: Optional[int] = 0
+
+class SavedCreatorIn(BaseModel):
+    creator_id: str
 
 class ReelUpdate(BaseModel):
     brand: Optional[str] = None
@@ -393,6 +397,66 @@ async def update_brand_profile(body: BrandProfileIn, user=Depends(current_user))
             f"UPDATE brand_profiles SET {cols}, updated_at=NOW() WHERE user_id=$1::uuid",
             user["id"], *vals,
         )
+    return {"success": True}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SAVED CREATORS ROUTES (Brand feature)
+# ─────────────────────────────────────────────────────────────────────────────
+
+@api_router.get("/saved-creators")
+async def list_saved_creators(user=Depends(current_user)):
+    if user["account_type"] != "brand":
+        raise HTTPException(status_code=403, detail="Brands only")
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        rows = await conn.fetch("""
+            SELECT sc.creator_id, sc.saved_at,
+                   cp.full_name, cp.handle, cp.avatar_url, cp.followers_count,
+                   cp.categories, cp.location, cp.bio, cp.collaborations_count
+            FROM saved_creators sc
+            LEFT JOIN creator_profiles cp ON cp.user_id = sc.creator_id
+            WHERE sc.brand_id = $1::uuid
+            ORDER BY sc.saved_at DESC
+        """, user["id"])
+    return [{
+        "creator_id": str(r["creator_id"]),
+        "name": r["full_name"] or "Creator",
+        "handle": r["handle"] or "",
+        "avatar": r["avatar_url"] or "",
+        "followers": r["followers_count"] or 0,
+        "categories": list(r["categories"] or []),
+        "location": r["location"] or "",
+        "bio": r["bio"] or "",
+        "collaborations": r["collaborations_count"] or 0,
+        "saved_at": r["saved_at"].isoformat() if r["saved_at"] else "",
+    } for r in rows]
+
+
+@api_router.post("/saved-creators")
+async def save_creator(body: SavedCreatorIn, user=Depends(current_user)):
+    if user["account_type"] != "brand":
+        raise HTTPException(status_code=403, detail="Brands only")
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        await conn.execute("""
+            INSERT INTO saved_creators(brand_id, creator_id)
+            VALUES($1::uuid, $2::uuid)
+            ON CONFLICT DO NOTHING
+        """, user["id"], body.creator_id)
+    return {"success": True}
+
+
+@api_router.delete("/saved-creators/{creator_id}")
+async def unsave_creator(creator_id: str, user=Depends(current_user)):
+    if user["account_type"] != "brand":
+        raise HTTPException(status_code=403, detail="Brands only")
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        await conn.execute("""
+            DELETE FROM saved_creators
+            WHERE brand_id=$1::uuid AND creator_id=$2::uuid
+        """, user["id"], creator_id)
     return {"success": True}
 
 

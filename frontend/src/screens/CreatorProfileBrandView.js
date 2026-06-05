@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { MapPin } from "lucide-react";
+import { MapPin, Bookmark } from "lucide-react";
 
 const InstagramIcon = ({ size = 16, className = "", strokeWidth = 2, ...props }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
@@ -25,7 +25,7 @@ function formatFollowers(n) {
 export default function CreatorProfileBrandView() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { currentUserId } = useApp();
+  const { currentUserId, isCreatorSaved, saveCreator, unsaveCreator } = useApp();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -37,8 +37,14 @@ export default function CreatorProfileBrandView() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  const handleShortlist = () => {
-    toast.success(`${profile?.full_name || "Creator"} shortlisted!`);
+  const handleToggleSave = () => {
+    if (isCreatorSaved(id)) {
+      unsaveCreator(id);
+      toast.success("Removed from saved creators");
+    } else {
+      saveCreator(id);
+      toast.success(`${profile?.full_name || "Creator"} saved!`);
+    }
   };
 
   const handleMessage = async () => {
@@ -221,11 +227,16 @@ export default function CreatorProfileBrandView() {
       <div className="sticky bottom-0 left-0 right-0 z-20 mt-6">
         <div className="px-5 py-4 bg-gradient-to-t from-[#F9F9F8] via-[#F9F9F8]/95 to-transparent flex gap-3">
           <button
-            data-testid="shortlist-btn"
-            onClick={handleShortlist}
-            className="flex-1 py-4 rounded-full border-2 border-[#0A0A0A] font-bold hover:bg-[#0A0A0A] hover:text-white transition-colors"
+            data-testid="save-btn"
+            onClick={handleToggleSave}
+            className={`flex-1 py-4 rounded-full border-2 font-bold flex items-center justify-center gap-2 transition-colors ${
+              isCreatorSaved(id)
+                ? "bg-[#E25238] border-[#E25238] text-white"
+                : "border-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white"
+            }`}
           >
-            Shortlist
+            <Bookmark size={16} fill={isCreatorSaved(id) ? "currentColor" : "none"} />
+            {isCreatorSaved(id) ? "Saved" : "Save"}
           </button>
           <button
             data-testid="message-btn"

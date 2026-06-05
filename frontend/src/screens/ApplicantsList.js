@@ -9,6 +9,7 @@ const TABS = [
   { id: "all", label: "All" },
   { id: "shortlisted", label: "Shortlisted" },
   { id: "accepted", label: "Accepted" },
+  { id: "rejected", label: "Rejected" },
 ];
 
 const STATUS_ACTIONS = [

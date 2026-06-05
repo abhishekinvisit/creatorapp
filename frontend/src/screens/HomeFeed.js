@@ -37,7 +37,7 @@ function mapApiOpp(o) {
 
 export default function HomeFeed() {
   const navigate = useNavigate();
-  const { opportunities, mergeOpportunities, isSaved, toggleSave, user, accountType } = useApp();
+  const { opportunities, mergeOpportunities, isSaved, toggleSave, user, accountType, applications } = useApp();
   const [activeCat, setActiveCat] = useState("All");
 
   useEffect(() => {
@@ -91,10 +91,16 @@ export default function HomeFeed() {
   const activeFilterCount =
     filterLanguages.length + (filterMinPayout > 0 ? 1 : 0) + (filterVerified ? 1 : 0);
 
+  // Filter out opportunities this creator already applied to
+  const appliedIds = new Set(
+    accountType === "creator" ? applications.map((a) => a.opportunityId) : []
+  );
+  const notApplied = opportunities.filter((o) => !appliedIds.has(o.id));
+
   // Step 1 — niche gate: if creator and not discovering all, restrict to their categories
   const nicheFiltered = (!discoverAll && creatorCats.length > 0)
-    ? opportunities.filter((o) => creatorCats.includes(o.category))
-    : opportunities;
+    ? notApplied.filter((o) => creatorCats.includes(o.category))
+    : notApplied;
 
   // Step 2 — all other filters on top
   const filtered = nicheFiltered.filter((o) => {

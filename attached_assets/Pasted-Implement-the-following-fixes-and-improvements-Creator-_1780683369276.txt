@@ -1,0 +1,47 @@
+Implement the following fixes and improvements:
+
+**Creator**
+
+* A creator can apply to an opportunity only once. After applying, remove that opportunity from their Home feed and Discover feed.
+* show real cover note fed by creator on application detail page
+* creator is still losing data after logout, like saved posts and applied opportunities 
+* Allow creators to add custom brands in the "Worked With" section, including:
+
+  * Brand Name
+  * Brand Logo
+* Ensure custom brands are saved to the database and persist after refresh, logout, and login.
+* Display all added social links (Instagram, YouTube, LinkedIn, TikTok, Website) on the creator profile.
+
+**Brand**
+
+* Fix brand profile picture uploads from both Signup and Edit Profile pages. The uploaded image should immediately update everywhere and persist after refresh, logout, and login.
+* remove dummy text from brand profile
+* Fix applicant management. Brands must be able to:
+
+  * View all applicants
+  * Open the real creator profile
+  * Shortlist applicants
+  * Accept applicants
+  * Reject applicants
+  * See status updates reflected immediately
+* Replace "Profile Views" on the Brand Dashboard with **Saved Creators**.
+* Create a Saved Creators page showing all creators saved by the brand.
+* Allow brands to save creators directly from the Discover Creators page.
+
+**Categories**
+
+* Replace all category text inputs with searchable dropdowns.
+* Sort all category lists alphabetically.
+* Use the same category source everywhere in the platform (Onboarding, Edit Profile, Opportunity Creation, Filters, Search, etc.).
+* Ensure category selection is consistent across Creator and Brand flows.
+
+**Data & Persistence**
+
+* Verify all profile updates, saved creators, applications, statuses, uploads, and social links are saved correctly to the database.
+* Ensure all changes persist after refresh, logout, login, and browser restart.
+* Audit related APIs, database tables, storage buckets, and frontend state management to eliminate data loss and synchronization issues.
+
+**Testing**
+
+* Perform end-to-end testing for Creator and Brand workflows.
+* Fix any additional bugs discovered during testing and provide a report of issues found and fixes implemented.

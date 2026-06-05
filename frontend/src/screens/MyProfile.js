@@ -27,9 +27,25 @@ async function shareProfile(url, name) {
   }
 }
 
+const YoutubeIcon = ({ size = 14, className = "" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/>
+  </svg>
+);
+const LinkedInIcon = ({ size = 14, className = "" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/>
+  </svg>
+);
+const TikTokIcon = ({ size = 14, className = "" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
+    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.75a8.16 8.16 0 0 0 4.76 1.51V6.8a4.85 4.85 0 0 1-1-.11z"/>
+  </svg>
+);
+
 export default function MyProfile() {
   const navigate = useNavigate();
-  const { user, accountType, workedWith, currentUserId } = useApp();
+  const { user, accountType, workedWith, currentUserId, activePosts, savedCreatorsCount } = useApp();
   const [reels, setReels] = useState([]);
 
   useEffect(() => {
@@ -39,6 +55,8 @@ export default function MyProfile() {
 
   if (accountType === "brand") {
     const b = user.brand;
+    const activePostCount = activePosts.filter((p) => p.status === "active").length;
+    const totalApplicants = activePosts.reduce((sum, p) => sum + (p.applicants || 0), 0);
     return (
       <div data-testid="my-profile-brand" className="min-h-full bg-[#0A0A0A] text-white pb-6">
         <TopBar title="Profile" dark rightSlot={
@@ -48,26 +66,35 @@ export default function MyProfile() {
         } />
         <div className="px-5 text-center">
           <div className="flex justify-center mb-4">
-            <BrandLogo name={b.name} size={96} dark />
+            {b.logo ? (
+              <img src={b.logo} alt={b.name} className="w-24 h-24 rounded-[28px] object-cover ring-4 ring-white/10 shadow-lg" />
+            ) : (
+              <BrandLogo name={b.name} size={96} dark />
+            )}
           </div>
           <div className="flex items-center justify-center gap-2">
             <h2 className="font-display font-black text-2xl tracking-tight">{b.name}</h2>
             <BadgeCheck size={20} className="text-[#E25238]" fill="#E25238" stroke="white" />
           </div>
-          <p className="text-sm text-neutral-400 font-medium">{b.handle}</p>
-          <p className="text-sm font-medium mt-3 max-w-xs mx-auto">{b.bio}</p>
+          {b.handle && <p className="text-sm text-neutral-400 font-medium">{b.handle}</p>}
+          {b.bio && <p className="text-sm font-medium mt-3 max-w-xs mx-auto">{b.bio}</p>}
 
           <div className="grid grid-cols-3 gap-3 mt-6">
-            {[
-              { label: "Active Posts", value: b.stats.activePosts },
-              { label: "Applicants", value: b.stats.totalApplicants },
-              { label: "Profile Views", value: b.stats.profileViews },
-            ].map((s) => (
-              <div key={s.label} className="bg-white/5 border border-white/10 rounded-2xl p-3">
-                <p className="font-display font-black text-2xl">{s.value}</p>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 mt-0.5">{s.label}</p>
-              </div>
-            ))}
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-3">
+              <p className="font-display font-black text-2xl">{activePostCount}</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 mt-0.5">Active Posts</p>
+            </div>
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-3">
+              <p className="font-display font-black text-2xl">{totalApplicants}</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 mt-0.5">Applicants</p>
+            </div>
+            <button
+              onClick={() => navigate("/brand/saved-creators")}
+              className="bg-white/5 border border-white/10 rounded-2xl p-3 text-left hover:bg-white/10 transition-colors"
+            >
+              <p className="font-display font-black text-2xl text-[#E25238]">{savedCreatorsCount}</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 mt-0.5">Saved</p>
+            </button>
           </div>
 
           <div className="flex gap-3 mt-6">
@@ -177,6 +204,44 @@ export default function MyProfile() {
                 {lang}
               </span>
             ))}
+          </div>
+        )}
+
+        {/* Social links row */}
+        {(c.youtubeUrl || c.tiktokUrl || c.linkedinUrl || c.websiteUrl) && (
+          <div className="flex items-center gap-2 mt-3 flex-wrap">
+            {c.youtubeUrl && (
+              <button
+                onClick={() => window.open(c.youtubeUrl, "_blank", "noopener,noreferrer")}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-[#E5E5E5] text-[10px] font-bold uppercase tracking-[0.1em] text-[#525252] hover:border-[#E25238] hover:text-[#E25238] transition-colors"
+              >
+                <YoutubeIcon size={11} /> YouTube
+              </button>
+            )}
+            {c.tiktokUrl && (
+              <button
+                onClick={() => window.open(c.tiktokUrl, "_blank", "noopener,noreferrer")}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-[#E5E5E5] text-[10px] font-bold uppercase tracking-[0.1em] text-[#525252] hover:border-[#0A0A0A] hover:text-[#0A0A0A] transition-colors"
+              >
+                <TikTokIcon size={11} /> TikTok
+              </button>
+            )}
+            {c.linkedinUrl && (
+              <button
+                onClick={() => window.open(c.linkedinUrl, "_blank", "noopener,noreferrer")}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-[#E5E5E5] text-[10px] font-bold uppercase tracking-[0.1em] text-[#525252] hover:border-[#0A7DBF] hover:text-[#0A7DBF] transition-colors"
+              >
+                <LinkedInIcon size={11} /> LinkedIn
+              </button>
+            )}
+            {c.websiteUrl && (
+              <button
+                onClick={() => window.open(c.websiteUrl, "_blank", "noopener,noreferrer")}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-[#E5E5E5] text-[10px] font-bold uppercase tracking-[0.1em] text-[#525252] hover:border-[#0A0A0A] hover:text-[#0A0A0A] transition-colors"
+              >
+                <Globe size={11} /> Website
+              </button>
+            )}
           </div>
         )}
 

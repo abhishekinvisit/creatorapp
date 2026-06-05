@@ -6,7 +6,7 @@ import { opportunitiesApi } from "@/lib/api";
 
 export default function BrandDashboard() {
   const navigate = useNavigate();
-  const { user, activePosts, setActivePosts } = useApp();
+  const { user, activePosts, setActivePosts, savedCreatorsCount } = useApp();
 
   useEffect(() => {
     opportunitiesApi.myPosts()
@@ -53,16 +53,22 @@ export default function BrandDashboard() {
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-3 mb-7">
-          {[
-            { label: "Active Posts", value: activePosts.filter(p => p.status === "active").length },
-            { label: "Total Applicants", value: totalApplicants },
-            { label: "Profile Views", value: user.brand.stats?.profileViews || 0 },
-          ].map((s) => (
-            <div key={s.label} className="bg-white/5 border border-white/10 rounded-2xl p-4">
-              <p className="font-display font-black text-3xl">{s.value}</p>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 mt-1">{s.label}</p>
-            </div>
-          ))}
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+            <p className="font-display font-black text-3xl">{activePosts.filter(p => p.status === "active").length}</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 mt-1">Active Posts</p>
+          </div>
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+            <p className="font-display font-black text-3xl">{totalApplicants}</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 mt-1">Total Applicants</p>
+          </div>
+          <button
+            data-testid="saved-creators-stat"
+            onClick={() => navigate("/brand/saved-creators")}
+            className="bg-white/5 border border-white/10 rounded-2xl p-4 text-left hover:bg-white/10 transition-colors"
+          >
+            <p className="font-display font-black text-3xl text-[#E25238]">{savedCreatorsCount}</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 mt-1">Saved Creators</p>
+          </button>
         </div>
 
         {/* Active posts */}

@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, SlidersHorizontal, X, MapPin, Users, Check, ChevronDown } from "lucide-react";
+import { Search, SlidersHorizontal, X, MapPin, Users, Check, ChevronDown, Bookmark } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { creatorsApi } from "@/lib/api";
+import { useApp } from "@/context/AppContext";
 
 const CATEGORIES = ["All", "Beauty", "Fashion", "Lifestyle", "Fitness", "Food", "Tech", "Travel"];
 const AGES = ["Any", "13-17", "18-24", "25-34", "35+"];
@@ -58,6 +59,7 @@ function mapCreator(c) {
 
 export default function BrandDiscover() {
   const navigate = useNavigate();
+  const { isCreatorSaved, saveCreator, unsaveCreator } = useApp();
   const [q, setQ] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
@@ -200,48 +202,62 @@ export default function BrandDiscover() {
         ) : (
           <div className="space-y-3">
             {results.map((c, idx) => (
-              <button
+              <div
                 key={c.id}
                 data-testid={`creator-${c.id}`}
-                onClick={() => navigate(`/brand/creator/${c.id}`)}
-                className="w-full text-left bg-white/5 border border-white/10 rounded-3xl p-4 flex items-start gap-4 hover:bg-white/10 transition-all animate-fade-up"
+                className="bg-white/5 border border-white/10 rounded-3xl p-4 flex items-start gap-4 animate-fade-up"
                 style={{ animationDelay: `${idx * 50}ms` }}
               >
-                {c.avatar ? (
-                  <img src={c.avatar} alt={c.name} className="w-16 h-16 rounded-2xl object-cover flex-shrink-0" />
-                ) : (
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#E25238] to-[#F59E0B] flex items-center justify-center flex-shrink-0">
-                    <span className="text-white font-black text-2xl">{c.name[0]}</span>
-                  </div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1">
-                    <h4 className="font-display font-bold text-white truncate">{c.name}</h4>
-                  </div>
-                  <p className="text-xs text-neutral-400 font-medium truncate">{c.handle}</p>
-                  <div className="flex items-center gap-3 mt-2 text-xs">
-                    <span className="flex items-center gap-1 text-neutral-300 font-medium">
-                      <Users size={11} className="text-[#E25238]" />
-                      <span className="font-bold text-white">{c.followers}</span>
-                    </span>
-                    {c.location && (
-                      <span className="flex items-center gap-1 text-neutral-300 font-medium">
-                        <MapPin size={11} className="text-[#E25238]" />
-                        {c.location}
-                      </span>
-                    )}
-                  </div>
-                  {c.categories.length > 0 && (
-                    <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-                      {c.categories.slice(0, 3).map((cat) => (
-                        <span key={cat} className="px-2 py-0.5 rounded-full bg-white/10 text-[10px] font-bold uppercase tracking-wider text-neutral-300">
-                          {cat}
-                        </span>
-                      ))}
+                <button
+                  onClick={() => navigate(`/brand/creator/${c.id}`)}
+                  className="flex items-start gap-4 flex-1 min-w-0 text-left"
+                >
+                  {c.avatar ? (
+                    <img src={c.avatar} alt={c.name} className="w-16 h-16 rounded-2xl object-cover flex-shrink-0" />
+                  ) : (
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#E25238] to-[#F59E0B] flex items-center justify-center flex-shrink-0">
+                      <span className="text-white font-black text-2xl">{c.name[0]}</span>
                     </div>
                   )}
-                </div>
-              </button>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-display font-bold text-white truncate">{c.name}</h4>
+                    <p className="text-xs text-neutral-400 font-medium truncate">{c.handle}</p>
+                    <div className="flex items-center gap-3 mt-2 text-xs">
+                      <span className="flex items-center gap-1 text-neutral-300 font-medium">
+                        <Users size={11} className="text-[#E25238]" />
+                        <span className="font-bold text-white">{c.followers}</span>
+                      </span>
+                      {c.location && (
+                        <span className="flex items-center gap-1 text-neutral-300 font-medium">
+                          <MapPin size={11} className="text-[#E25238]" />
+                          {c.location}
+                        </span>
+                      )}
+                    </div>
+                    {c.categories.length > 0 && (
+                      <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+                        {c.categories.slice(0, 3).map((cat) => (
+                          <span key={cat} className="px-2 py-0.5 rounded-full bg-white/10 text-[10px] font-bold uppercase tracking-wider text-neutral-300">
+                            {cat}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </button>
+                <button
+                  data-testid={`save-creator-${c.id}`}
+                  onClick={() => isCreatorSaved(c.id) ? unsaveCreator(c.id) : saveCreator(c.id)}
+                  className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${
+                    isCreatorSaved(c.id)
+                      ? "bg-[#E25238] text-white"
+                      : "bg-white/10 text-neutral-400 hover:bg-white/20 hover:text-white"
+                  }`}
+                  title={isCreatorSaved(c.id) ? "Unsave creator" : "Save creator"}
+                >
+                  <Bookmark size={15} fill={isCreatorSaved(c.id) ? "currentColor" : "none"} />
+                </button>
+              </div>
             ))}
 
             {results.length === 0 && !loading && (

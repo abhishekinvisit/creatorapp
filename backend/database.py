@@ -167,6 +167,16 @@ CREATE INDEX IF NOT EXISTS idx_applications_creator_id ON applications(creator_i
 CREATE INDEX IF NOT EXISTS idx_applications_opportunity_id ON applications(opportunity_id);
 CREATE INDEX IF NOT EXISTS idx_messages_thread_id ON messages(thread_id);
 CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications(user_id);
+
+CREATE TABLE IF NOT EXISTS saved_creators (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    brand_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    creator_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    saved_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(brand_id, creator_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_saved_creators_brand_id ON saved_creators(brand_id);
 """
 
 # Migrations for columns added after initial schema deployment
@@ -179,6 +189,8 @@ MIGRATIONS = [
     "ALTER TABLE brand_profiles ADD COLUMN IF NOT EXISTS instagram_url VARCHAR(500) DEFAULT ''",
     "ALTER TABLE brand_profiles ADD COLUMN IF NOT EXISTS website_url VARCHAR(500) DEFAULT ''",
     "ALTER TABLE brand_profiles ADD COLUMN IF NOT EXISTS custom_category VARCHAR(100) DEFAULT ''",
+    "CREATE TABLE IF NOT EXISTS saved_creators (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), brand_id UUID REFERENCES users(id) ON DELETE CASCADE, creator_id UUID REFERENCES users(id) ON DELETE CASCADE, saved_at TIMESTAMPTZ DEFAULT NOW(), UNIQUE(brand_id, creator_id))",
+    "CREATE INDEX IF NOT EXISTS idx_saved_creators_brand_id ON saved_creators(brand_id)",
 ]
 
 
