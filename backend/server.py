@@ -1,5 +1,7 @@
 from fastapi import FastAPI, APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from starlette.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
@@ -987,3 +989,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ── Serve React frontend in production ────────────────────────────────────────
+FRONTEND_BUILD = ROOT_DIR.parent / "frontend" / "build"
+
+if FRONTEND_BUILD.exists():
+    app.mount("/static", StaticFiles(directory=str(FRONTEND_BUILD / "static")), name="static")
+
+    @app.get("/{full_path:path}")
+    async def serve_spa(full_path: str):
+        index = FRONTEND_BUILD / "index.html"
+        return FileResponse(str(index))
