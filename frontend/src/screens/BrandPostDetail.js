@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Pencil, Trash2, Users, Wallet, Calendar, Tag, Filter, MapPin, Globe, Eye, Check, X } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
@@ -6,7 +6,7 @@ import { useApp } from "@/context/AppContext";
 import { opportunitiesApi } from "@/lib/api";
 import { toast } from "sonner";
 
-const CATS = ["Beauty", "Fashion", "Lifestyle", "Fitness", "Food", "Tech"];
+import { MASTER_CATEGORIES as CATS } from "@/data/categories";
 const AGES = ["Any Age", "13-17", "18-24", "25-34", "35+"];
 const GENDERS = ["All", "Female", "Male", "Non-binary"];
 const LANGUAGES = ["English", "Hindi", "Tamil", "Telugu", "Kannada", "Bengali", "Marathi", "Malayalam", "Punjabi"];
@@ -386,23 +386,7 @@ const EditForm = ({ form, setForm }) => {
       </Field>
 
       <Field label="Category">
-        <div className="flex flex-wrap gap-2">
-          {CATS.map((cat) => {
-            const active = form.category === cat;
-            return (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => setForm({ ...form, category: active ? "" : cat })}
-                className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
-                  active ? "bg-[#E25238] text-white" : "bg-white/5 text-neutral-300 border border-white/10 hover:border-white/30"
-                }`}
-              >
-                {cat}
-              </button>
-            );
-          })}
-        </div>
+        <CategoryPicker form={form} setForm={setForm} />
       </Field>
 
       <Field label="Requirements">
@@ -469,3 +453,35 @@ const Field = ({ label, children }) => (
     {children}
   </div>
 );
+
+const CategoryPicker = ({ form, setForm }) => {
+  const [q, setQ] = React.useState("");
+  const filtered = CATS.filter((c) => c.toLowerCase().includes(q.toLowerCase()));
+  return (
+    <div>
+      <input
+        value={q}
+        onChange={(e) => setQ(e.target.value)}
+        placeholder="Search categories…"
+        className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 outline-none text-white placeholder-neutral-500 text-sm font-medium focus:border-[#E25238] mb-3"
+      />
+      <div className="flex flex-wrap gap-2">
+        {filtered.map((cat) => {
+          const active = form.category === cat;
+          return (
+            <button
+              key={cat}
+              type="button"
+              onClick={() => setForm({ ...form, category: active ? "" : cat })}
+              className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
+                active ? "bg-[#E25238] text-white" : "bg-white/5 text-neutral-300 border border-white/10 hover:border-white/30"
+              }`}
+            >
+              {cat}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+};

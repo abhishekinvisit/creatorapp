@@ -4,7 +4,9 @@ import { authApi, TOKEN_KEY, clearToken, setToken, getToken, savedCreatorsApi, a
 
 const AppContext = createContext(null);
 
-const SAVED_KEY = "ollcollab_saved";
+function savedKey(userId) {
+  return userId ? `ollcollab_saved_${userId}` : null;
+}
 
 function formatFollowers(n) {
   if (!n) return "0";
@@ -83,10 +85,6 @@ function mapBrandProfile(prev, p) {
   };
 }
 
-function loadSavedIds() {
-  try { return JSON.parse(localStorage.getItem(SAVED_KEY) || "[]"); } catch (_) { return []; }
-}
-
 export const AppProvider = ({ children }) => {
   const [accountType, setAccountType] = useState("creator");
   const [isAuthed, setIsAuthed] = useState(false);
@@ -101,7 +99,7 @@ export const AppProvider = ({ children }) => {
   const [threads, setThreads] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [activePosts, setActivePosts] = useState([]);
-  const [savedIds, setSavedIds] = useState(loadSavedIds);
+  const [savedIds, setSavedIds] = useState([]);
   const [savedCreatorIds, setSavedCreatorIds] = useState(new Set());
   const [draftOpportunity, setDraftOpportunity] = useState({});
 
@@ -136,7 +134,10 @@ export const AppProvider = ({ children }) => {
           setWorkedWith(mapped.workedWith || []);
           return mapped;
         });
-        // Load persisted applications so HomeFeed can filter applied opps
+        const key = savedKey(data.id);
+        if (key) {
+          try { setSavedIds(JSON.parse(localStorage.getItem(key) || "[]")); } catch (_) {}
+        }
         loadMyApplications();
       } else if (data.account_type === "brand" && data.profile) {
         setUser((prev) => mapBrandProfile(prev, data.profile));
@@ -183,7 +184,10 @@ export const AppProvider = ({ children }) => {
           if (mapped.workedWith?.length) setWorkedWith(mapped.workedWith);
           return mapped;
         });
-        // Load persisted applications so HomeFeed filters correctly right away
+        const key = savedKey(data.id);
+        if (key) {
+          try { setSavedIds(JSON.parse(localStorage.getItem(key) || "[]")); } catch (_) {}
+        }
         loadMyApplications();
       } else if (data.account_type === "brand" && data.profile) {
         setUser((prev) => mapBrandProfile(prev, data.profile));
@@ -197,7 +201,11 @@ export const AppProvider = ({ children }) => {
     setIsAuthed(false);
     setOnboardingComplete(false);
     setCurrentUserId(null);
-    setUser(DEFAULT_USER);
+    setUser({
+      ...DEFAULT_USER,
+      creator: { ...DEFAULT_USER.creator, avatar: "" },
+      brand: { ...DEFAULT_USER.brand, logo: "" },
+    });
     setWorkedWith([]);
     setApplications([]);
     setOpportunities([]);
@@ -205,7 +213,7 @@ export const AppProvider = ({ children }) => {
     setNotifications([]);
     setThreads([]);
     setSavedCreatorIds(new Set());
-    // savedIds (saved opportunities) intentionally kept across logout for UX continuity
+    setSavedIds([]);
   };
 
   // ── Onboarding ────────────────────────────────────────────────────────────
@@ -289,7 +297,8 @@ export const AppProvider = ({ children }) => {
   const isSaved = (id) => savedIds.includes(id);
   const toggleSave = (id) => setSavedIds((prev) => {
     const next = prev.includes(id) ? prev.filter((x) => x !== id) : [id, ...prev];
-    try { localStorage.setItem(SAVED_KEY, JSON.stringify(next)); } catch (_) {}
+    const key = savedKey(currentUserId);
+    if (key) try { localStorage.setItem(key, JSON.stringify(next)); } catch (_) {}
     return next;
   });
   const savedOpportunities = opportunities.filter((o) => savedIds.includes(o.id));

@@ -5,7 +5,7 @@ import { TopBar } from "@/components/TopBar";
 import { creatorsApi } from "@/lib/api";
 import { useApp } from "@/context/AppContext";
 
-const CATEGORIES = ["All", "Beauty", "Fashion", "Lifestyle", "Fitness", "Food", "Tech", "Travel"];
+import { FILTER_CATEGORIES as CATEGORIES } from "@/data/categories";
 const AGES = ["Any", "13-17", "18-24", "25-34", "35+"];
 const GENDERS = ["Any", "Female", "Male", "Non-binary"];
 const LANGUAGES = ["English", "Hindi", "Tamil", "Telugu", "Kannada", "Bengali", "Marathi", "Malayalam", "Punjabi"];

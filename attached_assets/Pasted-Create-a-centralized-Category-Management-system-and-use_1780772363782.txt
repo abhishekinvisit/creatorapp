@@ -1,0 +1,106 @@
+Create a centralized Category Management system and use it everywhere in the platform.
+
+Requirements:
+
+* Create a single master category list in the database using the following categories. 
+  Art & Illustration
+  Automotive
+  Beauty & Skincare
+  Books & Literature
+  Business & Entrepreneurship
+  Campus & Student Life
+  Career & Professional
+  Comedy
+  Culture & Society
+  Dance
+  DIY & Crafts
+  Education
+  Entertainment
+  Events & Nightlife
+  Family
+  Fashion
+  Finance & Investing
+  Fitness
+  Food & Cooking
+  Gaming
+  Health & Wellness
+  Home Decor & Interior
+  Jewelry & Accessories
+  Kids Content
+  Lifestyle
+  Local Discovery
+  Luxury
+  Memes & Humor
+  Mental Wellness
+  Motivation & Self Growth
+  Movies & TV
+  Music
+  News & Media
+  Outdoor & Adventure
+  Parenting
+  Pets & Animals
+  Photography
+  Real Estate
+  Relationships
+  Science
+  Shopping & Reviews
+  Spirituality
+  Sports
+  Sustainability & Environment
+  Technology
+  Travel
+  Unboxing
+  Videography
+  Web3 & Crypto
+  Other
+* Store categories alphabetically.
+* Replace every category text input, custom input, and hardcoded category list with a searchable dropdown connected to the database.
+
+Use the same category source in:
+
+* Creator Onboarding
+* Creator Edit Profile
+* Brand Onboarding
+* Brand Edit Profile
+* Opportunity Creation
+* Opportunity Editing
+* Opportunity Filters
+* Creator Search Filters
+* Brand Search Filters
+* Discover Pages
+* Saved Searches
+* Any future category selection screens
+
+Creator Rules:
+
+* Allow selecting up to 3 categories.
+* Save selected categories to the database.
+* Display selected categories on creator profiles.
+* Use creator categories for opportunity matching and recommendations.
+
+Brand Rules:
+
+* Allow selecting multiple categories.
+* Save selected categories to the database.
+* Use brand categories for search, filtering, and opportunity targeting.
+
+Functionality:
+
+* All category selections must persist after refresh, logout, and login.
+* If a category is updated in the database, it should automatically reflect across the platform.
+* Remove duplicate category systems and hardcoded lists.
+* Ensure all search, filter, recommendation, and matching logic uses the same category data source.
+
+Database & Integration:
+
+* Create proper relationships between users, brands, opportunities, and categories.
+* Audit all APIs, queries, forms, filters, and matching logic to ensure they use the centralized category system.
+* Fix any existing category-related bugs or inconsistencies.
+
+Testing:
+
+* Verify category selection, saving, editing, filtering, searching, matching, and recommendations work correctly for both creators and brands.
+* Confirm all category data persists across refresh, logout, and login.
+
+
+  also, brand profile ui is broken, and an orange box is appearing, instagram and website link in note visible on profile added by brand and profile picture is looking after login/logout and if one creator is saving an ooportunity its showing to every creator

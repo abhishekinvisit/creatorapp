@@ -76,11 +76,7 @@ export default function MyProfile() {
         {/* Banner + Identity */}
         <div className="relative">
           {/* Gradient banner */}
-          <div className="h-28 bg-gradient-to-br from-[#E25238] via-[#C94532] to-[#0A0A0A] relative overflow-hidden">
-            <div className="absolute inset-0 opacity-30"
-              style={{ backgroundImage: "radial-gradient(circle at 30% 50%, #F59E0B 0%, transparent 60%), radial-gradient(circle at 80% 30%, #E25238 0%, transparent 50%)" }}
-            />
-          </div>
+          <div className="h-28 bg-gradient-to-br from-[#E25238] via-[#C94532] to-[#0A0A0A] relative overflow-hidden" />
 
           {/* Logo overlapping banner */}
           <div className="px-5 flex items-end gap-4 -mt-10 mb-4">
@@ -166,34 +162,34 @@ export default function MyProfile() {
         )}
 
         {/* Links section */}
-        {(b.instagram_url || b.website_url) && (
+        {(b.instagramUrl || b.websiteUrl) && (
           <div className="px-5 mb-6">
             <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-neutral-500 mb-3">Links</p>
             <div className="space-y-2">
-              {b.instagram_url && (
+              {b.instagramUrl && (
                 <button
-                  onClick={() => window.open(b.instagram_url, "_blank", "noopener,noreferrer")}
+                  onClick={() => window.open(b.instagramUrl, "_blank", "noopener,noreferrer")}
                   className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/5 border border-white/10 hover:border-[#E25238]/40 transition-colors group"
                 >
                   <div className="w-8 h-8 rounded-xl bg-[#E25238]/15 flex items-center justify-center flex-shrink-0">
                     <InstagramIcon size={14} className="text-[#E25238]" />
                   </div>
                   <span className="flex-1 text-sm font-medium text-neutral-300 text-left truncate">
-                    {b.instagram_url.replace(/https?:\/\/(www\.)?instagram\.com\/?/, "@").replace(/\/$/, "") || "Instagram"}
+                    {b.instagramUrl.replace(/https?:\/\/(www\.)?instagram\.com\/?/, "@").replace(/\/$/, "") || "Instagram"}
                   </span>
                   <ExternalLink size={12} className="text-neutral-600 group-hover:text-neutral-400 transition-colors" />
                 </button>
               )}
-              {b.website_url && (
+              {b.websiteUrl && (
                 <button
-                  onClick={() => window.open(b.website_url, "_blank", "noopener,noreferrer")}
+                  onClick={() => window.open(b.websiteUrl, "_blank", "noopener,noreferrer")}
                   className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/5 border border-white/10 hover:border-white/30 transition-colors group"
                 >
                   <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
                     <Globe size={14} className="text-neutral-300" />
                   </div>
                   <span className="flex-1 text-sm font-medium text-neutral-300 text-left truncate">
-                    {b.website_url.replace(/^https?:\/\//, "") || "Website"}
+                    {b.websiteUrl.replace(/^https?:\/\//, "") || "Website"}
                   </span>
                   <ExternalLink size={12} className="text-neutral-600 group-hover:text-neutral-400 transition-colors" />
                 </button>

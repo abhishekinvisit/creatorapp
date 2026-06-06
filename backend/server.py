@@ -1060,6 +1060,18 @@ async def delete_reel(reel_id: str, user=Depends(current_user)):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# CATEGORIES
+# ─────────────────────────────────────────────────────────────────────────────
+
+@api_router.get("/categories")
+async def list_categories():
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        rows = await conn.fetch("SELECT name FROM categories ORDER BY sort_order, name")
+        return [r["name"] for r in rows]
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # HEALTH
 # ─────────────────────────────────────────────────────────────────────────────
 

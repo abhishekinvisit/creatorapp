@@ -1,5 +1,7 @@
 const BASE = "/api";
 
+let _categoriesCache = null;
+
 export const TOKEN_KEY = "ollcollab_token";
 
 export const getToken = () => localStorage.getItem(TOKEN_KEY);
@@ -27,6 +29,16 @@ export const api = {
   put:    (path, body)  => request("PUT",    path, body),
   patch:  (path, body)  => request("PATCH",  path, body),
   delete: (path)        => request("DELETE", path),
+};
+
+// ── Categories ────────────────────────────────────────────────────────────────
+export const categoriesApi = {
+  list: async () => {
+    if (_categoriesCache) return _categoriesCache;
+    const data = await request("GET", "/categories");
+    _categoriesCache = data;
+    return data;
+  },
 };
 
 // ── Auth ─────────────────────────────────────────────────────────────────────

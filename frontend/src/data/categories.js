@@ -1,16 +1,61 @@
-export const CREATOR_CATEGORIES = [
-  "Beauty", "Comedy", "Education", "Fashion", "Fitness", "Food",
-  "Gaming", "Lifestyle", "Music", "Skincare", "Tech", "Travel",
+export const MASTER_CATEGORIES = [
+  "Art & Illustration",
+  "Automotive",
+  "Beauty & Skincare",
+  "Books & Literature",
+  "Business & Entrepreneurship",
+  "Campus & Student Life",
+  "Career & Professional",
+  "Comedy",
+  "Culture & Society",
+  "Dance",
+  "DIY & Crafts",
+  "Education",
+  "Entertainment",
+  "Events & Nightlife",
+  "Family",
+  "Fashion",
+  "Finance & Investing",
+  "Fitness",
+  "Food & Cooking",
+  "Gaming",
+  "Health & Wellness",
+  "Home Decor & Interior",
+  "Jewelry & Accessories",
+  "Kids Content",
+  "Lifestyle",
+  "Local Discovery",
+  "Luxury",
+  "Memes & Humor",
+  "Mental Wellness",
+  "Motivation & Self Growth",
+  "Movies & TV",
+  "Music",
+  "News & Media",
+  "Outdoor & Adventure",
+  "Parenting",
+  "Pets & Animals",
+  "Photography",
+  "Real Estate",
+  "Relationships",
+  "Science",
+  "Shopping & Reviews",
+  "Spirituality",
+  "Sports",
+  "Sustainability & Environment",
+  "Technology",
+  "Travel",
+  "Unboxing",
+  "Videography",
+  "Web3 & Crypto",
+  "Other",
 ];
 
-export const FILTER_CATEGORIES = ["All", ...CREATOR_CATEGORIES];
+export const CREATOR_CATEGORIES = MASTER_CATEGORIES;
 
-export const BRAND_CATEGORIES = [
-  "Automotive", "Beauty & Skincare", "Education", "Entertainment",
-  "Fashion & Apparel", "Finance & Fintech", "FMCG", "Food & Beverage",
-  "Health & Wellness", "Home & Decor", "Lifestyle", "Other",
-  "Sports & Fitness", "Tech & Electronics", "Travel & Hospitality",
-];
+export const FILTER_CATEGORIES = ["All", ...MASTER_CATEGORIES];
+
+export const BRAND_CATEGORIES = MASTER_CATEGORIES;
 
 export const LANGUAGES = [
   "Bengali", "English", "Gujarati", "Hindi", "Kannada",

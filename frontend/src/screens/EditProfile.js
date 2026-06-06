@@ -35,8 +35,8 @@ import { useApp } from "@/context/AppContext";
 import { profileApi, reelsApi } from "@/lib/api";
 import { toast } from "sonner";
 
-import { CREATOR_CATEGORIES, LANGUAGES as ALL_LANGUAGES } from "@/data/categories";
-const ALL_CATEGORIES = CREATOR_CATEGORIES;
+import { MASTER_CATEGORIES, LANGUAGES as ALL_LANGUAGES } from "@/data/categories";
+const ALL_CATEGORIES = MASTER_CATEGORIES;
 
 export default function EditProfile() {
   const navigate = useNavigate();
@@ -59,6 +59,7 @@ export default function EditProfile() {
   const [followersCount, setFollowersCount] = useState(String(profile.followersCount || ""));
   const [collaborations, setCollaborations] = useState(String(profile.collaborations || ""));
   const [cats, setCats] = useState(profile.category || []);
+  const [catSearch, setCatSearch] = useState("");
   const [languages, setLanguages] = useState(profile.language || []);
 
   // Brand-only form state
@@ -388,8 +389,14 @@ export default function EditProfile() {
         {/* Categories */}
         {accountType !== "brand" && (
           <Section label="Categories" hint="Pick up to 3 that describe you best.">
+            <input
+              value={catSearch}
+              onChange={(e) => setCatSearch(e.target.value)}
+              placeholder="Search categories…"
+              className="w-full px-4 py-3 mb-3 bg-[#F9F9F8] border-2 border-[#E5E5E5] rounded-2xl text-[#0A0A0A] font-medium text-sm outline-none focus:border-[#0A0A0A] transition-colors placeholder:text-[#B0B0B0]"
+            />
             <div className="flex flex-wrap gap-2">
-              {ALL_CATEGORIES.map((c) => {
+              {ALL_CATEGORIES.filter((c) => c.toLowerCase().includes(catSearch.toLowerCase())).map((c) => {
                 const active = cats.includes(c);
                 return (
                   <button

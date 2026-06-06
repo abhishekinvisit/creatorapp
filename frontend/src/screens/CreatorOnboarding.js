@@ -5,8 +5,9 @@ import { useApp } from "@/context/AppContext";
 import { onboardingApi } from "@/lib/api";
 import { toast } from "sonner";
 
+import { MASTER_CATEGORIES } from "@/data/categories";
+
 const TOTAL_STEPS = 4;
-const CATEGORIES = ["Lifestyle", "Fashion", "Beauty", "Fitness", "Food", "Tech", "Travel", "Skincare", "Gaming", "Education", "Comedy", "Music"];
 const GENDERS = ["Male", "Female", "Non-binary", "Prefer not to say"];
 const COUNTRIES = ["India", "United States", "United Kingdom", "Canada", "Australia", "UAE", "Singapore", "Germany", "France", "Japan", "Other"];
 
@@ -64,6 +65,7 @@ export default function CreatorOnboarding() {
 
   // Step 3 — Categories
   const [categories, setCategories] = useState([]);
+  const [catSearch, setCatSearch] = useState("");
 
   // Step 4 — Instagram
   const [instagramUrl, setInstagramUrl] = useState("");
@@ -269,8 +271,14 @@ export default function CreatorOnboarding() {
                 {categories.length}/3
               </span>
             </div>
+            <input
+              value={catSearch}
+              onChange={(e) => setCatSearch(e.target.value)}
+              placeholder="Search categories…"
+              className="w-full px-4 py-3 mb-3 bg-white border-2 border-[#E5E5E5] rounded-2xl text-[#0A0A0A] font-medium text-sm outline-none focus:border-[#0A0A0A] transition-colors placeholder:text-[#B0B0B0]"
+            />
             <div className="flex flex-wrap gap-2">
-              {CATEGORIES.map((c) => {
+              {MASTER_CATEGORIES.filter((c) => c.toLowerCase().includes(catSearch.toLowerCase())).map((c) => {
                 const active = categories.includes(c);
                 const disabled = !active && categories.length === 3;
                 return (

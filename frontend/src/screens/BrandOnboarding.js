@@ -5,13 +5,9 @@ import { useApp } from "@/context/AppContext";
 import { onboardingApi } from "@/lib/api";
 import { toast } from "sonner";
 
+import { MASTER_CATEGORIES } from "@/data/categories";
+
 const TOTAL_STEPS = 3;
-const BRAND_CATEGORIES = [
-  "Beauty & Skincare", "Fashion & Apparel", "Food & Beverage", "Health & Wellness",
-  "Tech & Electronics", "Home & Decor", "Sports & Fitness", "Education",
-  "Finance & Fintech", "Travel & Hospitality", "Automotive", "Entertainment",
-  "Lifestyle", "FMCG", "Other",
-];
 
 function ProgressBar({ step }) {
   return (
@@ -62,6 +58,7 @@ export default function BrandOnboarding() {
 
   // Step 2 — Business
   const [brandCategory, setBrandCategory] = useState("");
+  const [catSearch, setCatSearch] = useState("");
   const [gstNumber, setGstNumber] = useState("");
 
   // Step 3 — About
@@ -204,8 +201,14 @@ export default function BrandOnboarding() {
           <div className="space-y-5">
             <div>
               <Label required>Brand Category</Label>
+              <input
+                value={catSearch}
+                onChange={(e) => setCatSearch(e.target.value)}
+                placeholder="Search categories…"
+                className="w-full px-4 py-3 mb-3 bg-white border-2 border-[#E5E5E5] rounded-2xl text-[#0A0A0A] font-medium text-sm outline-none focus:border-[#0A0A0A] transition-colors placeholder:text-[#B0B0B0]"
+              />
               <div className="flex flex-wrap gap-2">
-                {BRAND_CATEGORIES.map((c) => (
+                {MASTER_CATEGORIES.filter((c) => c.toLowerCase().includes(catSearch.toLowerCase())).map((c) => (
                   <button
                     key={c}
                     onClick={() => setBrandCategory(c)}

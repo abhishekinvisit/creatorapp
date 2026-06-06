@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Camera } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
@@ -6,7 +6,7 @@ import { useApp } from "@/context/AppContext";
 import { opportunitiesApi } from "@/lib/api";
 import { toast } from "sonner";
 
-const CATS = ["Beauty", "Fashion", "Lifestyle", "Fitness", "Food", "Tech"];
+import { MASTER_CATEGORIES as CATS } from "@/data/categories";
 const AGES = ["Any Age", "13-17", "18-24", "25-34", "35+"];
 const GENDERS = ["All", "Female", "Male", "Non-binary"];
 const LANGUAGES = ["English", "Hindi", "Tamil", "Telugu", "Kannada", "Bengali", "Marathi", "Malayalam", "Punjabi"];
@@ -89,7 +89,7 @@ export default function AddRequirements() {
 
       <div className="px-5 space-y-5">
         <Field label="Category">
-          <Pills options={CATS} value={data.category} onChange={(v) => setData({ ...data, category: v })} testId="req-cat" />
+          <SearchablePills options={CATS} value={data.category} onChange={(v) => setData({ ...data, category: v })} testId="req-cat" />
         </Field>
 
         <Field label="Minimum Followers">
@@ -199,6 +199,35 @@ const Pills = ({ options, value, onChange, testId }) => (
     ))}
   </div>
 );
+
+const SearchablePills = ({ options, value, onChange, testId }) => {
+  const [q, setQ] = React.useState("");
+  const filtered = options.filter((o) => o.toLowerCase().includes(q.toLowerCase()));
+  return (
+    <div>
+      <input
+        value={q}
+        onChange={(e) => setQ(e.target.value)}
+        placeholder="Search categories…"
+        className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 outline-none text-white placeholder-neutral-500 text-sm font-medium focus:border-[#E25238] mb-3"
+      />
+      <div className="flex flex-wrap gap-2">
+        {filtered.map((o) => (
+          <button
+            key={o}
+            data-testid={`${testId}-${o.toLowerCase().replace(/\s+/g, "-")}`}
+            onClick={() => onChange(o)}
+            className={`px-4 py-2.5 rounded-full text-sm font-bold transition-all ${
+              value === o ? "bg-[#E25238] text-white" : "bg-white/5 text-neutral-300 border border-white/10 hover:border-white/30"
+            }`}
+          >
+            {o}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 const MultiPills = ({ options, value, onToggle, testId }) => (
   <div className="flex flex-wrap gap-2">

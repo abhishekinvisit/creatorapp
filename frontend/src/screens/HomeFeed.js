@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Search, SlidersHorizontal, Wallet, Calendar, Users, BadgeCheck, Bookmark, X, Sparkles, Globe2 } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { BrandLogo } from "@/components/BrandLogo";
-import { CATEGORIES } from "@/data/mockData";
+import { FILTER_CATEGORIES as CATEGORIES } from "@/data/categories";
 import { useApp } from "@/context/AppContext";
 import { opportunitiesApi } from "@/lib/api";
 import { toast } from "sonner";
