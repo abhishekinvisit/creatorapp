@@ -197,7 +197,13 @@ MIGRATIONS = [
 async def init_db():
     pool = await get_pool()
     async with pool.acquire() as conn:
-        await conn.execute(SCHEMA)
+        # Split schema into individual statements and execute each one
+        statements = [s.strip() for s in SCHEMA.split(";") if s.strip()]
+        for stmt in statements:
+            try:
+                await conn.execute(stmt)
+            except Exception as e:
+                logger.warning(f"Schema statement skipped: {stmt[:60]} — {e}")
         for migration in MIGRATIONS:
             try:
                 await conn.execute(migration)
