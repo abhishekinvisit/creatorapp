@@ -1,3 +1,4 @@
+- [Replit migration](replit-migration.md) — frontend npm install needs --legacy-peer-deps (react-day-picker/date-fns conflict); workflows use python3 -m uvicorn (not bare uvicorn); DATABASE_URL auto-provisioned as secret.
 - [Backend stack](backend-stack.md) — FastAPI + asyncpg + PostgreSQL; JWT via python-jose; bcrypt via passlib; 30-day tokens
 - [Reels persistence](reels-persistence.md) — creator_reels table; reelsApi in api.js; EditProfile/MyProfile load from API not mock
 - [Login profile mapping](login-profile-mapping.md) — loginWithToken is async; calls /me after setting token; refreshProfile() in AppContext for post-save refresh

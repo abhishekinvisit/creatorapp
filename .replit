@@ -1,11 +1,11 @@
-modules = ["nodejs-20", "web", "python-3.12"]
+modules = ["nodejs-20", "python-3.12", "web"]
 [agent]
 expertMode = true
 stack = "BEST_EFFORT_FALLBACK"
 
 [nix]
 channel = "stable-25_05"
-packages = ["cargo", "libiconv", "libxcrypt", "rustc"]
+packages = ["cargo", "libiconv", "libxcrypt", "postgresql", "rustc"]
 
 [userenv]
 
@@ -52,16 +52,12 @@ outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd backend && python -m uvicorn server:app --host 0.0.0.0 --port 8000 --reload"
+args = "cd backend && python3 -m uvicorn server:app --host 0.0.0.0 --port 8000 --reload"
 waitForPort = 8000
 
 [[ports]]
 localPort = 5000
 externalPort = 80
-
-[[ports]]
-localPort = 8000
-externalPort = 8000
 
 [deployment]
 deploymentTarget = "autoscale"
