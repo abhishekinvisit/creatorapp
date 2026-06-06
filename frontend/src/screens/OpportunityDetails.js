@@ -29,7 +29,7 @@ export default function OpportunityDetails() {
   const op = apiOp || ctxOp;
 
   useEffect(() => {
-    if (ctxOp) return;
+    // Always fetch from API to get fresh data including brand logo/links
     import("@/lib/api").then(({ opportunitiesApi }) => {
       opportunitiesApi.get(id)
         .then((o) => setApiOp({
@@ -37,6 +37,9 @@ export default function OpportunityDetails() {
           brandId: o.brand_id,
           brandName: o.brand_name,
           brandCategory: o.brand_category,
+          brandLogo: o.brand_logo || "",
+          brandInstagram: o.brand_instagram || "",
+          brandWebsite: o.brand_website || "",
           title: o.title,
           pitch: o.pitch,
           description: o.description,
@@ -52,7 +55,7 @@ export default function OpportunityDetails() {
         }))
         .catch(() => {});
     });
-  }, [id, ctxOp]);
+  }, [id]);
 
   if (!op) return (
     <div className="min-h-full bg-[#F9F9F8] flex items-center justify-center">
@@ -87,13 +90,17 @@ export default function OpportunityDetails() {
       <div className="px-5">
         {/* Brand header */}
         <div className="flex items-center gap-4 mb-2">
-          <BrandLogo name={op.brandName} size={64} />
+          {op.brandLogo ? (
+            <img src={op.brandLogo} alt={op.brandName} className="w-16 h-16 rounded-2xl object-cover flex-shrink-0" />
+          ) : (
+            <BrandLogo name={op.brandName} size={64} />
+          )}
           <div className="flex-1">
             <div className="flex items-center gap-1.5">
               <h1 className="font-display font-black text-2xl text-[#0A0A0A] tracking-tight">{op.brandName}</h1>
               {op.verified && <BadgeCheck size={18} className="text-[#E25238]" fill="#E25238" stroke="white" />}
             </div>
-            <p className="text-sm text-[#525252] font-medium">{op.brandCategory} · Verified Brand</p>
+            <p className="text-sm text-[#525252] font-medium">{op.brandCategory}{op.verified ? " · Verified Brand" : ""}</p>
           </div>
         </div>
 
@@ -111,11 +118,21 @@ export default function OpportunityDetails() {
             {op.brandName} is a trusted brand creating quality products for our community.
           </p>
           <div className="flex items-center gap-3 mt-4">
-            {[InstagramIcon, YoutubeIcon, Globe].map((Icon, i) => (
-              <button key={i} className="w-10 h-10 rounded-full bg-white border border-[#E5E5E5] flex items-center justify-center hover:border-[#0A0A0A]">
-                <Icon size={16} />
-              </button>
-            ))}
+            {op.brandInstagram && (
+              <a href={op.brandInstagram} target="_blank" rel="noopener noreferrer"
+                className="w-10 h-10 rounded-full bg-white border border-[#E5E5E5] flex items-center justify-center hover:border-[#0A0A0A] transition-colors">
+                <InstagramIcon size={16} />
+              </a>
+            )}
+            {op.brandWebsite && (
+              <a href={op.brandWebsite} target="_blank" rel="noopener noreferrer"
+                className="w-10 h-10 rounded-full bg-white border border-[#E5E5E5] flex items-center justify-center hover:border-[#0A0A0A] transition-colors">
+                <Globe size={16} />
+              </a>
+            )}
+            {!op.brandInstagram && !op.brandWebsite && (
+              <span className="text-xs text-[#525252] font-medium">No links provided</span>
+            )}
           </div>
         </div>
 

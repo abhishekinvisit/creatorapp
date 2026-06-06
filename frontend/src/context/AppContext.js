@@ -101,9 +101,11 @@ export const AppProvider = ({ children }) => {
       setOnboardingComplete(data.onboarding_complete);
       setIsAuthed(true);
       if (data.account_type === "creator" && data.profile) {
-        const mapped = mapCreatorProfile({ ...DEFAULT_USER, workedWith: [] }, data.profile);
-        setUser((prev) => mapCreatorProfile(prev, data.profile));
-        if (mapped.workedWith?.length) setWorkedWith(mapped.workedWith);
+        setUser((prev) => {
+          const mapped = mapCreatorProfile(prev, data.profile);
+          setWorkedWith(mapped.workedWith || []);
+          return mapped;
+        });
       } else if (data.account_type === "brand" && data.profile) {
         setUser((prev) => mapBrandProfile(prev, data.profile));
         loadSavedCreators();
@@ -125,7 +127,7 @@ export const AppProvider = ({ children }) => {
       if (data.account_type === "creator" && data.profile) {
         setUser((prev) => {
           const mapped = mapCreatorProfile(prev, data.profile);
-          if (mapped.workedWith?.length) setWorkedWith(mapped.workedWith);
+          setWorkedWith(mapped.workedWith || []); // always sync, even when empty
           return mapped;
         });
       } else if (data.account_type === "brand" && data.profile) {

@@ -21,6 +21,7 @@ function mapApiOpp(o) {
     id: o.id,
     brandName: o.brand_name || o.brandName || "",
     brandCategory: o.brand_category || o.brandCategory || "",
+    brandLogo: o.brand_logo || o.brandLogo || "",
     title: o.title,
     pitch: o.pitch || "",
     description: o.description || "",
@@ -293,7 +294,11 @@ export default function HomeFeed() {
                 {/* Right body */}
                 <div className="flex-1 min-w-0 p-3.5 pr-12">
                   <div className="flex items-center gap-2 mb-1.5">
-                    <BrandLogo name={op.brandName} size={28} />
+                    {op.brandLogo ? (
+                      <img src={op.brandLogo} alt={op.brandName} className="w-7 h-7 rounded-lg object-cover flex-shrink-0" />
+                    ) : (
+                      <BrandLogo name={op.brandName} size={28} />
+                    )}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1">
                         <h3 className="font-display font-bold text-sm text-[#0A0A0A] truncate">{op.brandName}</h3>

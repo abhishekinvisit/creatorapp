@@ -397,6 +397,17 @@ async def update_brand_profile(body: BrandProfileIn, user=Depends(current_user))
             f"UPDATE brand_profiles SET {cols}, updated_at=NOW() WHERE user_id=$1::uuid",
             user["id"], *vals,
         )
+        # Keep opportunities in sync with brand name / category changes
+        if "brand_name" in updates or "category" in updates:
+            brand = await conn.fetchrow(
+                "SELECT brand_name, category FROM brand_profiles WHERE user_id=$1::uuid",
+                user["id"]
+            )
+            if brand and brand["brand_name"]:
+                await conn.execute(
+                    "UPDATE opportunities SET brand_name=$1, brand_category=$2 WHERE brand_id=$3::uuid",
+                    brand["brand_name"], brand["category"] or "", user["id"]
+                )
     return {"success": True}
 
 
@@ -618,10 +629,22 @@ async def my_posts(user=Depends(current_user)):
 async def get_opportunity(opp_id: str, user=Depends(optional_user)):
     pool = await get_pool()
     async with pool.acquire() as conn:
-        row = await conn.fetchrow("SELECT * FROM opportunities WHERE id=$1::uuid", opp_id)
+        row = await conn.fetchrow("""
+            SELECT o.*,
+                   bp.logo_data    AS brand_logo,
+                   bp.instagram_url AS brand_instagram,
+                   bp.website_url   AS brand_website
+            FROM opportunities o
+            LEFT JOIN brand_profiles bp ON bp.user_id = o.brand_id
+            WHERE o.id=$1::uuid
+        """, opp_id)
     if not row:
         raise HTTPException(status_code=404, detail="Opportunity not found")
-    return _opp_row(row)
+    result = _opp_row(row)
+    result["brand_logo"]      = row["brand_logo"]      or ""
+    result["brand_instagram"] = row["brand_instagram"] or ""
+    result["brand_website"]   = row["brand_website"]   or ""
+    return result
 
 
 @api_router.post("/opportunities")

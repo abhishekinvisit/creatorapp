@@ -35,8 +35,8 @@ import { useApp } from "@/context/AppContext";
 import { profileApi, reelsApi } from "@/lib/api";
 import { toast } from "sonner";
 
-const ALL_CATEGORIES = ["Lifestyle", "Fashion", "Beauty", "Fitness", "Food", "Tech", "Travel", "Skincare"];
-const ALL_LANGUAGES = ["Hindi", "English", "Tamil", "Telugu", "Kannada", "Marathi", "Bengali", "Gujarati", "Punjabi", "Malayalam"];
+import { CREATOR_CATEGORIES, LANGUAGES as ALL_LANGUAGES } from "@/data/categories";
+const ALL_CATEGORIES = CREATOR_CATEGORIES;
 
 export default function EditProfile() {
   const navigate = useNavigate();
@@ -106,7 +106,11 @@ export default function EditProfile() {
           website_url: brandWebsiteUrl,
         });
         await refreshProfile();
-      } catch (_) {}
+        toast.success("Profile updated");
+        navigate(-1);
+      } catch (_) {
+        toast.error("Failed to save profile. Please try again.");
+      }
     } else {
       const workedWithPayload = workedWith.map((b) => ({
         id: b.id || String(Math.random()),
@@ -145,10 +149,12 @@ export default function EditProfile() {
           worked_with: workedWithPayload,
         });
         await refreshProfile();
-      } catch (_) {}
+        toast.success("Profile updated");
+        navigate(-1);
+      } catch (_) {
+        toast.error("Failed to save profile. Please try again.");
+      }
     }
-    toast.success("Profile updated");
-    navigate(-1);
   };
 
   const toggleCat = (c) => setCats((prev) => prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]);
