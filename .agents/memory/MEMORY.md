@@ -11,5 +11,7 @@
 - [Tailwind version](tailwind-version.md) — must stay at v3.4.17; v4 breaks PostCSS setup
 - [Lucide icons](lucide-icons.md) — Instagram/Youtube icons removed from lucide-react; use inline SVGs instead
 - [Saved creators feature](saved-creators.md) — saved_creators table (UNIQUE brand_id+creator_id); savedCreatorsApi in api.js; savedCreatorIds Set in AppContext; loaded on brand login
-- [addApplication signature](add-application-sig.md) — takes full object {id, opportunityId, brandName, opportunityTitle, appliedOn, status, note}; NOT old (opportunityId, brandName) pair
+- [addApplication signature](add-application-sig.md) — takes full object {id, opportunityId, brandName, brandId, opportunityTitle, appliedOn, status, note}; brandId needed for Message button
 - [savedIds logout behavior](saved-ids-logout.md) — creator's saved opportunity IDs (localStorage) intentionally NOT cleared on logout; only savedCreatorIds (brand Set) resets
+- [Applications persistence](applications-persistence.md) — must call applicationsApi.myApplications() in both restoreSession and loginWithToken for creator accounts; context exports hasApplied(id) and loadMyApplications
+- [ApplicantsList UUID guard](applicants-uuid-guard.md) — use full UUID regex (not just includes("-")) to validate opportunityId; fake local IDs like "p-1234567890" contain hyphens but are not UUIDs

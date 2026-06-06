@@ -2,8 +2,10 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { TopBar } from "@/components/TopBar";
 import { useApp } from "@/context/AppContext";
-import { applicationsApi, opportunitiesApi } from "@/lib/api";
+import { applicationsApi } from "@/lib/api";
 import { toast } from "sonner";
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const TABS = [
   { id: "all", label: "All" },
@@ -14,8 +16,8 @@ const TABS = [
 
 const STATUS_ACTIONS = [
   { label: "Shortlist ⭐", value: "shortlisted", cls: "bg-[#F59E0B] text-white" },
-  { label: "Accept ✓", value: "accepted", cls: "bg-[#22C55E] text-white" },
-  { label: "Reject ✗", value: "rejected", cls: "bg-[#EF4444] text-white" },
+  { label: "Accept ✓",    value: "accepted",    cls: "bg-[#22C55E] text-white" },
+  { label: "Reject ✗",   value: "rejected",    cls: "bg-[#EF4444] text-white" },
 ];
 
 export default function ApplicantsList() {
@@ -27,16 +29,23 @@ export default function ApplicantsList() {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(null);
 
-  // Determine which opportunity to load
-  const opportunityId = location.state?.opportunityId || activePosts[0]?.id;
+  // Prefer opportunityId passed via navigation state; fall back to first active post only
+  // if it carries a real UUID (not a local fake ID like "p-1234567890").
+  const stateId = location.state?.opportunityId;
+  const fallbackId = activePosts.find((p) => UUID_RE.test(String(p.id)))?.id;
+  const opportunityId = stateId && UUID_RE.test(String(stateId))
+    ? stateId
+    : fallbackId;
 
   useEffect(() => {
-    if (!opportunityId) { setLoading(false); return; }
-    // Only load if it looks like a real UUID
-    if (!opportunityId.toString().includes("-")) { setLoading(false); return; }
+    if (!opportunityId) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
     applicationsApi.forOpportunity(opportunityId)
       .then((data) => setApplicants(data))
-      .catch(() => {})
+      .catch(() => toast.error("Could not load applicants"))
       .finally(() => setLoading(false));
   }, [opportunityId]);
 
@@ -44,9 +53,7 @@ export default function ApplicantsList() {
     setUpdating(appId);
     try {
       await applicationsApi.updateStatus(appId, status);
-      setApplicants((prev) =>
-        prev.map((a) => a.id === appId ? { ...a, status } : a)
-      );
+      setApplicants((prev) => prev.map((a) => a.id === appId ? { ...a, status } : a));
       toast.success(`Applicant ${status}`);
     } catch (err) {
       toast.error(err.message || "Failed to update status");
@@ -56,6 +63,26 @@ export default function ApplicantsList() {
   };
 
   const filtered = tab === "all" ? applicants : applicants.filter((a) => a.status === tab);
+
+  // No valid opportunityId at all — guide the brand back to their posts
+  if (!loading && !opportunityId) {
+    return (
+      <div data-testid="applicants-list" className="min-h-full bg-[#0A0A0A] text-white">
+        <TopBar title="Applicants" dark />
+        <div className="px-5 pt-16 text-center">
+          <p className="font-display font-bold text-lg">No post selected</p>
+          <p className="text-sm text-neutral-400 mt-2">Open a post from your dashboard to view its applicants.</p>
+          <button
+            data-testid="goto-dashboard"
+            onClick={() => navigate("/brand/dashboard")}
+            className="mt-6 px-6 py-3 bg-[#E25238] rounded-full text-sm font-bold"
+          >
+            Back to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div data-testid="applicants-list" className="min-h-full bg-[#0A0A0A] text-white pb-6">
@@ -115,9 +142,9 @@ export default function ApplicantsList() {
                     </p>
                   </div>
                   <span className={`px-3 py-1.5 rounded-full text-xs font-bold ${
-                    c.status === "accepted" ? "bg-[#22C55E]/20 text-[#22C55E]"
+                    c.status === "accepted"    ? "bg-[#22C55E]/20 text-[#22C55E]"
                     : c.status === "shortlisted" ? "bg-[#F59E0B]/20 text-[#F59E0B]"
-                    : c.status === "rejected" ? "bg-[#EF4444]/20 text-[#EF4444]"
+                    : c.status === "rejected"    ? "bg-[#EF4444]/20 text-[#EF4444]"
                     : "bg-white/10 text-neutral-300"
                   }`}>
                     {c.status?.charAt(0).toUpperCase() + c.status?.slice(1) || "Applied"}
@@ -143,7 +170,7 @@ export default function ApplicantsList() {
                       disabled={updating === c.id}
                       className={`px-4 py-2 rounded-full text-xs font-bold transition-colors disabled:opacity-60 ${action.cls}`}
                     >
-                      {updating === c.id ? "..." : action.label}
+                      {updating === c.id ? "…" : action.label}
                     </button>
                   ))}
                 </div>

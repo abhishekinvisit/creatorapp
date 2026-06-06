@@ -17,6 +17,7 @@ export const ApplyDialog = ({ opportunity, onClose, onApplied }) => {
         id: appRow.id,
         opportunityId: appRow.opportunity_id,
         brandName: appRow.brand_name || opportunity.brandName || opportunity.brand_name || "",
+        brandId: appRow.brand_id || opportunity.brandId || opportunity.brand_id || null,
         opportunityTitle: appRow.opportunity_title || opportunity.title || "",
         appliedOn: new Date(appRow.applied_at || Date.now()).toLocaleDateString("en-GB", {
           day: "numeric", month: "short", year: "numeric",

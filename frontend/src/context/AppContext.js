@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { DEFAULT_USER } from "@/data/mockData";
-import { authApi, TOKEN_KEY, clearToken, setToken, getToken, savedCreatorsApi } from "@/lib/api";
+import { authApi, TOKEN_KEY, clearToken, setToken, getToken, savedCreatorsApi, applicationsApi } from "@/lib/api";
 
 const AppContext = createContext(null);
 
@@ -9,6 +9,28 @@ const SAVED_KEY = "ollcollab_saved";
 function formatFollowers(n) {
   if (!n) return "0";
   return Number(n).toLocaleString("en-IN");
+}
+
+function formatDate(isoStr) {
+  if (!isoStr) return "";
+  try {
+    return new Date(isoStr).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  } catch (_) {
+    return isoStr;
+  }
+}
+
+function mapApiApplications(data) {
+  return data.map((a) => ({
+    id: a.id,
+    opportunityId: a.opportunity_id,
+    brandName: a.brand_name || "Brand",
+    brandId: a.brand_id,
+    opportunityTitle: a.opportunity_title,
+    appliedOn: formatDate(a.applied_at),
+    status: a.status || "applied",
+    note: a.note || "",
+  }));
 }
 
 function mapCreatorProfile(prev, p) {
@@ -90,6 +112,14 @@ export const AppProvider = ({ children }) => {
     } catch (_) {}
   }, []);
 
+  // Load applications from API and populate state (creator only)
+  const loadMyApplications = useCallback(async () => {
+    try {
+      const data = await applicationsApi.myApplications();
+      setApplications(mapApiApplications(data));
+    } catch (_) {}
+  }, []);
+
   // ── Session restoration ───────────────────────────────────────────────────
   const restoreSession = useCallback(async () => {
     const token = getToken();
@@ -106,6 +136,8 @@ export const AppProvider = ({ children }) => {
           setWorkedWith(mapped.workedWith || []);
           return mapped;
         });
+        // Load persisted applications so HomeFeed can filter applied opps
+        loadMyApplications();
       } else if (data.account_type === "brand" && data.profile) {
         setUser((prev) => mapBrandProfile(prev, data.profile));
         loadSavedCreators();
@@ -115,7 +147,7 @@ export const AppProvider = ({ children }) => {
     } finally {
       setAuthLoading(false);
     }
-  }, [loadSavedCreators]);
+  }, [loadSavedCreators, loadMyApplications]);
 
   useEffect(() => { restoreSession(); }, [restoreSession]);
 
@@ -127,7 +159,7 @@ export const AppProvider = ({ children }) => {
       if (data.account_type === "creator" && data.profile) {
         setUser((prev) => {
           const mapped = mapCreatorProfile(prev, data.profile);
-          setWorkedWith(mapped.workedWith || []); // always sync, even when empty
+          setWorkedWith(mapped.workedWith || []);
           return mapped;
         });
       } else if (data.account_type === "brand" && data.profile) {
@@ -151,12 +183,14 @@ export const AppProvider = ({ children }) => {
           if (mapped.workedWith?.length) setWorkedWith(mapped.workedWith);
           return mapped;
         });
+        // Load persisted applications so HomeFeed filters correctly right away
+        loadMyApplications();
       } else if (data.account_type === "brand" && data.profile) {
         setUser((prev) => mapBrandProfile(prev, data.profile));
         loadSavedCreators();
       }
     } catch (_) {}
-  }, [loadSavedCreators]);
+  }, [loadSavedCreators, loadMyApplications]);
 
   const logout = () => {
     clearToken();
@@ -223,6 +257,10 @@ export const AppProvider = ({ children }) => {
   const withdrawApplication = (appId) => {
     setApplications((prev) => prev.filter((a) => a.id !== appId));
   };
+
+  // Expose a way for screens to check if a specific opp is already applied
+  const hasApplied = (opportunityId) =>
+    applications.some((a) => a.opportunityId === opportunityId);
 
   // ── Brand posts ───────────────────────────────────────────────────────────
   const publishOpportunity = (data) => {
@@ -305,6 +343,7 @@ export const AppProvider = ({ children }) => {
       user, setUser,
       workedWith, setWorkedWith,
       applications, setApplications, addApplication, withdrawApplication,
+      hasApplied, loadMyApplications,
       opportunities, setOpportunities, mergeOpportunities,
       threads, setThreads,
       getOrCreateThread,

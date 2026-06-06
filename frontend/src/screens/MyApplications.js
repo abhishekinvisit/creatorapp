@@ -34,6 +34,7 @@ export default function MyApplications() {
   useEffect(() => {
     applicationsApi.myApplications()
       .then((data) => {
+        // API is the source of truth — always replace with server data
         const mapped = data.map((a) => ({
           id: a.id,
           opportunityId: a.opportunity_id,
@@ -44,18 +45,13 @@ export default function MyApplications() {
           status: a.status || "applied",
           note: a.note || "",
         }));
-        // Merge: API rows win; keep any locally-added rows not yet confirmed by API
-        setApplications((prev) => {
-          const apiIds = new Set(mapped.map((a) => a.opportunityId));
-          const localOnly = prev.filter((a) => !apiIds.has(a.opportunityId));
-          return [...mapped, ...localOnly];
-        });
+        setApplications(mapped);
       })
       .catch(() => {
         // API failed — local state already has optimistic entries; keep them
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const filtered = applications.filter((a) => {
     const s = (a.status || "applied").toLowerCase();

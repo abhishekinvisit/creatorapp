@@ -1,0 +1,52 @@
+Fix the application persistence and applicant visibility issues.
+
+**Current Bugs**
+
+* When a creator applies to an opportunity, it appears correctly in "My Applications".
+* After logout and login, all applied opportunities disappear.
+* The same opportunity reappears in Home Feed and Discover Feed as if the creator never applied.
+* Brands are unable to see applicants for opportunities even after creators have applied.
+* Applications are not appearing on the Brand Applicant Management page.
+
+**Expected Behavior**
+
+* Every application must be permanently saved in the database with the creator ID, brand ID, and opportunity ID.
+* After login, "My Applications" should load data directly from the database.
+* Applied opportunities should remain visible in My Applications after refresh, logout, login, or browser restart.
+* Opportunities already applied to should never appear in Home Feed or Discover Feed.
+* Prevent duplicate applications to the same opportunity.
+* Show an "Applied" status wherever applicable.
+* Brands should instantly see all applicants on the Applicant page.
+* Applicant counts should update in real time.
+* Brands should be able to open applicant profiles and perform actions such as Shortlist, Accept, and Reject.
+
+**Audit and Fix**
+
+* Application creation API
+* Database writes and relationships
+* Creator-to-opportunity mapping
+* Brand-to-opportunity mapping
+* Authentication and user ID mapping
+* Application retrieval queries
+* Applicant retrieval queries
+* Feed filtering logic
+* State management and caching
+* Logout/login session handling
+* Role permissions and access control
+
+**End-to-End Testing**
+
+1. Creator applies to an opportunity.
+2. Verify application record is created in the database.
+3. Verify applicant count increases.
+4. Verify brand can see the applicant immediately.
+5. Refresh page.
+6. Logout and login as creator.
+7. Confirm application still exists in My Applications.
+8. Confirm opportunity is hidden from feeds.
+9. Logout and login as brand.
+10. Confirm applicant is still visible.
+11. Confirm Shortlist, Accept, and Reject actions work correctly.
+12. Confirm duplicate applications are blocked.
+
+Provide a report with root cause, fixes implemented, database changes made, and test results.

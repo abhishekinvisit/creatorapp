@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Wallet, Calendar, Users, Tag, ListChecks, Globe, Share2, BadgeCheck, Languages } from "lucide-react";
+import { Wallet, Calendar, Users, Tag, ListChecks, Globe, Share2, BadgeCheck, Languages, CheckCircle2 } from "lucide-react";
 
 const InstagramIcon = ({ size = 16, className = "", ...props }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
@@ -21,12 +21,18 @@ import { toast } from "sonner";
 export default function OpportunityDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { opportunities, isSaved, toggleSave } = useApp();
+  const { opportunities, isSaved, toggleSave, hasApplied, applications } = useApp();
   const [showApply, setShowApply] = useState(false);
   const [apiOp, setApiOp] = useState(null);
+  const [applied, setApplied] = useState(false);
 
   const ctxOp = opportunities.find((o) => String(o.id) === String(id));
   const op = apiOp || ctxOp;
+
+  // Check applied status from context applications (loaded on login) or derive after apply
+  useEffect(() => {
+    setApplied(hasApplied(id));
+  }, [id, applications, hasApplied]);
 
   useEffect(() => {
     // Always fetch from API to get fresh data including brand logo/links
@@ -103,6 +109,17 @@ export default function OpportunityDetails() {
             <p className="text-sm text-[#525252] font-medium">{op.brandCategory}{op.verified ? " · Verified Brand" : ""}</p>
           </div>
         </div>
+
+        {/* Already applied banner */}
+        {applied && (
+          <div className="mt-4 flex items-center gap-3 px-4 py-3 rounded-2xl bg-[#22C55E]/10 border border-[#22C55E]/25">
+            <CheckCircle2 size={18} className="text-[#15803D] flex-shrink-0" />
+            <div>
+              <p className="text-sm font-bold text-[#15803D]">You've already applied</p>
+              <p className="text-xs text-[#15803D]/80 font-medium">Track your application in My Applications.</p>
+            </div>
+          </div>
+        )}
 
         {/* Cover */}
         {op.cover && (
@@ -198,13 +215,24 @@ export default function OpportunityDetails() {
       {/* Floating actions */}
       <div className="sticky bottom-0 left-0 right-0 z-20 mt-4">
         <div className="px-5 py-4 bg-gradient-to-t from-[#F9F9F8] via-[#F9F9F8]/95 to-transparent">
-          <button
-            data-testid="apply-now-btn"
-            onClick={() => setShowApply(true)}
-            className="w-full bg-[#0A0A0A] text-white rounded-full py-5 font-bold text-base hover:bg-[#E25238] transition-colors shadow-xl"
-          >
-            Send My Profile
-          </button>
+          {applied ? (
+            <button
+              data-testid="already-applied-btn"
+              onClick={() => navigate("/applications")}
+              className="w-full bg-[#22C55E] text-white rounded-full py-5 font-bold text-base flex items-center justify-center gap-2 shadow-xl"
+            >
+              <CheckCircle2 size={18} />
+              Applied — View My Applications
+            </button>
+          ) : (
+            <button
+              data-testid="apply-now-btn"
+              onClick={() => setShowApply(true)}
+              className="w-full bg-[#0A0A0A] text-white rounded-full py-5 font-bold text-base hover:bg-[#E25238] transition-colors shadow-xl"
+            >
+              Send My Profile
+            </button>
+          )}
           <button
             data-testid="share-btn"
             onClick={handleShare}
@@ -219,7 +247,11 @@ export default function OpportunityDetails() {
         <ApplyDialog
           opportunity={op}
           onClose={() => setShowApply(false)}
-          onApplied={() => { setShowApply(false); navigate("/application-submitted"); }}
+          onApplied={() => {
+            setApplied(true);
+            setShowApply(false);
+            navigate("/application-submitted");
+          }}
         />
       )}
     </div>
