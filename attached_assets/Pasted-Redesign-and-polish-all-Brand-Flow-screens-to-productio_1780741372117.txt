@@ -1,0 +1,76 @@
+Redesign and polish all Brand Flow screens to production quality. The current UI has excessive empty space, poor content hierarchy, inconsistent layouts, and lacks a premium marketplace feel.
+
+**Brand Profile Screen**
+
+* Reduce empty space below profile actions.
+* Add meaningful sections:
+
+  * About Brand
+  * Brand Categories
+  * Instagram & Website Links
+  * Active Opportunities
+  * Saved Creators Preview
+* Replace stat cards with cleaner, compact cards.
+* Show brand logo, verified badge, location, and bio more prominently.
+* Improve spacing, typography, and alignment.
+* Make the profile feel like a professional brand page rather than an empty placeholder.
+
+**Messages List Screen**
+
+* Remove excessive white space.
+* Display conversations as modern chat cards.
+* Show:
+
+  * Profile picture
+  * Name
+  * Last message
+  * Timestamp
+  * Unread badge
+* Add search bar at the top.
+* Add empty state if no conversations exist.
+* Make the screen visually rich and similar to modern messaging apps.
+
+**Chat Screen**
+
+* Fix the broken layout and excessive blank area. in creator & brand view
+* Messages should anchor to the bottom naturally.
+* Add proper message bubbles for sender and receiver.
+* Improve timestamps.
+* Add typing state, read receipts, and loading states.
+* Keep message input fixed at the bottom.
+* Improve spacing and overall usability.
+* Match modern chat experiences like WhatsApp, Instagram, or Slack.
+
+**Saved Creators Screen**
+
+* Redesign creator cards completely.
+* Increase visual appeal and information density.
+* Show:
+
+  * Profile Picture
+  * Name
+  * Username
+  * Followers
+  * Collaboration Count
+  * Location
+  * Categories
+  * Social Links
+* Add buttons:
+
+  * View Profile
+  * Message
+  * Remove from Saved
+* Add Sort and Filter options.
+* Remove large empty spaces.
+* Display multiple creators efficiently on screen.
+
+**Global Brand UI Improvements**
+
+* fix the ui of get started page
+* Maintain consistent spacing, typography, and card design across all screens.
+* Improve mobile responsiveness.
+* Remove all unnecessary blank sections.
+* Add loading, empty, and error states.
+* Ensure all screens use real database data only.
+* Remove any dummy or placeholder content.
+* Make the entire Brand experience feel like a polished creator marketplace 

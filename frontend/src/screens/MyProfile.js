@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Settings, BadgeCheck, Pencil, Briefcase, Share2, MapPin, Globe } from "lucide-react";
+import { Settings, BadgeCheck, Pencil, Briefcase, Share2, MapPin, Globe, ChevronRight, Plus, Tag, ExternalLink, Users, Bookmark } from "lucide-react";
 import { toast } from "sonner";
 
 const InstagramIcon = ({ size = 16, className = "", strokeWidth = 2, ...props }) => (
@@ -57,54 +57,213 @@ export default function MyProfile() {
     const b = user.brand;
     const activePostCount = activePosts.filter((p) => p.status === "active").length;
     const totalApplicants = activePosts.reduce((sum, p) => sum + (p.applicants || 0), 0);
+    const previewPosts = activePosts.filter((p) => p.status === "active").slice(0, 2);
+
     return (
-      <div data-testid="my-profile-brand" className="min-h-full bg-[#0A0A0A] text-white pb-6">
-        <TopBar title="Profile" dark rightSlot={
-          <button data-testid="open-settings" onClick={() => navigate("/settings")} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+      <div data-testid="my-profile-brand" className="min-h-full bg-[#0A0A0A] text-white pb-8">
+        {/* Header */}
+        <div className="sticky top-0 z-30 bg-[#0A0A0A] px-5 py-4 flex items-center justify-between">
+          <h2 className="font-display font-bold text-lg tracking-tight">Profile</h2>
+          <button
+            data-testid="open-settings"
+            onClick={() => navigate("/settings")}
+            className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+          >
             <Settings size={18} />
           </button>
-        } />
-        <div className="px-5 text-center">
-          <div className="flex justify-center mb-4">
-            {b.logo ? (
-              <img src={b.logo} alt={b.name} className="w-24 h-24 rounded-[28px] object-cover ring-4 ring-white/10 shadow-lg" />
-            ) : (
-              <BrandLogo name={b.name} size={96} dark />
+        </div>
+
+        {/* Banner + Identity */}
+        <div className="relative">
+          {/* Gradient banner */}
+          <div className="h-28 bg-gradient-to-br from-[#E25238] via-[#C94532] to-[#0A0A0A] relative overflow-hidden">
+            <div className="absolute inset-0 opacity-30"
+              style={{ backgroundImage: "radial-gradient(circle at 30% 50%, #F59E0B 0%, transparent 60%), radial-gradient(circle at 80% 30%, #E25238 0%, transparent 50%)" }}
+            />
+          </div>
+
+          {/* Logo overlapping banner */}
+          <div className="px-5 flex items-end gap-4 -mt-10 mb-4">
+            <div className="ring-4 ring-[#0A0A0A] rounded-[24px] shadow-2xl flex-shrink-0">
+              {b.logo ? (
+                <img src={b.logo} alt={b.name} className="w-20 h-20 rounded-[24px] object-cover" />
+              ) : (
+                <BrandLogo name={b.name} size={80} dark />
+              )}
+            </div>
+            {/* Action buttons anchored to right */}
+            <div className="flex-1 flex justify-end gap-2 mb-1">
+              <button
+                data-testid="edit-profile-btn"
+                onClick={() => navigate("/profile/edit")}
+                className="h-9 px-4 rounded-full border border-white/20 font-bold text-xs text-white hover:border-white/40 transition-colors flex items-center gap-1.5"
+              >
+                <Pencil size={12} /> Edit
+              </button>
+              <button
+                data-testid="post-new-btn"
+                onClick={() => navigate("/brand/post")}
+                className="h-9 px-4 rounded-full bg-[#E25238] font-bold text-xs text-white hover:bg-[#C9452D] transition-colors flex items-center gap-1.5 shadow-lg shadow-[#E25238]/20"
+              >
+                <Plus size={12} /> Post New
+              </button>
+            </div>
+          </div>
+
+          {/* Name + meta */}
+          <div className="px-5 mb-5">
+            <div className="flex items-center gap-2 mb-0.5">
+              <h2 className="font-display font-black text-2xl tracking-tight">{b.name}</h2>
+              <BadgeCheck size={20} className="text-[#E25238] flex-shrink-0" fill="#E25238" stroke="white" />
+            </div>
+            {b.handle && (
+              <p className="text-sm text-neutral-500 font-medium">@{b.handle.replace(/^@/, "")}</p>
+            )}
+            {(b.location) && (
+              <div className="flex items-center gap-1 mt-1.5">
+                <MapPin size={11} className="text-neutral-500" />
+                <span className="text-xs text-neutral-500 font-medium">{b.location}</span>
+              </div>
             )}
           </div>
-          <div className="flex items-center justify-center gap-2">
-            <h2 className="font-display font-black text-2xl tracking-tight">{b.name}</h2>
-            <BadgeCheck size={20} className="text-[#E25238]" fill="#E25238" stroke="white" />
-          </div>
-          {b.handle && <p className="text-sm text-neutral-400 font-medium">{b.handle}</p>}
-          {b.bio && <p className="text-sm font-medium mt-3 max-w-xs mx-auto">{b.bio}</p>}
+        </div>
 
-          <div className="grid grid-cols-3 gap-3 mt-6">
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-3">
-              <p className="font-display font-black text-2xl">{activePostCount}</p>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 mt-0.5">Active Posts</p>
+        {/* Stats strip */}
+        <div className="px-5 mb-6">
+          <div className="grid grid-cols-3 divide-x divide-white/10 bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+            <div className="px-3 py-4 text-center">
+              <p className="font-display font-black text-xl">{activePostCount}</p>
+              <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-neutral-500 mt-0.5">Posts</p>
             </div>
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-3">
-              <p className="font-display font-black text-2xl">{totalApplicants}</p>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 mt-0.5">Applicants</p>
+            <div className="px-3 py-4 text-center">
+              <p className="font-display font-black text-xl">{totalApplicants}</p>
+              <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-neutral-500 mt-0.5">Applicants</p>
             </div>
+            <button onClick={() => navigate("/brand/saved-creators")} className="px-3 py-4 text-center hover:bg-white/5 transition-colors">
+              <p className="font-display font-black text-xl text-[#E25238]">{savedCreatorsCount}</p>
+              <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-neutral-500 mt-0.5">Saved</p>
+            </button>
+          </div>
+        </div>
+
+        {/* About section */}
+        {(b.bio || b.categories?.length > 0) && (
+          <div className="px-5 mb-6">
+            <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-neutral-500 mb-3">About</p>
+            {b.bio && (
+              <p className="text-sm font-medium text-neutral-300 leading-relaxed mb-3">{b.bio}</p>
+            )}
+            {b.categories?.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {b.categories.map((cat) => (
+                  <span key={cat} className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-wider text-neutral-400">
+                    <Tag size={9} className="text-[#E25238]" /> {cat}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Links section */}
+        {(b.instagram_url || b.website_url) && (
+          <div className="px-5 mb-6">
+            <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-neutral-500 mb-3">Links</p>
+            <div className="space-y-2">
+              {b.instagram_url && (
+                <button
+                  onClick={() => window.open(b.instagram_url, "_blank", "noopener,noreferrer")}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/5 border border-white/10 hover:border-[#E25238]/40 transition-colors group"
+                >
+                  <div className="w-8 h-8 rounded-xl bg-[#E25238]/15 flex items-center justify-center flex-shrink-0">
+                    <InstagramIcon size={14} className="text-[#E25238]" />
+                  </div>
+                  <span className="flex-1 text-sm font-medium text-neutral-300 text-left truncate">
+                    {b.instagram_url.replace(/https?:\/\/(www\.)?instagram\.com\/?/, "@").replace(/\/$/, "") || "Instagram"}
+                  </span>
+                  <ExternalLink size={12} className="text-neutral-600 group-hover:text-neutral-400 transition-colors" />
+                </button>
+              )}
+              {b.website_url && (
+                <button
+                  onClick={() => window.open(b.website_url, "_blank", "noopener,noreferrer")}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/5 border border-white/10 hover:border-white/30 transition-colors group"
+                >
+                  <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
+                    <Globe size={14} className="text-neutral-300" />
+                  </div>
+                  <span className="flex-1 text-sm font-medium text-neutral-300 text-left truncate">
+                    {b.website_url.replace(/^https?:\/\//, "") || "Website"}
+                  </span>
+                  <ExternalLink size={12} className="text-neutral-600 group-hover:text-neutral-400 transition-colors" />
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Active Opportunities */}
+        <div className="px-5 mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-neutral-500">Active Opportunities</p>
             <button
-              onClick={() => navigate("/brand/saved-creators")}
-              className="bg-white/5 border border-white/10 rounded-2xl p-3 text-left hover:bg-white/10 transition-colors"
+              onClick={() => navigate("/brand/posts")}
+              className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[#E25238]"
             >
-              <p className="font-display font-black text-2xl text-[#E25238]">{savedCreatorsCount}</p>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 mt-0.5">Saved</p>
+              See all <ChevronRight size={11} />
             </button>
           </div>
+          {previewPosts.length === 0 ? (
+            <button
+              onClick={() => navigate("/brand/post")}
+              className="w-full py-6 rounded-2xl border border-dashed border-white/20 flex flex-col items-center gap-2 hover:border-[#E25238]/40 transition-colors"
+            >
+              <Plus size={20} className="text-neutral-600" />
+              <span className="text-xs font-bold text-neutral-600">Post your first opportunity</span>
+            </button>
+          ) : (
+            <div className="space-y-2">
+              {previewPosts.map((post) => (
+                <button
+                  key={post.id}
+                  onClick={() => navigate(`/brand/post/${post.id}`)}
+                  className="w-full text-left px-4 py-3.5 rounded-2xl bg-white/5 border border-white/10 hover:border-white/20 transition-colors flex items-center justify-between gap-3"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-sm text-white truncate">{post.title || "Untitled"}</p>
+                    <p className="text-[11px] text-neutral-500 font-medium mt-0.5">
+                      {post.applicants || 0} applicants · ₹{post.payout || 0}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <span className="px-2 py-0.5 rounded-full bg-[#22C55E]/10 border border-[#22C55E]/20 text-[9px] font-bold uppercase tracking-wider text-[#22C55E]">
+                      Live
+                    </span>
+                    <ChevronRight size={14} className="text-neutral-600" />
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
-          <div className="flex gap-3 mt-6">
-            <button data-testid="edit-profile-btn" onClick={() => navigate("/profile/edit")} className="flex-1 py-3 rounded-full border-2 border-white font-bold text-sm flex items-center justify-center gap-2">
-              <Pencil size={14} /> Edit Profile
-            </button>
-            <button data-testid="post-new-btn" onClick={() => navigate("/brand/post")} className="flex-1 py-3 rounded-full bg-[#E25238] font-bold text-sm flex items-center justify-center gap-2">
-              <Briefcase size={14} /> Post New
-            </button>
-          </div>
+        {/* Saved Creators shortcut */}
+        <div className="px-5">
+          <button
+            onClick={() => navigate("/brand/saved-creators")}
+            className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl bg-white/5 border border-white/10 hover:border-[#E25238]/30 transition-colors group"
+          >
+            <div className="w-10 h-10 rounded-2xl bg-[#E25238]/15 flex items-center justify-center flex-shrink-0">
+              <Bookmark size={18} className="text-[#E25238]" fill="#E25238" />
+            </div>
+            <div className="flex-1 text-left">
+              <p className="font-bold text-sm text-white">Saved Creators</p>
+              <p className="text-xs text-neutral-500 font-medium">
+                {savedCreatorsCount > 0 ? `${savedCreatorsCount} creators saved` : "Your shortlist is empty"}
+              </p>
+            </div>
+            <ChevronRight size={18} className="text-neutral-600 group-hover:text-neutral-400 transition-colors" />
+          </button>
         </div>
       </div>
     );
