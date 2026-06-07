@@ -31,6 +31,7 @@ import EditProfile from "@/screens/EditProfile";
 import BrandsList from "@/screens/BrandsList";
 import MyProfile from "@/screens/MyProfile";
 import SavedCreatorsScreen from "@/screens/SavedCreatorsScreen";
+import PublicCreatorProfile from "@/screens/PublicCreatorProfile";
 
 // Minimal spinner shown while session is being restored from localStorage
 function AuthLoading() {
@@ -76,6 +77,7 @@ function AppRoutes() {
         <Route path="/" element={<SplashScreen />} />
         <Route path="/account-type" element={<AccountTypeScreen />} />
         <Route path="/login" element={<LoginScreen />} />
+        <Route path="/creator/:id" element={<PublicCreatorProfile />} />
 
         {/* Onboarding — authed but not yet complete */}
         <Route

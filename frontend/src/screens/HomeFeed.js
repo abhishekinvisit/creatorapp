@@ -38,7 +38,7 @@ function mapApiOpp(o) {
 
 export default function HomeFeed() {
   const navigate = useNavigate();
-  const { opportunities, mergeOpportunities, isSaved, toggleSave, user, accountType, applications } = useApp();
+  const { opportunities, mergeOpportunities, isSaved, toggleSave, user, accountType, applications, unreadNotifications } = useApp();
   const [activeCat, setActiveCat] = useState("All");
 
   useEffect(() => {
@@ -129,7 +129,7 @@ export default function HomeFeed() {
 
   return (
     <div data-testid="home-feed" className="min-h-full bg-[#F9F9F8] pb-6">
-      <TopBar title="" showBack={false} showMenu showBell rightSlot={<div className="hidden" />} />
+      <TopBar title="" showBack={false} showMenu showBell unreadCount={unreadNotifications} rightSlot={<div className="hidden" />} />
 
       {/* Brand wordmark */}
       <div className="-mt-12 px-5 pb-3 flex flex-col items-center pointer-events-none">

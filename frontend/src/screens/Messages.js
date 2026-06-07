@@ -28,17 +28,25 @@ export default function Messages() {
   useEffect(() => {
     messagesApi.threads()
       .then((data) => {
-        const mapped = data.map((t) => ({
-          id: t.id,
-          name: accountType === "creator" ? (t.brand_name || "Brand") : (t.creator_name || "Creator"),
-          online: false,
-          lastMessage: t.last_message || "Conversation started",
-          time: timeAgo(t.updated_at),
-          unread: accountType === "creator" ? (t.unread_creator || 0) : (t.unread_brand || 0),
-          messages: [],
-          creator_id: t.creator_id,
-          brand_id: t.brand_id,
-        }));
+        const mapped = data.map((t) => {
+          const isCreator = accountType === "creator";
+          const name = isCreator ? (t.brand_name || "Brand") : (t.creator_name || "Creator");
+          const avatarSrc = isCreator
+            ? (t.brand_logo_data && (t.brand_logo_data.startsWith("data:") || t.brand_logo_data.startsWith("http")) ? t.brand_logo_data : null)
+            : (t.creator_avatar_url && (t.creator_avatar_url.startsWith("data:") || t.creator_avatar_url.startsWith("http")) ? t.creator_avatar_url : null);
+          return {
+            id: t.id,
+            name,
+            avatarSrc,
+            online: false,
+            lastMessage: t.last_message || "Conversation started",
+            time: timeAgo(t.updated_at),
+            unread: isCreator ? (t.unread_creator || 0) : (t.unread_brand || 0),
+            messages: [],
+            creator_id: t.creator_id,
+            brand_id: t.brand_id,
+          };
+        });
         setThreads(mapped);
       })
       .catch(() => {})
@@ -111,7 +119,7 @@ export default function Messages() {
             >
               {/* Avatar with online dot */}
               <div className="relative flex-shrink-0">
-                <BrandLogo name={t.name} size={52} dark={dark} />
+                <BrandLogo name={t.name} size={52} dark={dark} src={t.avatarSrc} />
                 {t.online && (
                   <span className={`absolute bottom-0.5 right-0.5 w-3 h-3 rounded-full bg-[#22C55E] ring-2 ${dark ? "ring-[#0A0A0A]" : "ring-[#F9F9F8]"}`} />
                 )}

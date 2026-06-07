@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { DEFAULT_USER } from "@/data/mockData";
-import { authApi, TOKEN_KEY, clearToken, setToken, getToken, savedCreatorsApi, applicationsApi } from "@/lib/api";
+import { authApi, TOKEN_KEY, clearToken, setToken, getToken, savedCreatorsApi, applicationsApi, unreadCountsApi } from "@/lib/api";
 
 const AppContext = createContext(null);
 
@@ -98,6 +98,8 @@ export const AppProvider = ({ children }) => {
   const [opportunities, setOpportunities] = useState([]);
   const [threads, setThreads] = useState([]);
   const [notifications, setNotifications] = useState([]);
+  const [unreadMessages, setUnreadMessages] = useState(0);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
   const [activePosts, setActivePosts] = useState([]);
   const [savedIds, setSavedIds] = useState([]);
   const [savedCreatorIds, setSavedCreatorIds] = useState(new Set());
@@ -151,6 +153,21 @@ export const AppProvider = ({ children }) => {
   }, [loadSavedCreators, loadMyApplications]);
 
   useEffect(() => { restoreSession(); }, [restoreSession]);
+
+  // ── Unread counts polling (every 30s when authed) ─────────────────────────
+  useEffect(() => {
+    if (!isAuthed) return;
+    const fetchCounts = async () => {
+      try {
+        const data = await unreadCountsApi.get();
+        setUnreadMessages(data.messages || 0);
+        setUnreadNotifications(data.notifications || 0);
+      } catch (_) {}
+    };
+    fetchCounts();
+    const timer = setInterval(fetchCounts, 30000);
+    return () => clearInterval(timer);
+  }, [isAuthed]);
 
   // ── Profile refresh (called after login or save) ──────────────────────────
   const refreshProfile = useCallback(async () => {
@@ -322,7 +339,10 @@ export const AppProvider = ({ children }) => {
   };
 
   // ── Notifications ─────────────────────────────────────────────────────────
-  const markAllNotificationsRead = () => setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
+  const markAllNotificationsRead = () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
+    setUnreadNotifications(0);
+  };
 
   // ── Threads ───────────────────────────────────────────────────────────────
   const getOrCreateThread = (brandName) => {
@@ -357,6 +377,7 @@ export const AppProvider = ({ children }) => {
       threads, setThreads,
       getOrCreateThread,
       notifications, setNotifications, markAllNotificationsRead,
+      unreadMessages, unreadNotifications,
       activePosts, setActivePosts, publishOpportunity, updatePost, deletePost,
       savedIds, isSaved, toggleSave, savedOpportunities,
       savedCreatorIds, isCreatorSaved, savedCreatorsCount, saveCreator, unsaveCreator,

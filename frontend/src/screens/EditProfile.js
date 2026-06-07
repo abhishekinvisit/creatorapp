@@ -643,6 +643,8 @@ const BrandPickerModal = ({ existing, onClose, onPick }) => {
   const [q, setQ] = useState("");
   const [customName, setCustomName] = useState("");
   const [customLogo, setCustomLogo] = useState("");
+  const [customLink, setCustomLink] = useState("");
+  const [showCustomForm, setShowCustomForm] = useState(false);
   const customLogoRef = useRef(null);
   const filtered = BRAND_SUGGESTIONS.filter((b) =>
     !existing.find((e) => e.id === b.id) &&
@@ -671,15 +673,24 @@ const BrandPickerModal = ({ existing, onClose, onPick }) => {
         />
       </div>
 
+      {/* Toggle to show custom brand form */}
+      <button
+        onClick={() => setShowCustomForm((v) => !v)}
+        className="w-full text-left text-xs font-bold text-[#525252] mb-3 flex items-center gap-1.5 hover:text-[#0A0A0A] transition-colors"
+      >
+        <span className="text-[#E25238]">{showCustomForm ? "▲" : "▼"}</span>
+        Add a custom brand (not in list)
+      </button>
+
       {/* Custom brand entry */}
-      {q.trim() && !filtered.length && (
-        <div className="mb-4">
-          <p className="text-xs text-[#525252] font-medium mb-2">Not listed? Add it manually:</p>
-          <div className="flex items-center gap-2 mb-2">
+      {showCustomForm && (
+        <div className="mb-4 bg-[#F9F9F8] border border-[#E5E5E5] rounded-2xl p-4 space-y-2.5">
+          <p className="text-xs text-[#525252] font-medium">Brand name, logo &amp; link:</p>
+          <div className="flex items-center gap-2">
             <button
               data-testid="custom-brand-logo"
               onClick={() => customLogoRef.current?.click()}
-              className="w-12 h-12 rounded-xl bg-[#F3F3F3] border border-[#E5E5E5] flex items-center justify-center flex-shrink-0 hover:border-[#0A0A0A] transition-colors overflow-hidden"
+              className="w-12 h-12 rounded-xl bg-white border border-[#E5E5E5] flex items-center justify-center flex-shrink-0 hover:border-[#0A0A0A] transition-colors overflow-hidden"
               title="Upload logo"
             >
               {customLogo ? (
@@ -692,19 +703,26 @@ const BrandPickerModal = ({ existing, onClose, onPick }) => {
             <input
               value={customName}
               onChange={(e) => setCustomName(e.target.value)}
-              placeholder="Brand name"
-              className="flex-1 bg-[#F9F9F8] border border-[#E5E5E5] rounded-2xl px-4 py-3 outline-none font-medium text-sm focus:border-[#0A0A0A] transition-colors"
+              placeholder="Brand name *"
+              className="flex-1 bg-white border border-[#E5E5E5] rounded-2xl px-4 py-3 outline-none font-medium text-sm focus:border-[#0A0A0A] transition-colors"
             />
-            <button
-              onClick={() => {
-                if (!customName.trim()) return;
-                onPick({ id: `custom-${Date.now()}`, name: customName.trim(), logo: customLogo });
-              }}
-              className="px-5 py-3 bg-[#0A0A0A] text-white rounded-2xl font-bold text-sm"
-            >
-              Add
-            </button>
           </div>
+          <input
+            value={customLink}
+            onChange={(e) => setCustomLink(e.target.value)}
+            placeholder="Website or profile link (optional)"
+            className="w-full bg-white border border-[#E5E5E5] rounded-2xl px-4 py-3 outline-none font-medium text-sm focus:border-[#0A0A0A] transition-colors"
+          />
+          <button
+            onClick={() => {
+              if (!customName.trim()) { toast.error("Enter a brand name"); return; }
+              onPick({ id: `custom-${Date.now()}`, name: customName.trim(), logo: customLogo, link: customLink.trim() });
+              setCustomName(""); setCustomLogo(""); setCustomLink(""); setShowCustomForm(false);
+            }}
+            className="w-full py-3 bg-[#0A0A0A] text-white rounded-2xl font-bold text-sm"
+          >
+            Add Brand
+          </button>
         </div>
       )}
 

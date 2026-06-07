@@ -21,7 +21,7 @@ const brandItems = [
 export const BottomNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { accountType } = useApp();
+  const { accountType, unreadMessages } = useApp();
   const items = accountType === "brand" ? brandItems : creatorItems;
   const isBrand = accountType === "brand";
 
@@ -41,11 +41,18 @@ export const BottomNav = () => {
               onClick={() => navigate(it.path)}
               className="flex-1 flex flex-col items-center gap-1 py-2 rounded-2xl transition-all"
             >
-              <Icon
-                size={22}
-                strokeWidth={active ? 2.4 : 1.8}
-                className={`transition-colors ${active ? (isBrand ? "text-[#E25238]" : "text-[#0A0A0A]") : (isBrand ? "text-neutral-500" : "text-neutral-400")}`}
-              />
+              <div className="relative">
+                <Icon
+                  size={22}
+                  strokeWidth={active ? 2.4 : 1.8}
+                  className={`transition-colors ${active ? (isBrand ? "text-[#E25238]" : "text-[#0A0A0A]") : (isBrand ? "text-neutral-500" : "text-neutral-400")}`}
+                />
+                {it.id === "msg" && unreadMessages > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 rounded-full bg-[#E25238] text-white text-[9px] font-black flex items-center justify-center px-1 leading-none">
+                    {unreadMessages > 9 ? "9+" : unreadMessages}
+                  </span>
+                )}
+              </div>
               <span className={`text-[10px] font-bold tracking-wider uppercase ${active ? (isBrand ? "text-[#E25238]" : "text-[#0A0A0A]") : (isBrand ? "text-neutral-500" : "text-neutral-400")}`}>
                 {it.label}
               </span>

@@ -45,6 +45,7 @@ export default function ChatScreen() {
   const pollRef = useRef(null);
 
   const threadName = thread?.name || (accountType === "creator" ? "Brand" : "Creator");
+  const threadAvatar = thread?.avatarSrc || null;
   const role = accountType === "brand" ? "Creator" : "Brand";
 
   const loadMessages = useCallback(() => {
@@ -133,7 +134,7 @@ export default function ChatScreen() {
         >
           <ChevronLeft size={22} className={dark ? "text-white" : "text-[#0A0A0A]"} />
         </button>
-        <BrandLogo name={threadName} size={40} dark={dark} />
+        <BrandLogo name={threadName} size={40} dark={dark} src={threadAvatar} />
         <div className="flex-1 min-w-0">
           <h3 className={`font-display font-bold text-base leading-tight truncate ${dark ? "text-white" : "text-[#0A0A0A]"}`}>
             {threadName}

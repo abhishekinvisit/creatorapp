@@ -1,7 +1,7 @@
 import { ChevronLeft, Bell, Menu, Bookmark, MoreVertical } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-export const TopBar = ({ title, showBack = true, showMenu = false, showBell = false, showBookmark = false, bookmarkActive = false, onBookmarkClick, showMore = false, dark = false, onMenuClick, rightSlot }) => {
+export const TopBar = ({ title, showBack = true, showMenu = false, showBell = false, showBookmark = false, bookmarkActive = false, onBookmarkClick, showMore = false, dark = false, onMenuClick, rightSlot, unreadCount = 0 }) => {
   const navigate = useNavigate();
   const textCls = dark ? "text-white" : "text-[#0A0A0A]";
   const iconBtnCls = `w-10 h-10 rounded-full flex items-center justify-center ${dark ? "bg-white/10 hover:bg-white/20" : "bg-black/5 hover:bg-black/10"} transition-colors`;
@@ -39,8 +39,13 @@ export const TopBar = ({ title, showBack = true, showMenu = false, showBell = fa
           </button>
         )}
         {showBell && (
-          <button data-testid="topbar-bell" onClick={() => navigate("/notifications")} className={iconBtnCls}>
+          <button data-testid="topbar-bell" onClick={() => navigate("/notifications")} className={`${iconBtnCls} relative`}>
             <Bell size={18} className={textCls} />
+            {unreadCount > 0 && (
+              <span className="absolute top-0.5 right-0.5 min-w-[16px] h-4 rounded-full bg-[#E25238] text-white text-[9px] font-black flex items-center justify-center px-1 leading-none">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            )}
           </button>
         )}
         {showMore && (

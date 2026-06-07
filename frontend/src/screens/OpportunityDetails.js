@@ -21,7 +21,7 @@ import { toast } from "sonner";
 export default function OpportunityDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { opportunities, isSaved, toggleSave, hasApplied, applications } = useApp();
+  const { opportunities, isSaved, toggleSave, hasApplied, applications, accountType, user } = useApp();
   const [showApply, setShowApply] = useState(false);
   const [apiOp, setApiOp] = useState(null);
   const [applied, setApplied] = useState(false);
@@ -225,15 +225,28 @@ export default function OpportunityDetails() {
               <CheckCircle2 size={18} />
               Applied — View My Applications
             </button>
-          ) : (
-            <button
-              data-testid="apply-now-btn"
-              onClick={() => setShowApply(true)}
-              className="w-full bg-[#0A0A0A] text-white rounded-full py-5 font-bold text-base hover:bg-[#E25238] transition-colors shadow-xl"
-            >
-              Send My Profile
-            </button>
-          )}
+          ) : (() => {
+            const creatorCats = accountType === "creator" ? (user?.creator?.category || []) : [];
+            const opCat = op.category || "";
+            const catMismatch = accountType === "creator" && creatorCats.length > 0 && opCat && !creatorCats.includes(opCat);
+            if (catMismatch) {
+              return (
+                <div className="w-full bg-[#F3F3F3] rounded-full py-5 font-bold text-sm text-[#525252] flex flex-col items-center justify-center text-center px-6">
+                  <span className="font-bold text-[#0A0A0A] text-base">Category Mismatch</span>
+                  <span className="text-xs mt-0.5">This opportunity is in <strong>{opCat}</strong>. Your niche: {creatorCats.join(", ")}.</span>
+                </div>
+              );
+            }
+            return (
+              <button
+                data-testid="apply-now-btn"
+                onClick={() => setShowApply(true)}
+                className="w-full bg-[#0A0A0A] text-white rounded-full py-5 font-bold text-base hover:bg-[#E25238] transition-colors shadow-xl"
+              >
+                Send My Profile
+              </button>
+            );
+          })()}
           <button
             data-testid="share-btn"
             onClick={handleShare}

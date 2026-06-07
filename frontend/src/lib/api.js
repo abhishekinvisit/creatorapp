@@ -87,6 +87,11 @@ export const applicationsApi = {
   withdraw:       (id)            => api.delete(`/applications/${id}`),
 };
 
+// ── Unread counts ─────────────────────────────────────────────────────────────
+export const unreadCountsApi = {
+  get: () => api.get("/unread-counts"),
+};
+
 // ── Messages ──────────────────────────────────────────────────────────────────
 export const messagesApi = {
   threads:       ()              => api.get("/threads"),

@@ -273,14 +273,24 @@ export default function CreatorProfileBrandView() {
               </span>
             </div>
             <div className="flex items-start gap-3 overflow-x-auto scrollbar-hide -mx-1 px-1 pb-1">
-              {workedWith.map((b, i) => (
-                <div key={b.id || i} className="flex flex-col items-center gap-1.5 flex-shrink-0 w-14">
-                  <BrandLogo name={b.name || b.brand_name || "B"} size={48} />
-                  <p className="text-[9px] font-bold text-center text-[#525252] leading-tight truncate w-full text-center">
-                    {b.name || b.brand_name || ""}
-                  </p>
-                </div>
-              ))}
+              {workedWith.map((b, i) => {
+                const logoSrc = b.logo || b.customLogo || "";
+                const isValidLogo = logoSrc && (logoSrc.startsWith("data:") || logoSrc.startsWith("http"));
+                const displayName = b.name || b.brand_name || "";
+                const item = (
+                  <div key={b.id || i} className="flex flex-col items-center gap-1.5 flex-shrink-0 w-14">
+                    <BrandLogo name={displayName || "B"} size={48} src={isValidLogo ? logoSrc : undefined} />
+                    <p className="text-[9px] font-bold text-center text-[#525252] leading-tight truncate w-full">
+                      {displayName}
+                    </p>
+                  </div>
+                );
+                return b.link ? (
+                  <a key={b.id || i} href={b.link.startsWith("http") ? b.link : `https://${b.link}`} target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">
+                    {item}
+                  </a>
+                ) : item;
+              })}
             </div>
           </div>
         )}

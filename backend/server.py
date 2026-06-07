@@ -840,6 +840,11 @@ def _thread_row(row, user_id_str):
     d["creator_id"] = str(d["creator_id"]) if d.get("creator_id") else None
     d["brand_id"] = str(d["brand_id"]) if d.get("brand_id") else None
     d["updated_at"] = d["updated_at"].isoformat() if d.get("updated_at") else ""
+    # Prefer live profile names over cached thread names
+    if d.get("creator_display_name"):
+        d["creator_name"] = d["creator_display_name"]
+    if d.get("brand_display_name"):
+        d["brand_name"] = d["brand_display_name"]
     return d
 
 def _msg_row(row):
@@ -857,10 +862,37 @@ async def list_threads(user=Depends(current_user)):
     col = "creator_id" if user["account_type"] == "creator" else "brand_id"
     async with pool.acquire() as conn:
         rows = await conn.fetch(
-            f"SELECT * FROM threads WHERE {col}=$1::uuid ORDER BY updated_at DESC",
+            f"""
+            SELECT t.*,
+                COALESCE(cp.full_name, t.creator_name) AS creator_display_name,
+                cp.avatar_url AS creator_avatar_url,
+                COALESCE(bp.brand_name, t.brand_name) AS brand_display_name,
+                bp.logo_data AS brand_logo_data
+            FROM threads t
+            LEFT JOIN creator_profiles cp ON cp.user_id = t.creator_id
+            LEFT JOIN brand_profiles bp ON bp.user_id = t.brand_id
+            WHERE t.{col}=$1::uuid ORDER BY t.updated_at DESC
+            """,
             user["id"],
         )
     return [_thread_row(r, str(user["id"])) for r in rows]
+
+
+@api_router.get("/unread-counts")
+async def unread_counts(user=Depends(current_user)):
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        unread_col = "unread_creator" if user["account_type"] == "creator" else "unread_brand"
+        thread_col = "creator_id" if user["account_type"] == "creator" else "brand_id"
+        msgs = await conn.fetchval(
+            f"SELECT COALESCE(SUM({unread_col}), 0) FROM threads WHERE {thread_col}=$1::uuid",
+            user["id"],
+        )
+        notifs = await conn.fetchval(
+            "SELECT COUNT(*) FROM notifications WHERE user_id=$1::uuid AND is_read=FALSE",
+            user["id"],
+        )
+    return {"messages": int(msgs or 0), "notifications": int(notifs or 0)}
 
 
 @api_router.post("/threads/open")
