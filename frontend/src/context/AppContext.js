@@ -79,7 +79,7 @@ function mapBrandProfile(prev, p) {
       customCategory: p.custom_category || prev.brand.customCategory || "",
       instagramUrl:   p.instagram_url || prev.brand.instagramUrl || "",
       websiteUrl:     p.website_url   || prev.brand.websiteUrl   || "",
-      logo:           p.logo_data     || prev.brand.logo,
+      logo:           (p.logo_data && (p.logo_data.startsWith("data:") || p.logo_data.startsWith("http"))) ? p.logo_data : ((prev.brand.logo && (prev.brand.logo.startsWith("data:") || prev.brand.logo.startsWith("http"))) ? prev.brand.logo : ""),
       gstNumber:      p.gst_number    || "",
     },
   };

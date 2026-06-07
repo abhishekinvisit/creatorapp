@@ -44,6 +44,7 @@ export default function OpportunityDetails() {
           brandName: o.brand_name,
           brandCategory: o.brand_category,
           brandLogo: o.brand_logo || "",
+          brandBio: o.brand_bio || "",
           brandInstagram: o.brand_instagram || "",
           brandWebsite: o.brand_website || "",
           title: o.title,
@@ -132,7 +133,7 @@ export default function OpportunityDetails() {
         <div className="mb-6">
           <p className="text-xs font-bold tracking-[0.2em] uppercase text-[#E25238] mb-2">About Brand</p>
           <p className="text-sm text-[#0A0A0A] leading-relaxed font-medium">
-            {op.brandName} is a trusted brand creating quality products for our community.
+            {op.brandBio || `${op.brandName} hasn't added a description yet.`}
           </p>
           <div className="flex items-center gap-3 mt-4">
             {op.brandInstagram && (

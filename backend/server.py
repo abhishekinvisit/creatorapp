@@ -632,6 +632,7 @@ async def get_opportunity(opp_id: str, user=Depends(optional_user)):
         row = await conn.fetchrow("""
             SELECT o.*,
                    bp.logo_data    AS brand_logo,
+                   bp.bio          AS brand_bio,
                    bp.instagram_url AS brand_instagram,
                    bp.website_url   AS brand_website
             FROM opportunities o
@@ -642,6 +643,7 @@ async def get_opportunity(opp_id: str, user=Depends(optional_user)):
         raise HTTPException(status_code=404, detail="Opportunity not found")
     result = _opp_row(row)
     result["brand_logo"]      = row["brand_logo"]      or ""
+    result["brand_bio"]       = row["brand_bio"]       or ""
     result["brand_instagram"] = row["brand_instagram"] or ""
     result["brand_website"]   = row["brand_website"]   or ""
     return result

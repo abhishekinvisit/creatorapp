@@ -73,22 +73,19 @@ export default function MyProfile() {
           </button>
         </div>
 
-        {/* Banner + Identity */}
-        <div className="relative">
-          {/* Gradient banner */}
-          <div className="h-28 bg-gradient-to-br from-[#E25238] via-[#C94532] to-[#0A0A0A] relative overflow-hidden" />
-
-          {/* Logo overlapping banner */}
-          <div className="px-5 flex items-end gap-4 -mt-10 mb-4">
-            <div className="ring-4 ring-[#0A0A0A] rounded-[24px] shadow-2xl flex-shrink-0">
-              {b.logo ? (
+        {/* Identity Header */}
+        <div className="px-5 pt-2 pb-1">
+          <div className="flex items-center gap-4 mb-4">
+            {/* Logo */}
+            <div className="ring-2 ring-white/10 rounded-[24px] shadow-xl flex-shrink-0">
+              {b.logo && (b.logo.startsWith("data:") || b.logo.startsWith("http")) ? (
                 <img src={b.logo} alt={b.name} className="w-20 h-20 rounded-[24px] object-cover" />
               ) : (
                 <BrandLogo name={b.name} size={80} dark />
               )}
             </div>
-            {/* Action buttons anchored to right */}
-            <div className="flex-1 flex justify-end gap-2 mb-1">
+            {/* Action buttons */}
+            <div className="flex-1 flex justify-end gap-2">
               <button
                 data-testid="edit-profile-btn"
                 onClick={() => navigate("/profile/edit")}
@@ -107,7 +104,7 @@ export default function MyProfile() {
           </div>
 
           {/* Name + meta */}
-          <div className="px-5 mb-5">
+          <div className="mb-5">
             <div className="flex items-center gap-2 mb-0.5">
               <h2 className="font-display font-black text-2xl tracking-tight">{b.name}</h2>
               <BadgeCheck size={20} className="text-[#E25238] flex-shrink-0" fill="#E25238" stroke="white" />

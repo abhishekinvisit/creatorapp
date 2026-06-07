@@ -46,7 +46,8 @@ export default function EditProfile() {
   // Form state — shared
   const [name, setName] = useState(profile.name || "");
   const [bio, setBio] = useState(profile.bio || "");
-  const [avatar, setAvatar] = useState(accountType === "brand" ? (user.brand.logo || "") : (user.creator.avatar || ""));
+  const isValidImg = (s) => s && (s.startsWith("data:") || s.startsWith("http"));
+  const [avatar, setAvatar] = useState(accountType === "brand" ? (isValidImg(user.brand.logo) ? user.brand.logo : "") : (user.creator.avatar || ""));
 
   // Creator-only form state
   const [handle, setHandle] = useState(profile.handle || "");

@@ -14,5 +14,6 @@
 - [addApplication signature](add-application-sig.md) — takes full object {id, opportunityId, brandName, brandId, opportunityTitle, appliedOn, status, note}; brandId needed for Message button
 - [savedIds logout behavior](saved-ids-logout.md) — savedIds now per-user (key: ollcollab_saved_${userId}), loaded on login, cleared on logout; logout also clears avatar/logo from user state
 - [categories system](categories-system.md) — 50 MASTER_CATEGORIES in categories.js; DB categories table seeded via MIGRATIONS; GET /api/categories; all screens import from @/data/categories with searchable pill UIs
+- [Brand logo validity](brand-logo-validity.md) — always guard with isValidImg(s) before rendering <img> for brand logos; DEFAULT_USER has logo="GLOW" (text, not image)
 - [Applications persistence](applications-persistence.md) — must call applicationsApi.myApplications() in both restoreSession and loginWithToken for creator accounts; context exports hasApplied(id) and loadMyApplications
 - [ApplicantsList UUID guard](applicants-uuid-guard.md) — use full UUID regex (not just includes("-")) to validate opportunityId; fake local IDs like "p-1234567890" contain hyphens but are not UUIDs
