@@ -68,7 +68,7 @@ export default function BrandDiscover() {
   const [creators, setCreators] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch creators from API
+  // Fetch creators from API — server handles category, followers, location, gender, language
   useEffect(() => {
     setLoading(true);
     const params = { sort_by: sortBy };
@@ -77,12 +77,14 @@ export default function BrandDiscover() {
       const bucket = FOLLOWER_BUCKETS.find((b) => b.id === filters.followers);
       if (bucket) params.min_followers = bucket.min;
     }
+    if (filters.location.trim()) params.location = filters.location.trim();
+    if (filters.gender !== "Any") params.gender = filters.gender;
     if (filters.language.length === 1) params.language = filters.language[0];
     creatorsApi.list(params)
       .then((data) => setCreators(data.map(mapCreator)))
       .catch(() => setCreators([]))
       .finally(() => setLoading(false));
-  }, [sortBy, filters.category, filters.followers]);
+  }, [sortBy, filters.category, filters.followers, filters.location, filters.gender]);
 
   const activeCount =
     (filters.category !== "All" ? 1 : 0) +
@@ -92,18 +94,23 @@ export default function BrandDiscover() {
     (filters.followers !== "any" ? 1 : 0) +
     (filters.language.length > 0 ? 1 : 0);
 
-  // Client-side filtering for fields not passed to API (age, gender, location, languages[multi])
+  // Client-side filtering: search text, age range, multi-language
   const results = useMemo(() => {
     const term = q.trim().toLowerCase();
     return creators.filter((c) => {
       if (term && !c.name.toLowerCase().includes(term) && !c.handle.toLowerCase().includes(term)) return false;
-      if (filters.age !== "Any" && String(c.age) !== filters.age) return false;
-      if (filters.gender !== "Any" && c.gender !== filters.gender) return false;
-      if (filters.location && !(c.location || "").toLowerCase().includes(filters.location.toLowerCase())) return false;
-      if (filters.language.length > 1 && !filters.language.some((l) => (c.languages || []).includes(l))) return false;
+      if (filters.age !== "Any") {
+        const age = Number(c.age);
+        if (!age) return false;
+        if (filters.age === "13-17" && !(age >= 13 && age <= 17)) return false;
+        if (filters.age === "18-24" && !(age >= 18 && age <= 24)) return false;
+        if (filters.age === "25-34" && !(age >= 25 && age <= 34)) return false;
+        if (filters.age === "35+" && age < 35) return false;
+      }
+      if (filters.language.length > 0 && !filters.language.some((l) => (c.languages || []).includes(l))) return false;
       return true;
     });
-  }, [creators, q, filters.age, filters.gender, filters.location, filters.language]);
+  }, [creators, q, filters.age, filters.language]);
 
   const reset = () => setFilters(DEFAULT_FILTERS);
   const currentSort = SORT_OPTIONS.find((s) => s.id === sortBy) || SORT_OPTIONS[0];

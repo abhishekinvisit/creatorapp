@@ -481,6 +481,8 @@ async def list_creators(
     category: Optional[str] = None,
     language: Optional[str] = None,
     min_followers: Optional[int] = None,
+    location: Optional[str] = None,
+    gender: Optional[str] = None,
     sort_by: Optional[str] = "followers",
     user=Depends(optional_user),
 ):
@@ -501,6 +503,12 @@ async def list_creators(
     if min_followers:
         conditions.append(f"cp.followers_count >= ${i}")
         params.append(min_followers); i += 1
+    if location:
+        conditions.append(f"cp.location ILIKE ${i}")
+        params.append(f"%{location}%"); i += 1
+    if gender and gender != "Any":
+        conditions.append(f"LOWER(cp.gender) = LOWER(${i})")
+        params.append(gender); i += 1
 
     order_map = {
         "followers": "cp.followers_count DESC NULLS LAST",

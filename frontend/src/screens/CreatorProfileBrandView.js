@@ -174,6 +174,22 @@ export default function CreatorProfileBrandView() {
           </div>
         )}
 
+        {(c.languages?.length > 0) && (
+          <div className="mt-4">
+            <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#525252] mb-2">Content Languages</p>
+            <div className="flex flex-wrap gap-2">
+              {c.languages.map((lang) => (
+                <span
+                  key={lang}
+                  className="px-3 py-1.5 rounded-full bg-[#E25238]/10 border border-[#E25238]/20 text-[10px] font-bold uppercase tracking-[0.15em] text-[#E25238]"
+                >
+                  {lang}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
         {workedWith.length > 0 && (
           <div className="mt-6">
             <div className="flex items-center justify-between mb-3">
