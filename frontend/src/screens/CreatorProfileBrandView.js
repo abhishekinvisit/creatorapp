@@ -1,10 +1,25 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { MapPin, Bookmark } from "lucide-react";
+import { MapPin, Bookmark, Globe } from "lucide-react";
 
 const InstagramIcon = ({ size = 16, className = "", strokeWidth = 2, ...props }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
     <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+  </svg>
+);
+const YoutubeIcon = ({ size = 16, className = "", ...props }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className} {...props}>
+    <path d="M23.5 6.2a3.01 3.01 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3.01 3.01 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3.01 3.01 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3.01 3.01 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.75 15.5V8.5l6.25 3.5-6.25 3.5z"/>
+  </svg>
+);
+const LinkedinIcon = ({ size = 16, className = "", ...props }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className} {...props}>
+    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2zM4 6a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/>
+  </svg>
+);
+const TiktokIcon = ({ size = 16, className = "", ...props }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className} {...props}>
+    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.17 8.17 0 0 0 4.78 1.52V6.77a4.85 4.85 0 0 1-1.01-.08z"/>
   </svg>
 );
 
@@ -159,6 +174,65 @@ export default function CreatorProfileBrandView() {
 
         {c.bio && (
           <p className="text-sm font-medium text-[#0A0A0A] mt-4 leading-relaxed">{c.bio}</p>
+        )}
+
+        {/* Social links */}
+        {(c.instagram_url || c.youtube_url || c.linkedin_url || c.tiktok_url || c.website_url) && (
+          <div className="mt-4">
+            <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#525252] mb-2">Social Links</p>
+            <div className="flex items-center gap-2 flex-wrap">
+              {c.instagram_url && (
+                <a
+                  href={c.instagram_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-3 py-2 rounded-full bg-gradient-to-tr from-[#E25238] via-[#F59E0B] to-[#E25238] text-white text-xs font-bold hover:opacity-90 transition-opacity"
+                >
+                  <InstagramIcon size={13} /> Instagram
+                </a>
+              )}
+              {c.youtube_url && (
+                <a
+                  href={c.youtube_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-3 py-2 rounded-full bg-[#FF0000] text-white text-xs font-bold hover:opacity-90 transition-opacity"
+                >
+                  <YoutubeIcon size={13} /> YouTube
+                </a>
+              )}
+              {c.linkedin_url && (
+                <a
+                  href={c.linkedin_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-3 py-2 rounded-full bg-[#0A66C2] text-white text-xs font-bold hover:opacity-90 transition-opacity"
+                >
+                  <LinkedinIcon size={13} /> LinkedIn
+                </a>
+              )}
+              {c.tiktok_url && (
+                <a
+                  href={c.tiktok_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-3 py-2 rounded-full bg-[#0A0A0A] text-white text-xs font-bold hover:opacity-90 transition-opacity"
+                >
+                  <TiktokIcon size={13} /> TikTok
+                </a>
+              )}
+              {c.website_url && (
+                <a
+                  href={c.website_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-3 py-2 rounded-full bg-white border border-[#E5E5E5] text-[#0A0A0A] text-xs font-bold hover:border-[#0A0A0A] transition-colors"
+                >
+                  <Globe size={13} /> Website
+                </a>
+              )}
+            </div>
+          </div>
         )}
 
         {(c.categories?.length > 0) && (
