@@ -7,12 +7,16 @@ import { toast } from "sonner";
 export const ApplyDialog = ({ opportunity, onClose, onApplied }) => {
   const { user, addApplication } = useApp();
   const [note, setNote] = useState("");
+  const [counterAmount, setCounterAmount] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const hasRange = opportunity.payout_min > 0 || opportunity.payoutMin > 0;
 
   const handleApply = async () => {
     setLoading(true);
     try {
-      const appRow = await applicationsApi.apply(opportunity.id, note);
+      const counter = counterAmount ? parseInt(counterAmount) : null;
+      const appRow = await applicationsApi.apply(opportunity.id, note, counter);
       addApplication({
         id: appRow.id,
         opportunityId: appRow.opportunity_id,
@@ -24,6 +28,7 @@ export const ApplyDialog = ({ opportunity, onClose, onApplied }) => {
         }),
         status: "applied",
         note: appRow.note || note || "",
+        counterAmount: appRow.counter_amount || counter,
       });
       onApplied();
     } catch (err) {
@@ -43,7 +48,7 @@ export const ApplyDialog = ({ opportunity, onClose, onApplied }) => {
         <div className="flex items-start justify-between mb-5">
           <div>
             <h2 className="font-display font-black text-2xl text-[#0A0A0A] tracking-tight">Send my profile</h2>
-            <p className="text-sm text-[#525252] mt-1 font-medium">Your OLLCOLLAB profile will be shared with this brand.</p>
+            <p className="text-sm text-[#525252] mt-1 font-medium">Your Rytspot profile will be shared with this brand.</p>
           </div>
           <button data-testid="apply-close" onClick={onClose} className="w-9 h-9 rounded-full bg-[#F3F3F3] flex items-center justify-center flex-shrink-0">
             <X size={18} />
@@ -83,6 +88,24 @@ export const ApplyDialog = ({ opportunity, onClose, onApplied }) => {
           className="w-full px-4 py-3 rounded-2xl bg-[#F9F9F8] border border-[#E5E5E5] outline-none focus:border-[#0A0A0A] text-sm font-medium resize-none"
         />
         <p className="text-xs text-[#525252] text-right mt-1 font-medium">{note.length}/300</p>
+
+        {/* Counter offer */}
+        {hasRange && (
+          <div className="mt-4">
+            <p className="text-xs font-bold tracking-[0.2em] uppercase text-[#525252] mb-1">Counter Offer ₹ (Optional)</p>
+            <p className="text-xs text-[#525252] mb-2 font-medium">
+              Budget range: ₹{(opportunity.payout_min || opportunity.payoutMin || 0).toLocaleString("en-IN")} – ₹{(opportunity.payout_max || opportunity.payoutMax || 0).toLocaleString("en-IN")}. Propose your rate.
+            </p>
+            <input
+              data-testid="counter-amount"
+              type="number"
+              value={counterAmount}
+              onChange={(e) => setCounterAmount(e.target.value)}
+              placeholder="Enter your rate in ₹"
+              className="w-full px-4 py-3 rounded-2xl bg-[#F9F9F8] border border-[#E5E5E5] outline-none focus:border-[#0A0A0A] text-sm font-medium"
+            />
+          </div>
+        )}
 
         <div className="flex gap-3 mt-5">
           <button data-testid="apply-cancel" onClick={onClose} className="flex-1 py-4 rounded-full border border-[#E5E5E5] font-bold text-sm">

@@ -155,6 +155,13 @@ export default function ApplicantsList() {
                   <p className="text-xs text-neutral-400 bg-white/5 rounded-xl px-4 py-3 mb-3 italic">"{c.note}"</p>
                 )}
 
+                {c.counter_amount > 0 && (
+                  <div className="flex items-center gap-2 px-3 py-2 bg-[#F59E0B]/10 border border-[#F59E0B]/20 rounded-xl mb-3">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-[#F59E0B]">Counter Offer</span>
+                    <span className="text-sm font-black text-white ml-1">₹{c.counter_amount.toLocaleString("en-IN")}</span>
+                  </div>
+                )}
+
                 <div className="flex gap-2">
                   <button
                     data-testid={`view-profile-${c.id}`}

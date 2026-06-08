@@ -41,7 +41,7 @@ function AuthLoading() {
         <div className="w-10 h-10 rounded-[14px] bg-gradient-to-br from-[#E25238] to-[#F59E0B] flex items-center justify-center animate-pulse">
           <div className="w-4 h-4 rounded-full border-2 border-white" />
         </div>
-        <p className="text-sm font-bold text-[#525252] uppercase tracking-widest">OLLCOLLAB</p>
+        <p className="text-sm font-bold text-[#525252] uppercase tracking-widest">RYTSPOT</p>
       </div>
     </div>
   );

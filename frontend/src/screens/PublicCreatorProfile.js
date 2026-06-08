@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ChevronLeft, MapPin, Users, Star, Link2, ExternalLink } from "lucide-react";
+import { ChevronLeft, MapPin, Users, Star, Link2, ExternalLink, BarChart2 } from "lucide-react";
 import { creatorsApi } from "@/lib/api";
+import { AudienceInsightsModal } from "@/components/AudienceInsightsModal";
 
 const InstagramIcon = ({ size = 16, className = "" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -13,6 +14,8 @@ const YoutubeIcon = ({ size = 16, className = "" }) => (
     <path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/>
   </svg>
 );
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function formatFollowers(n) {
   if (!n) return "0";
@@ -32,9 +35,14 @@ export default function PublicCreatorProfile() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [showInsights, setShowInsights] = useState(false);
 
   useEffect(() => {
-    creatorsApi.get(id)
+    const fetchProfile = UUID_RE.test(id)
+      ? creatorsApi.get(id)
+      : creatorsApi.getByHandle(id);
+
+    fetchProfile
       .then((data) => setProfile(data))
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false));
@@ -57,7 +65,7 @@ export default function PublicCreatorProfile() {
           onClick={() => navigate("/")}
           className="px-6 py-3 bg-[#0A0A0A] text-white rounded-full text-sm font-bold"
         >
-          Go to OLLCOLLAB
+          Go to Rytspot
         </button>
       </div>
     );
@@ -75,6 +83,12 @@ export default function PublicCreatorProfile() {
   const languages = profile.languages || [];
   const reels = profile.reels || [];
   const hasAvatar = isValidImg(profile.avatar_url);
+  const ai = profile.audience_insights;
+  const hasInsights = ai && (
+    (ai.gender_male > 0) || (ai.gender_female > 0) ||
+    (ai.age_18_24 > 0) || (ai.age_25_34 > 0) ||
+    (ai.top_cities?.length > 0) || (ai.top_states?.length > 0)
+  );
 
   const socialLinks = [
     profile.instagram_url && { label: "Instagram", url: profile.instagram_url, icon: <InstagramIcon size={14} /> },
@@ -125,7 +139,7 @@ export default function PublicCreatorProfile() {
         </div>
 
         {/* Stats row */}
-        <div className="grid grid-cols-3 gap-3 mb-5">
+        <div className="grid grid-cols-3 gap-3 mb-4">
           <div className="bg-white border border-[#E5E5E5] rounded-2xl p-3 text-center">
             <p className="font-display font-black text-xl text-[#0A0A0A]">{formatFollowers(profile.followers_count)}</p>
             <p className="text-[10px] font-bold uppercase tracking-wider text-[#525252] mt-0.5 flex items-center justify-center gap-1">
@@ -143,6 +157,22 @@ export default function PublicCreatorProfile() {
             <p className="text-[10px] font-bold uppercase tracking-wider text-[#525252] mt-0.5">Reels</p>
           </div>
         </div>
+
+        {/* Audience Insights button */}
+        {hasInsights && (
+          <button
+            onClick={() => setShowInsights(true)}
+            className="w-full mb-4 flex items-center gap-3 px-4 py-3.5 bg-[#E25238]/8 border border-[#E25238]/20 rounded-2xl hover:bg-[#E25238]/15 transition-colors"
+          >
+            <div className="w-8 h-8 rounded-xl bg-[#E25238] flex items-center justify-center flex-shrink-0">
+              <BarChart2 size={16} className="text-white" />
+            </div>
+            <div className="flex-1 text-left">
+              <p className="text-sm font-bold text-[#0A0A0A]">Audience Insights</p>
+              <p className="text-xs text-[#525252] font-medium">View demographics & reach data</p>
+            </div>
+          </button>
+        )}
 
         {/* Bio */}
         {profile.bio && (
@@ -262,10 +292,19 @@ export default function PublicCreatorProfile() {
             onClick={() => navigate("/")}
             className="px-8 py-3.5 bg-[#E25238] text-white rounded-full font-bold text-sm hover:bg-[#C9452D] transition-colors"
           >
-            Join OLLCOLLAB
+            Join Rytspot
           </button>
         </div>
       </div>
+
+      {showInsights && (
+        <AudienceInsightsModal
+          open={showInsights}
+          onClose={() => setShowInsights(false)}
+          isOwner={false}
+          initialData={ai}
+        />
+      )}
     </div>
   );
 }

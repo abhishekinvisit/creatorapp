@@ -14,7 +14,15 @@ const LANGUAGES = ["English", "Hindi", "Tamil", "Telugu", "Kannada", "Bengali", 
 export default function AddRequirements() {
   const navigate = useNavigate();
   const { draftOpportunity, publishOpportunity } = useApp();
-  const [data, setData] = useState({ category: "", minFollowers: "", age: "", gender: "", location: "", language: [] });
+  const [data, setData] = useState({
+    category: "",
+    followersMin: "",
+    followersMax: "",
+    age: "",
+    gender: "",
+    location: "",
+    language: [],
+  });
   const [coverUrl, setCoverUrl] = useState("");
   const [saving, setSaving] = useState(false);
   const coverRef = useRef(null);
@@ -41,21 +49,31 @@ export default function AddRequirements() {
   const handlePublish = async () => {
     setSaving(true);
     try {
+      const payoutMin = parseInt(draftOpportunity.payoutMin || 0);
+      const payoutMax = parseInt(draftOpportunity.payoutMax || 0);
+      const followersMin = parseInt(data.followersMin || 0);
+      const followersMax = parseInt(data.followersMax || 0);
+
+      const requirements = [
+        data.age && data.age !== "Any Age" ? `Age: ${data.age}` : "",
+        data.gender && data.gender !== "All" ? `Gender: ${data.gender}` : "",
+        data.location ? `Location: ${data.location}` : "",
+      ].filter(Boolean);
+
       const payload = {
         title: draftOpportunity.title || "Untitled Campaign",
         pitch: draftOpportunity.description || draftOpportunity.title || "",
         description: draftOpportunity.description || "",
-        payout: parseInt(draftOpportunity.payout || 0),
+        payout: payoutMax || payoutMin || 0,
+        payout_min: payoutMin,
+        payout_max: payoutMax,
+        followers_min: followersMin,
+        followers_max: followersMax,
         creators_needed: parseInt(draftOpportunity.creatorsNeeded || 5),
         deadline: draftOpportunity.deadline || "",
         category: data.category || "Lifestyle",
         cover_url: coverUrl || draftOpportunity.coverUrl || "",
-        requirements: [
-          data.minFollowers ? `Min ${data.minFollowers} followers` : "",
-          data.age ? `Age: ${data.age}` : "",
-          data.gender ? `Gender: ${data.gender}` : "",
-          data.location ? `Location: ${data.location}` : "",
-        ].filter(Boolean),
+        requirements,
         languages: data.language,
       };
       const created = await opportunitiesApi.create(payload);
@@ -65,6 +83,10 @@ export default function AddRequirements() {
         description: created.description || created.pitch || "",
         pitch: created.pitch || "",
         payout: created.payout || 0,
+        payoutMin: created.payout_min || 0,
+        payoutMax: created.payout_max || 0,
+        followersMin: created.followers_min || 0,
+        followersMax: created.followers_max || 0,
         needed: created.creators_needed || 1,
         deadline: created.deadline || "",
         category: created.category || "",
@@ -92,15 +114,32 @@ export default function AddRequirements() {
           <SearchablePills options={CATS} value={data.category} onChange={(v) => setData({ ...data, category: v })} testId="req-cat" />
         </Field>
 
-        <Field label="Minimum Followers">
-          <input
-            data-testid="req-followers"
-            type="number"
-            value={data.minFollowers}
-            onChange={(e) => setData({ ...data, minFollowers: e.target.value })}
-            placeholder="e.g. 5000"
-            className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-4 outline-none text-white placeholder-neutral-500 font-medium focus:border-[#E25238]"
-          />
+        <Field label="Follower Range Required">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <p className="text-[10px] font-bold tracking-widest uppercase text-neutral-500 mb-1.5">Min Followers</p>
+              <input
+                data-testid="req-followers-min"
+                type="number"
+                value={data.followersMin}
+                onChange={(e) => setData({ ...data, followersMin: e.target.value })}
+                placeholder="e.g. 5000"
+                className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-4 outline-none text-white placeholder-neutral-500 font-medium focus:border-[#E25238]"
+              />
+            </div>
+            <div>
+              <p className="text-[10px] font-bold tracking-widest uppercase text-neutral-500 mb-1.5">Max Followers</p>
+              <input
+                data-testid="req-followers-max"
+                type="number"
+                value={data.followersMax}
+                onChange={(e) => setData({ ...data, followersMax: e.target.value })}
+                placeholder="e.g. 100000"
+                className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-4 outline-none text-white placeholder-neutral-500 font-medium focus:border-[#E25238]"
+              />
+            </div>
+          </div>
+          <p className="text-[11px] text-neutral-500 mt-1.5 font-medium">Leave blank to accept all follower counts</p>
         </Field>
 
         <Field label="Audience Age Group">

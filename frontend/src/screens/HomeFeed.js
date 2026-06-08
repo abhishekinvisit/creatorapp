@@ -26,6 +26,10 @@ function mapApiOpp(o) {
     pitch: o.pitch || "",
     description: o.description || "",
     payout: o.payout || 0,
+    payoutMin: o.payout_min || 0,
+    payoutMax: o.payout_max || 0,
+    followersMin: o.followers_min || 0,
+    followersMax: o.followers_max || 0,
     needed: o.creators_needed || o.needed || 1,
     deadline: o.deadline || "",
     category: o.category || "",
@@ -138,7 +142,7 @@ export default function HomeFeed() {
             <div className="w-3 h-3 rounded-full border-2 border-white" />
           </div>
           <h1 className="font-display font-black text-2xl tracking-[-0.04em] text-[#0A0A0A]">
-            OLLCOLLAB
+            RYTSPOT
           </h1>
         </div>
       </div>
@@ -315,7 +319,11 @@ export default function HomeFeed() {
                   <div className="flex items-center gap-3 text-[11px] text-[#525252] flex-wrap">
                     <span className="flex items-center gap-1">
                       <Wallet size={11} className="text-[#E25238]" />
-                      <span className="font-bold text-[#0A0A0A]">₹{op.payout}</span>
+                      <span className="font-bold text-[#0A0A0A]">
+                        {op.payoutMin > 0 && op.payoutMax > 0
+                          ? `₹${op.payoutMin.toLocaleString("en-IN")}–₹${op.payoutMax.toLocaleString("en-IN")}`
+                          : `₹${(op.payoutMax || op.payout || 0).toLocaleString("en-IN")}`}
+                      </span>
                     </span>
                     <span className="flex items-center gap-1">
                       <Users size={11} className="text-[#E25238]" />

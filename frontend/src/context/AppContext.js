@@ -5,7 +5,7 @@ import { authApi, TOKEN_KEY, clearToken, setToken, getToken, savedCreatorsApi, a
 const AppContext = createContext(null);
 
 function savedKey(userId) {
-  return userId ? `ollcollab_saved_${userId}` : null;
+  return userId ? `rytspot_saved_${userId}` : null;
 }
 
 function formatFollowers(n) {
@@ -32,6 +32,7 @@ function mapApiApplications(data) {
     appliedOn: formatDate(a.applied_at),
     status: a.status || "applied",
     note: a.note || "",
+    counterAmount: a.counter_amount || null,
   }));
 }
 
@@ -62,6 +63,7 @@ function mapCreatorProfile(prev, p) {
       followersCount:   p.followers_count || prev.creator.followersCount || 0,
       collaborations:   p.collaborations_count != null ? p.collaborations_count : (prev.creator.collaborations || 0),
       avatar:           p.avatar_url    || prev.creator.avatar,
+      isPublic:         p.is_public !== false,
     },
     workedWith: workedWith.length ? workedWith : prev.workedWith,
   };

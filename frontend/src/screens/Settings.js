@@ -15,7 +15,7 @@ export default function Settings() {
     { id: "notif",   icon: Bell,        label: "Notifications",         action: () => navigate("/notifications") },
     { id: "privacy", icon: ShieldCheck, label: "Privacy & Security",    action: () => toast.info("Coming soon") },
     { id: "blocked", icon: UserX,       label: "Blocked Users",         action: () => toast.info("No blocked users") },
-    { id: "help",    icon: HelpCircle,  label: "Help & Support",        action: () => toast.info("Support: hello@ollcollab.com") },
+    { id: "help",    icon: HelpCircle,  label: "Help & Support",        action: () => toast.info("Support: hello@rytspot.com") },
   ];
 
   return (
@@ -49,7 +49,7 @@ export default function Settings() {
         </button>
 
         <p className={`text-center text-xs font-medium mt-6 ${dark ? "text-neutral-500" : "text-[#525252]"}`}>
-          OLLCOLLAB · v1.0.0
+          RYTSPOT · v1.0.0
         </p>
       </div>
     </div>

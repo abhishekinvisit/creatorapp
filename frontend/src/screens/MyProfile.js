@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Settings, BadgeCheck, Pencil, Briefcase, Share2, MapPin, Globe, ChevronRight, Plus, Tag, ExternalLink, Users, Bookmark } from "lucide-react";
+import { Settings, BadgeCheck, Pencil, Briefcase, Share2, MapPin, Globe, ChevronRight, Plus, Tag, ExternalLink, Users, Bookmark, BarChart2 } from "lucide-react";
 import { toast } from "sonner";
 
 const InstagramIcon = ({ size = 16, className = "", strokeWidth = 2, ...props }) => (
@@ -14,10 +14,11 @@ import { BrandLogo } from "@/components/BrandLogo";
 import { WorkedWithItem } from "@/components/WorkedWithItem";
 import { ReelCard } from "@/components/ReelCard";
 import { reelsApi } from "@/lib/api";
+import { AudienceInsightsModal } from "@/components/AudienceInsightsModal";
 
 async function shareProfile(url, name) {
   if (navigator.share) {
-    try { await navigator.share({ title: `${name} on OllCollab`, url }); return; } catch (_) {}
+    try { await navigator.share({ title: `${name} on Rytspot`, url }); return; } catch (_) {}
   }
   try {
     await navigator.clipboard.writeText(url);
@@ -47,6 +48,7 @@ export default function MyProfile() {
   const navigate = useNavigate();
   const { user, accountType, workedWith, currentUserId, activePosts, savedCreatorsCount } = useApp();
   const [reels, setReels] = useState([]);
+  const [showInsights, setShowInsights] = useState(false);
 
   useEffect(() => {
     if (accountType !== "creator") return;
@@ -423,12 +425,25 @@ export default function MyProfile() {
           </button>
           <button
             data-testid="share-profile-btn"
-            onClick={() => shareProfile(`${window.location.origin}/brand/creator/${currentUserId}`, c.name)}
+            onClick={() => shareProfile(`${window.location.origin}/creator/${(c.handle || "").replace(/^@/, "")}`, c.name)}
             className="px-5 py-3 rounded-full bg-[#0A0A0A] text-white font-bold text-sm flex items-center justify-center gap-2"
           >
             <Share2 size={14} /> Share
           </button>
         </div>
+        <button
+          data-testid="audience-insights-btn"
+          onClick={() => setShowInsights(true)}
+          className="w-full mt-3 flex items-center gap-3 px-4 py-3.5 bg-[#E25238]/8 border border-[#E25238]/20 rounded-2xl hover:bg-[#E25238]/15 transition-colors"
+        >
+          <div className="w-8 h-8 rounded-xl bg-[#E25238] flex items-center justify-center flex-shrink-0">
+            <BarChart2 size={16} className="text-white" />
+          </div>
+          <div className="flex-1 text-left">
+            <p className="text-sm font-bold text-[#0A0A0A]">Audience Insights</p>
+            <p className="text-xs text-[#525252] font-medium">Share your demographics with brands</p>
+          </div>
+        </button>
       </div>
 
       {/* PORTFOLIO – main focus */}
@@ -463,6 +478,14 @@ export default function MyProfile() {
           )}
         </div>
       </div>
+
+      {showInsights && (
+        <AudienceInsightsModal
+          open={showInsights}
+          onClose={() => setShowInsights(false)}
+          isOwner={true}
+        />
+      )}
     </div>
   );
 }

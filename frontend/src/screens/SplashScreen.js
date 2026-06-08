@@ -1,11 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Zap, TrendingUp, Users } from "lucide-react";
-
-const FEATURES = [
-  { icon: Zap, text: "Instant brand matching" },
-  { icon: TrendingUp, text: "Track campaign performance" },
-  { icon: Users, text: "10,000+ active creators" },
-];
+import { ArrowRight } from "lucide-react";
 
 export default function SplashScreen() {
   const navigate = useNavigate();
@@ -19,17 +13,10 @@ export default function SplashScreen() {
       <div className="absolute bottom-[-60px] left-[-60px] w-64 h-64 rounded-full bg-[#F59E0B] opacity-10 blur-3xl pointer-events-none" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-[#E25238] opacity-5 blur-3xl pointer-events-none" />
 
-      {/* Top badge */}
-      <div className="pt-16 flex justify-center relative z-10">
-        <span className="px-4 py-1.5 rounded-full bg-[#E25238]/15 border border-[#E25238]/30 text-[#E25238] text-[10px] font-bold uppercase tracking-[0.3em]">
-          Creator Marketplace
-        </span>
-      </div>
-
       {/* Center hero */}
       <div className="flex-1 flex flex-col items-center justify-center px-8 relative z-10">
-        {/* Logo */}
-        <div className="relative mb-10">
+        {/* Logo mark */}
+        <div className="relative mb-8">
           <div className="absolute inset-0 bg-[#E25238] rounded-[28px] blur-2xl opacity-40 scale-110" />
           <div className="relative w-24 h-24 rounded-[24px] bg-gradient-to-br from-[#E25238] to-[#F59E0B] flex items-center justify-center shadow-2xl">
             <div className="w-11 h-11 rounded-full border-[4px] border-white opacity-90" />
@@ -37,30 +24,14 @@ export default function SplashScreen() {
         </div>
 
         {/* Wordmark */}
-        <h1 className="font-display font-black text-6xl tracking-tighter text-white leading-none mb-2">
-          OLL
-          <span className="text-[#E25238]">COLLAB</span>
+        <h1 className="font-display font-black text-6xl tracking-tighter text-white leading-none mb-4">
+          Ryt<span className="text-[#E25238]">spot</span>
         </h1>
-        <p className="text-sm font-medium text-neutral-400 tracking-[0.2em] uppercase mt-1 mb-10">
-          Where Brand Meet Creators
-        </p>
 
-        {/* Feature pills */}
-        <div className="flex flex-col gap-3 w-full max-w-xs">
-          {FEATURES.map(({ icon: Icon, text }) => (
-            <div
-              key={text}
-              className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/5 border border-white/10"
-            >
-              <div className="w-8 h-8 rounded-xl bg-[#E25238]/15 flex items-center justify-center flex-shrink-0">
-                <Icon size={15} className="text-[#E25238]" />
-              </div>
-              <span className="text-sm font-medium text-neutral-300">
-                {text}
-              </span>
-            </div>
-          ))}
-        </div>
+        {/* Tagline */}
+        <p className="text-base font-medium text-neutral-400 text-center leading-relaxed max-w-xs">
+          Connecting the Right Creators with the Right Brands
+        </p>
       </div>
 
       {/* Bottom CTA */}

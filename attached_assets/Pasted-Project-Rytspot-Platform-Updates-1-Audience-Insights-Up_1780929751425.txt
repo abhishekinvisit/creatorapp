@@ -1,0 +1,145 @@
+Project: Rytspot Platform Updates
+
+1. Audience Insights Upload & Display
+
+Build an "Audience Insights" feature for creators.
+
+Creator Side:
+
+* Add an "Audience Insights" section during onboarding and inside Edit Profile.
+* Allow creators to upload analytics screenshots from Instagram, YouTube, and TikTok.
+* Support multiple screenshots.
+* Use OCR and AI to extract:
+
+  * Gender split
+  * Age groups
+  * Top cities
+  * Top states/regions
+  * Top countries
+  * Any additional audience metrics available in screenshots
+* Store extracted data in structured database fields.
+* Allow creators to manually edit extracted values before saving.
+* Allow creators to update insights anytime.
+* Store:
+
+  * Last uploaded date
+  * Last verified date
+  * Source platform (Instagram, YouTube, TikTok)
+
+Creator Profile Display:
+
+* Add a button called "Audience Insights" on every creator profile.
+* When clicked, open a professional popup/modal screen.
+* Show:
+
+  * Gender distribution chart
+  * Age distribution chart
+  * Top countries
+  * Top cities
+  * Top states/regions
+  * Last verified date
+  * Source platform badges
+* Design charts similar to modern creator marketplace platforms.
+* Make popup responsive on mobile and desktop.
+
+2. Opportunity Posting Improvements
+
+Brand Side:
+
+* Replace fixed follower requirement with follower range.
+
+* Replace fixed collaboration budget with budget range.
+
+Store both minimum and maximum values in database.
+
+Display ranges on:
+
+* Opportunity cards
+* Opportunity details page
+* Filters and search
+
+3. Creator Counter Offer Feature
+
+While applying to an opportunity:
+
+Current Fields:
+
+* Cover Note
+
+Add:
+
+* Counter Amount
+
+Example:
+Brand Budget Range: ₹10,000 - ₹20,000
+Creator Counter Offer: ₹25,000
+
+Application Form Fields:
+
+* Cover Note
+* Counter Amount (Optional)
+
+Brand should see:
+
+* Creator profile
+* Cover note
+* Counter amount
+
+Store counter amount with application data.
+
+4. Rebrand Entire Application to Rytspot
+
+Update application branding everywhere:
+
+Replace:
+
+* OllCollab
+* Old branding 
+
+With:
+
+* Rytspot
+
+Landing / First Screen:
+Create a minimal modern welcome screen.
+
+Only show:
+
+* Rytspot logo
+* Tagline:
+  "Connecting the Right Creators with the Right Brands"
+* Get Started button
+
+No additional navigation or content on first screen.
+
+Maintain mobile-first responsive design.
+
+
+  5. Public Creator Profiles
+
+Allow creator profiles to be viewed without login/signup so creators can use Rytspot as their portfolio.
+
+* Anyone with the profile link can view the profile.
+* Show profile details, social links, portfolio content, collaborations, and audience insights.
+* Generate public URLs like: rytspot.com/creator/username
+* Add a profile visibility setting (Public/Private).
+* Public visitors cannot access messages, dashboard, applications, or any private data.
+
+
+
+Tasks:
+
+* Analyze attached brand profile file.
+* Create required database schema if fields do not exist.
+* Import all brand profile information.
+* Map data correctly to existing brand profile structure.
+* Ensure imported profile appears in brand dashboard and profile views.
+
+General Requirements:
+
+* Maintain existing functionality.
+* Ensure all new fields are included in database migrations.
+* Update APIs, frontend forms, validation, profile pages, opportunity pages, and dashboards.
+* Ensure mobile responsiveness.
+* Use clean modern UI consistent with Rytspot branding.
+* Test all flows end-to-end before deployment.

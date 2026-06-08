@@ -51,6 +51,10 @@ export default function OpportunityDetails() {
           pitch: o.pitch,
           description: o.description,
           payout: o.payout,
+          payoutMin: o.payout_min || 0,
+          payoutMax: o.payout_max || 0,
+          followersMin: o.followers_min || 0,
+          followersMax: o.followers_max || 0,
           needed: o.creators_needed,
           deadline: o.deadline,
           category: o.category,
@@ -163,7 +167,14 @@ export default function OpportunityDetails() {
         {/* Details list */}
         <div className="bg-white rounded-3xl border border-[#E5E5E5] divide-y divide-[#F3F3F3] mb-6">
           {[
-            { icon: Wallet,   label: "Payout",                value: `₹${op.payout} per reel` },
+            { icon: Wallet,   label: "Budget", value: (() => {
+              const min = op.payoutMin || 0;
+              const max = op.payoutMax || 0;
+              if (min > 0 && max > 0) return `₹${min.toLocaleString("en-IN")} – ₹${max.toLocaleString("en-IN")}`;
+              if (max > 0) return `Up to ₹${max.toLocaleString("en-IN")}`;
+              if (min > 0) return `₹${min.toLocaleString("en-IN")}+`;
+              return `₹${(op.payout || 0).toLocaleString("en-IN")} per reel`;
+            })() },
             { icon: Calendar, label: "Application Deadline",  value: op.deadline },
             { icon: Users,    label: "Creators Needed",       value: `${op.needed}` },
             { icon: Tag,      label: "Category",              value: op.category },

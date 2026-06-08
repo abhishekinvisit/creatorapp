@@ -113,6 +113,7 @@ class CreatorProfileIn(BaseModel):
     years_experience: Optional[int] = None
     avatar_url: Optional[str] = None
     worked_with: Optional[Any] = None  # JSON array of brand objects
+    is_public: Optional[bool] = None
 
 class BrandProfileIn(BaseModel):
     brand_name: Optional[str] = None
@@ -148,19 +149,25 @@ class OpportunityIn(BaseModel):
     title: str
     pitch: str
     description: Optional[str] = ""
-    payout: int
+    payout: int = 0
+    payout_min: Optional[int] = 0
+    payout_max: Optional[int] = 0
     creators_needed: int
     deadline: str
     category: str
     cover_url: Optional[str] = ""
     requirements: Optional[List[str]] = []
     languages: Optional[List[str]] = []
+    followers_min: Optional[int] = 0
+    followers_max: Optional[int] = 0
 
 class OpportunityUpdate(BaseModel):
     title: Optional[str] = None
     pitch: Optional[str] = None
     description: Optional[str] = None
     payout: Optional[int] = None
+    payout_min: Optional[int] = None
+    payout_max: Optional[int] = None
     creators_needed: Optional[int] = None
     deadline: Optional[str] = None
     category: Optional[str] = None
@@ -168,6 +175,8 @@ class OpportunityUpdate(BaseModel):
     requirements: Optional[List[str]] = None
     languages: Optional[List[str]] = None
     status: Optional[str] = None
+    followers_min: Optional[int] = None
+    followers_max: Optional[int] = None
 
 class ReelIn(BaseModel):
     brand: str
@@ -190,6 +199,21 @@ class ReelUpdate(BaseModel):
 class ApplyIn(BaseModel):
     opportunity_id: str
     note: Optional[str] = ""
+    counter_amount: Optional[int] = None
+
+class AudienceInsightsIn(BaseModel):
+    gender_male: Optional[float] = 0
+    gender_female: Optional[float] = 0
+    gender_other: Optional[float] = 0
+    age_13_17: Optional[float] = 0
+    age_18_24: Optional[float] = 0
+    age_25_34: Optional[float] = 0
+    age_35_44: Optional[float] = 0
+    age_45_plus: Optional[float] = 0
+    top_countries: Optional[List[Any]] = []
+    top_cities: Optional[List[Any]] = []
+    top_states: Optional[List[Any]] = []
+    source_platforms: Optional[List[str]] = []
 
 class ApplicationStatusIn(BaseModel):
     status: str  # applied | shortlisted | accepted | rejected
@@ -272,6 +296,34 @@ def _serialize_profile(profile: dict) -> dict:
                 d["worked_with"] = []
         elif ww is None:
             d["worked_with"] = []
+    return d
+
+
+def _serialize_ai(row) -> Optional[dict]:
+    """Serialize audience_insights row to JSON-safe dict."""
+    if not row:
+        return None
+    d = dict(row)
+    d["id"] = str(d["id"])
+    d["creator_id"] = str(d["creator_id"])
+    for col in ["top_countries", "top_cities", "top_states"]:
+        v = d.get(col)
+        if isinstance(v, str):
+            try: d[col] = json.loads(v)
+            except Exception: d[col] = []
+        elif v is None:
+            d[col] = []
+    if "source_platforms" in d:
+        d["source_platforms"] = list(d.get("source_platforms") or [])
+    for col in ["last_uploaded_at", "last_verified_at", "updated_at"]:
+        if col in d and hasattr(d.get(col), "isoformat"):
+            d[col] = d[col].isoformat()
+    for col in ["gender_male", "gender_female", "gender_other",
+                "age_13_17", "age_18_24", "age_25_34", "age_35_44", "age_45_plus"]:
+        if col in d and d[col] is not None:
+            d[col] = float(d[col])
+        else:
+            d[col] = 0.0
     return d
 
 
@@ -517,7 +569,8 @@ async def list_creators(
         "name": "cp.full_name ASC",
     }
     order = order_map.get(sort_by, "cp.followers_count DESC NULLS LAST")
-    where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
+    conditions.insert(0, "cp.is_public IS NOT FALSE")
+    where = "WHERE " + " AND ".join(conditions)
 
     async with pool.acquire() as conn:
         rows = await conn.fetch(f"""
@@ -537,6 +590,32 @@ async def list_creators(
     return result
 
 
+@api_router.get("/creators/handle/{handle}")
+async def get_creator_by_handle(handle: str, user=Depends(optional_user)):
+    """Public: get a creator profile by their handle."""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        cp = await conn.fetchrow(
+            "SELECT * FROM creator_profiles WHERE LOWER(handle)=LOWER($1)", handle
+        )
+        if not cp:
+            raise HTTPException(status_code=404, detail="Creator not found")
+        creator_user_id = str(cp["user_id"])
+        reels = await conn.fetch(
+            "SELECT * FROM creator_reels WHERE creator_id=$1::uuid ORDER BY sort_order, created_at DESC",
+            creator_user_id,
+        )
+        ai = await conn.fetchrow(
+            "SELECT * FROM audience_insights WHERE creator_id=$1::uuid", creator_user_id
+        )
+    profile = _serialize_profile(dict(cp))
+    profile["creator_user_id"] = creator_user_id
+    profile["is_public"] = cp.get("is_public", True)
+    profile["audience_insights"] = _serialize_ai(ai) if ai else None
+    profile["reels"] = [_reel_row(r) for r in reels]
+    return profile
+
+
 @api_router.get("/creators/{creator_user_id}")
 async def get_creator_public(creator_user_id: str, user=Depends(optional_user)):
     """Public: get a creator profile by their user_id (for brand view)."""
@@ -549,9 +628,14 @@ async def get_creator_public(creator_user_id: str, user=Depends(optional_user)):
             "SELECT * FROM creator_reels WHERE creator_id=$1::uuid ORDER BY sort_order, created_at DESC",
             creator_user_id,
         )
+        ai = await conn.fetchrow(
+            "SELECT * FROM audience_insights WHERE creator_id=$1::uuid", creator_user_id
+        )
     if not cp:
         raise HTTPException(status_code=404, detail="Creator not found")
     profile = _serialize_profile(dict(cp))
+    profile["is_public"] = cp.get("is_public", True)
+    profile["audience_insights"] = _serialize_ai(dict(ai)) if ai else None
     profile["reels"] = [
         {
             "id": str(r["id"]),
@@ -668,13 +752,17 @@ async def create_opportunity(body: OpportunityIn, user=Depends(current_user)):
         brand_cat = brand["category"] if brand else ""
         verified = brand["verified"] if brand else False
         cover = body.cover_url or "https://images.unsplash.com/photo-1558655146-d09347e92766?w=940&q=85"
+        payout_val = body.payout or body.payout_max or body.payout_min or 0
         row = await conn.fetchrow("""
             INSERT INTO opportunities(brand_id,brand_name,brand_category,title,pitch,description,
-              payout,creators_needed,deadline,category,cover_url,requirements,languages,verified)
-            VALUES($1::uuid,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+              payout,payout_min,payout_max,followers_min,followers_max,
+              creators_needed,deadline,category,cover_url,requirements,languages,verified)
+            VALUES($1::uuid,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
             RETURNING *
         """, user["id"], brand_name, brand_cat, body.title, body.pitch, body.description,
-            body.payout, body.creators_needed, body.deadline, body.category,
+            payout_val, body.payout_min or 0, body.payout_max or 0,
+            body.followers_min or 0, body.followers_max or 0,
+            body.creators_needed, body.deadline, body.category,
             cover, body.requirements, body.languages, verified)
     return _opp_row(row)
 
@@ -733,10 +821,10 @@ async def apply(body: ApplyIn, user=Depends(current_user)):
             raise HTTPException(status_code=404, detail="Opportunity not found")
         try:
             app_row = await conn.fetchrow("""
-                INSERT INTO applications(opportunity_id,creator_id,brand_id,brand_name,opportunity_title,note)
-                VALUES($1::uuid,$2::uuid,$3::uuid,$4,$5,$6) RETURNING *
+                INSERT INTO applications(opportunity_id,creator_id,brand_id,brand_name,opportunity_title,note,counter_amount)
+                VALUES($1::uuid,$2::uuid,$3::uuid,$4,$5,$6,$7) RETURNING *
             """, body.opportunity_id, user["id"], opp["brand_id"],
-                opp["brand_name"], opp["title"], body.note)
+                opp["brand_name"], opp["title"], body.note, body.counter_amount)
             await conn.execute(
                 "UPDATE opportunities SET applicants_count=applicants_count+1 WHERE id=$1::uuid",
                 body.opportunity_id,
@@ -1098,6 +1186,57 @@ async def delete_reel(reel_id: str, user=Depends(current_user)):
         if not reel or str(reel["creator_id"]) != str(user["id"]):
             raise HTTPException(status_code=403, detail="Not your reel")
         await conn.execute("DELETE FROM creator_reels WHERE id=$1::uuid", reel_id)
+    return {"success": True}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# AUDIENCE INSIGHTS
+# ─────────────────────────────────────────────────────────────────────────────
+
+@api_router.get("/audience-insights")
+async def get_audience_insights(user=Depends(current_user)):
+    if user["account_type"] != "creator":
+        raise HTTPException(status_code=403, detail="Creators only")
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow(
+            "SELECT * FROM audience_insights WHERE creator_id=$1::uuid", user["id"]
+        )
+    if not row:
+        return {}
+    return _serialize_ai(dict(row))
+
+
+@api_router.put("/audience-insights")
+async def update_audience_insights(body: AudienceInsightsIn, user=Depends(current_user)):
+    if user["account_type"] != "creator":
+        raise HTTPException(status_code=403, detail="Creators only")
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        await conn.execute("""
+            INSERT INTO audience_insights(
+                creator_id, gender_male, gender_female, gender_other,
+                age_13_17, age_18_24, age_25_34, age_35_44, age_45_plus,
+                top_countries, top_cities, top_states, source_platforms,
+                last_uploaded_at, updated_at
+            )
+            VALUES($1::uuid,$2,$3,$4,$5,$6,$7,$8,$9,
+                   $10::jsonb,$11::jsonb,$12::jsonb,$13,NOW(),NOW())
+            ON CONFLICT(creator_id) DO UPDATE SET
+                gender_male=$2, gender_female=$3, gender_other=$4,
+                age_13_17=$5, age_18_24=$6, age_25_34=$7, age_35_44=$8, age_45_plus=$9,
+                top_countries=$10::jsonb, top_cities=$11::jsonb, top_states=$12::jsonb,
+                source_platforms=$13, last_uploaded_at=NOW(), updated_at=NOW()
+        """,
+            user["id"],
+            body.gender_male or 0, body.gender_female or 0, body.gender_other or 0,
+            body.age_13_17 or 0, body.age_18_24 or 0, body.age_25_34 or 0,
+            body.age_35_44 or 0, body.age_45_plus or 0,
+            json.dumps(body.top_countries or []),
+            json.dumps(body.top_cities or []),
+            json.dumps(body.top_states or []),
+            body.source_platforms or [],
+        )
     return {"success": True}
 
 

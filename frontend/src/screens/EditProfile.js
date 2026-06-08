@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Camera, Plus, X, Link2, Pencil, MapPin } from "lucide-react";
+import { Camera, Plus, X, Link2, Pencil, MapPin, BarChart2 } from "lucide-react";
 
 const InstagramIcon = ({ size = 16, className = "", ...props }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
@@ -33,6 +33,7 @@ import { BrandLogo } from "@/components/BrandLogo";
 import { WorkedWithItem } from "@/components/WorkedWithItem";
 import { useApp } from "@/context/AppContext";
 import { profileApi, reelsApi } from "@/lib/api";
+import { AudienceInsightsModal } from "@/components/AudienceInsightsModal";
 import { toast } from "sonner";
 
 import { MASTER_CATEGORIES, LANGUAGES as ALL_LANGUAGES } from "@/data/categories";
@@ -62,6 +63,8 @@ export default function EditProfile() {
   const [cats, setCats] = useState(profile.category || []);
   const [catSearch, setCatSearch] = useState("");
   const [languages, setLanguages] = useState(profile.language || []);
+  const [isPublic, setIsPublic] = useState(profile.isPublic !== false);
+  const [showInsights, setShowInsights] = useState(false);
 
   // Brand-only form state
   const [brandInstagramUrl, setBrandInstagramUrl] = useState(profile.instagramUrl || "");
@@ -149,6 +152,7 @@ export default function EditProfile() {
           followers_count: Number(followersCount) || undefined,
           collaborations_count: Number(collaborations) || undefined,
           worked_with: workedWithPayload,
+          is_public: isPublic,
         });
         await refreshProfile();
         toast.success("Profile updated");
@@ -439,6 +443,38 @@ export default function EditProfile() {
           </Section>
         )}
 
+        {/* Profile Visibility + Audience Insights */}
+        {accountType !== "brand" && (
+          <Section label="Profile Visibility">
+            <div className="flex items-center justify-between px-4 py-4 bg-white border border-[#E5E5E5] rounded-2xl">
+              <div>
+                <p className="font-bold text-sm text-[#0A0A0A]">Public Profile</p>
+                <p className="text-xs text-[#525252] font-medium mt-0.5">Visible to brands in Discover</p>
+              </div>
+              <button
+                data-testid="visibility-toggle"
+                onClick={() => setIsPublic((v) => !v)}
+                className={`relative w-12 h-6 rounded-full transition-colors ${isPublic ? "bg-[#22C55E]" : "bg-[#E5E5E5]"}`}
+              >
+                <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${isPublic ? "translate-x-6" : "translate-x-0.5"}`} />
+              </button>
+            </div>
+            <button
+              data-testid="audience-insights-edit-btn"
+              onClick={() => setShowInsights(true)}
+              className="w-full flex items-center gap-3 px-4 py-3.5 bg-white border border-[#E5E5E5] rounded-2xl hover:border-[#E25238] transition-colors"
+            >
+              <div className="w-8 h-8 rounded-xl bg-[#E25238] flex items-center justify-center flex-shrink-0">
+                <BarChart2 size={16} className="text-white" />
+              </div>
+              <div className="flex-1 text-left">
+                <p className="text-sm font-bold text-[#0A0A0A]">Audience Insights</p>
+                <p className="text-xs text-[#525252] font-medium">Add demographics to attract brands</p>
+              </div>
+            </button>
+          </Section>
+        )}
+
         {/* Worked With */}
         {accountType !== "brand" && (
           <Section
@@ -557,6 +593,14 @@ export default function EditProfile() {
           reel={editingReel === "new" ? null : reels.find((r) => r.id === editingReel)}
           onClose={() => setEditingReel(null)}
           onSave={saveReel}
+        />
+      )}
+
+      {showInsights && accountType !== "brand" && (
+        <AudienceInsightsModal
+          open={showInsights}
+          onClose={() => setShowInsights(false)}
+          isOwner={true}
         />
       )}
     </div>

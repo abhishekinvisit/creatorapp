@@ -8,7 +8,15 @@ import { toast } from "sonner";
 export default function PostOpportunity() {
   const navigate = useNavigate();
   const { setDraftOpportunity } = useApp();
-  const [data, setData] = useState({ title: "", description: "", payout: "", creatorsNeeded: "", deadline: "", coverUrl: "" });
+  const [data, setData] = useState({
+    title: "",
+    description: "",
+    payoutMin: "",
+    payoutMax: "",
+    creatorsNeeded: "",
+    deadline: "",
+    coverUrl: "",
+  });
   const coverRef = useRef(null);
 
   const handleCoverFile = (e) => {
@@ -24,6 +32,10 @@ export default function PostOpportunity() {
   const handleContinue = () => {
     if (!data.title || !data.description) {
       toast.error("Please fill in title and description");
+      return;
+    }
+    if (data.payoutMin && data.payoutMax && Number(data.payoutMin) > Number(data.payoutMax)) {
+      toast.error("Minimum budget cannot exceed maximum budget");
       return;
     }
     setDraftOpportunity(data);
@@ -90,15 +102,32 @@ export default function PostOpportunity() {
           />
         </Field>
 
-        <Field label="Payout (per reel) ₹">
-          <input
-            data-testid="campaign-payout"
-            type="number"
-            value={data.payout}
-            onChange={(e) => setData({ ...data, payout: e.target.value })}
-            placeholder="Enter amount"
-            className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-4 outline-none text-white placeholder-neutral-500 font-medium focus:border-[#E25238]"
-          />
+        <Field label="Budget Range (₹ per reel)">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <p className="text-[10px] font-bold tracking-widest uppercase text-neutral-500 mb-1.5">Min ₹</p>
+              <input
+                data-testid="campaign-payout-min"
+                type="number"
+                value={data.payoutMin}
+                onChange={(e) => setData({ ...data, payoutMin: e.target.value })}
+                placeholder="e.g. 500"
+                className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-4 outline-none text-white placeholder-neutral-500 font-medium focus:border-[#E25238]"
+              />
+            </div>
+            <div>
+              <p className="text-[10px] font-bold tracking-widest uppercase text-neutral-500 mb-1.5">Max ₹</p>
+              <input
+                data-testid="campaign-payout-max"
+                type="number"
+                value={data.payoutMax}
+                onChange={(e) => setData({ ...data, payoutMax: e.target.value })}
+                placeholder="e.g. 2000"
+                className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-4 outline-none text-white placeholder-neutral-500 font-medium focus:border-[#E25238]"
+              />
+            </div>
+          </div>
+          <p className="text-[11px] text-neutral-500 mt-1.5 font-medium">Creators can see the full range and propose a counter offer</p>
         </Field>
 
         <Field label="Number of Creators Needed">

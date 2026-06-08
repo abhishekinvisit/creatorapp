@@ -202,6 +202,33 @@ MIGRATIONS = [
     "CREATE TABLE IF NOT EXISTS categories (id SERIAL PRIMARY KEY, name VARCHAR(100) UNIQUE NOT NULL, sort_order INTEGER DEFAULT 0)",
     "CREATE INDEX IF NOT EXISTS idx_categories_name ON categories(name)",
     "INSERT INTO categories (name, sort_order) VALUES ('Art & Illustration',1),('Automotive',2),('Beauty & Skincare',3),('Books & Literature',4),('Business & Entrepreneurship',5),('Campus & Student Life',6),('Career & Professional',7),('Comedy',8),('Culture & Society',9),('Dance',10),('DIY & Crafts',11),('Education',12),('Entertainment',13),('Events & Nightlife',14),('Family',15),('Fashion',16),('Finance & Investing',17),('Fitness',18),('Food & Cooking',19),('Gaming',20),('Health & Wellness',21),('Home Decor & Interior',22),('Jewelry & Accessories',23),('Kids Content',24),('Lifestyle',25),('Local Discovery',26),('Luxury',27),('Memes & Humor',28),('Mental Wellness',29),('Motivation & Self Growth',30),('Movies & TV',31),('Music',32),('News & Media',33),('Outdoor & Adventure',34),('Parenting',35),('Pets & Animals',36),('Photography',37),('Real Estate',38),('Relationships',39),('Science',40),('Shopping & Reviews',41),('Spirituality',42),('Sports',43),('Sustainability & Environment',44),('Technology',45),('Travel',46),('Unboxing',47),('Videography',48),('Web3 & Crypto',49),('Other',50) ON CONFLICT (name) DO NOTHING",
+    # Rytspot Platform Updates
+    "ALTER TABLE opportunities ADD COLUMN IF NOT EXISTS payout_min INTEGER DEFAULT 0",
+    "ALTER TABLE opportunities ADD COLUMN IF NOT EXISTS payout_max INTEGER DEFAULT 0",
+    "ALTER TABLE opportunities ADD COLUMN IF NOT EXISTS followers_min INTEGER DEFAULT 0",
+    "ALTER TABLE opportunities ADD COLUMN IF NOT EXISTS followers_max INTEGER DEFAULT 0",
+    "ALTER TABLE applications ADD COLUMN IF NOT EXISTS counter_amount INTEGER",
+    "ALTER TABLE creator_profiles ADD COLUMN IF NOT EXISTS is_public BOOLEAN DEFAULT TRUE",
+    """CREATE TABLE IF NOT EXISTS audience_insights (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        creator_id UUID REFERENCES users(id) ON DELETE CASCADE UNIQUE,
+        gender_male DECIMAL(5,2) DEFAULT 0,
+        gender_female DECIMAL(5,2) DEFAULT 0,
+        gender_other DECIMAL(5,2) DEFAULT 0,
+        age_13_17 DECIMAL(5,2) DEFAULT 0,
+        age_18_24 DECIMAL(5,2) DEFAULT 0,
+        age_25_34 DECIMAL(5,2) DEFAULT 0,
+        age_35_44 DECIMAL(5,2) DEFAULT 0,
+        age_45_plus DECIMAL(5,2) DEFAULT 0,
+        top_countries JSONB DEFAULT '[]',
+        top_cities JSONB DEFAULT '[]',
+        top_states JSONB DEFAULT '[]',
+        source_platforms TEXT[] DEFAULT '{}',
+        last_uploaded_at TIMESTAMPTZ,
+        last_verified_at TIMESTAMPTZ,
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+    )""",
+    "CREATE INDEX IF NOT EXISTS idx_audience_insights_creator_id ON audience_insights(creator_id)",
 ]
 
 

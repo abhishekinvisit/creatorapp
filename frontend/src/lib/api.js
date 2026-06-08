@@ -79,8 +79,8 @@ export const opportunitiesApi = {
 
 // ── Applications ──────────────────────────────────────────────────────────────
 export const applicationsApi = {
-  apply:          (opportunityId, note = "") =>
-                    api.post("/applications", { opportunity_id: opportunityId, note }),
+  apply:          (opportunityId, note = "", counterAmount = null) =>
+                    api.post("/applications", { opportunity_id: opportunityId, note, counter_amount: counterAmount }),
   myApplications: ()              => api.get("/applications/mine"),
   forOpportunity: (opportunityId) => api.get(`/applications/opportunity/${opportunityId}`),
   updateStatus:   (id, status)    => api.patch(`/applications/${id}`, { status }),
@@ -123,6 +123,7 @@ export const creatorsApi = {
     return api.get(`/creators${qs ? `?${qs}` : ""}`);
   },
   get: (creatorUserId) => api.get(`/creators/${creatorUserId}`),
+  getByHandle: (handle) => api.get(`/creators/handle/${handle}`),
 };
 
 // ── Brands (public — for creator view) ────────────────────────────────────────
@@ -135,4 +136,10 @@ export const savedCreatorsApi = {
   list:   ()           => api.get("/saved-creators"),
   save:   (creatorId)  => api.post("/saved-creators", { creator_id: creatorId }),
   unsave: (creatorId)  => api.delete(`/saved-creators/${creatorId}`),
+};
+
+// ── Audience Insights ─────────────────────────────────────────────────────────
+export const audienceInsightsApi = {
+  get:  ()     => api.get("/audience-insights"),
+  save: (data) => api.put("/audience-insights", data),
 };

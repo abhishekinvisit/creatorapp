@@ -1,5 +1,6 @@
 - [Replit migration](replit-migration.md) — frontend npm install needs --legacy-peer-deps (react-day-picker/date-fns conflict); workflows use python3 -m uvicorn (not bare uvicorn); DATABASE_URL auto-provisioned as secret.
-- [Backend stack](backend-stack.md) — FastAPI + asyncpg + PostgreSQL; JWT via python-jose; bcrypt via passlib; 30-day tokens
+- [Backend stack](backend-stack.md) — FastAPI + asyncpg + PostgreSQL; JWT via python-jose; bcrypt DIRECT (not passlib — passlib wrap-bug detection breaks with newer bcrypt); 30-day tokens
+- [bcrypt passlib conflict](bcrypt-passlib.md) — passlib's bcrypt wrap-bug detection crashes with newer bcrypt; use `import bcrypt as _bcrypt` directly in auth.py
 - [Reels persistence](reels-persistence.md) — creator_reels table; reelsApi in api.js; EditProfile/MyProfile load from API not mock
 - [Login profile mapping](login-profile-mapping.md) — loginWithToken is async; calls /me after setting token; refreshProfile() in AppContext for post-save refresh
 - [Image upload pattern](image-upload-pattern.md) — FileReader base64 → stored as TEXT in DB; 3MB client limit; avatar_url / logo_data / cover_url / thumbnail columns
