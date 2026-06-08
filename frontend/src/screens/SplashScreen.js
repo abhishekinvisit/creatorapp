@@ -42,17 +42,22 @@ export default function SplashScreen() {
           <span className="text-[#E25238]">COLLAB</span>
         </h1>
         <p className="text-sm font-medium text-neutral-400 tracking-[0.2em] uppercase mt-1 mb-10">
-          Where Brands Meet Creators
+          Where Brand Meet Creators
         </p>
 
         {/* Feature pills */}
         <div className="flex flex-col gap-3 w-full max-w-xs">
           {FEATURES.map(({ icon: Icon, text }) => (
-            <div key={text} className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/5 border border-white/10">
+            <div
+              key={text}
+              className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/5 border border-white/10"
+            >
               <div className="w-8 h-8 rounded-xl bg-[#E25238]/15 flex items-center justify-center flex-shrink-0">
                 <Icon size={15} className="text-[#E25238]" />
               </div>
-              <span className="text-sm font-medium text-neutral-300">{text}</span>
+              <span className="text-sm font-medium text-neutral-300">
+                {text}
+              </span>
             </div>
           ))}
         </div>
@@ -66,7 +71,10 @@ export default function SplashScreen() {
           className="w-full bg-[#E25238] text-white rounded-full py-5 font-bold text-base flex items-center justify-center gap-2 hover:bg-[#C9452D] transition-all group shadow-xl shadow-[#E25238]/20"
         >
           Get Started
-          <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+          <ArrowRight
+            size={20}
+            className="group-hover:translate-x-1 transition-transform"
+          />
         </button>
         <button
           data-testid="login-link"
