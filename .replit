@@ -10,10 +10,7 @@ packages = ["cargo", "libiconv", "libxcrypt", "postgresql", "rustc"]
 [userenv]
 
 [userenv.shared]
-MONGO_URL = "mongodb://localhost:27017"
-DB_NAME = "ollcollab"
 CORS_ORIGINS = "*"
-JWT_SECRET = "ollcollab-jwt-secret-replit-2025"
 
 [workflows]
 runButton = "Project"
