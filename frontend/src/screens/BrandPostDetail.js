@@ -35,8 +35,6 @@ export default function BrandPostDetail() {
           description: p.description || p.pitch || "",
           pitch: p.pitch || p.description || "",
           payout: p.payout || 0,
-          payout_min: p.payout_min || 0,
-          payout_max: p.payout_max || 0,
           needed: p.creators_needed || 1,
           deadline: p.deadline || "",
           category: p.category || "",
@@ -66,7 +64,7 @@ export default function BrandPostDetail() {
   if (loading) {
     return (
       <div className="min-h-full bg-[#0A0A0A] text-white flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-white/10 border-t-[#E25238] rounded-full animate-spin" />
+        <p className="text-neutral-400 font-medium">Loading…</p>
       </div>
     );
   }
@@ -96,16 +94,11 @@ export default function BrandPostDetail() {
         ...(form.requirements || []),
       ].filter(Boolean);
 
-      const pMin = parseInt(form.payout_min) || 0;
-      const pMax = parseInt(form.payout_max) || 0;
-      const pFixed = parseInt(form.payout) || 0;
       await opportunitiesApi.update(id, {
         title: form.title,
         pitch: form.description,
         description: form.description,
-        payout: pFixed,
-        payout_min: pMin,
-        payout_max: pMax,
+        payout: parseInt(form.payout) || 0,
         creators_needed: parseInt(form.needed) || 1,
         deadline: form.deadline,
         cover_url: form.cover_url || "",
@@ -117,9 +110,7 @@ export default function BrandPostDetail() {
       });
       const updated = {
         ...post, ...form,
-        payout: pFixed,
-        payout_min: pMin,
-        payout_max: pMax,
+        payout: parseInt(form.payout) || 0,
         needed: parseInt(form.needed) || 1,
         category: form.category || "",
         requirements: builtRequirements,
@@ -252,8 +243,6 @@ function buildForm(post) {
     title: post.title || "",
     description: post.description || post.pitch || "",
     payout: post.payout || "",
-    payout_min: post.payout_min || post.payoutMin || "",
-    payout_max: post.payout_max || post.payoutMax || "",
     needed: post.needed || "",
     deadline: post.deadline || "",
     cover_url: post.cover_url || "",
@@ -278,21 +267,7 @@ const ViewBody = ({ post }) => {
       )}
 
       <div className="grid grid-cols-3 gap-3 mt-6">
-        <Stat
-          icon={Wallet}
-          label="Payout"
-          value={
-            post.payout
-              ? `₹${post.payout}`
-              : post.payout_min && post.payout_max
-              ? `₹${post.payout_min.toLocaleString()} – ₹${post.payout_max.toLocaleString()}`
-              : post.payout_min
-              ? `₹${post.payout_min.toLocaleString()}+`
-              : post.payout_max
-              ? `Up to ₹${post.payout_max.toLocaleString()}`
-              : "—"
-          }
-        />
+        <Stat icon={Wallet} label="Payout" value={post.payout ? `₹${post.payout}` : "—"} />
         <Stat icon={Users} label="Needed" value={post.needed || "—"} />
         <Stat icon={Calendar} label="Deadline" value={post.deadline || "—"} />
       </div>
@@ -427,34 +402,6 @@ const EditForm = ({ form, setForm }) => {
         />
       </Field>
 
-      <Field label="Budget Range (₹ per reel)">
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <p className="text-[10px] font-bold tracking-widest uppercase text-neutral-500 mb-1.5">Min ₹</p>
-            <input
-              data-testid="edit-payout-min"
-              type="number"
-              value={form.payout_min}
-              onChange={(e) => setForm({ ...form, payout_min: e.target.value })}
-              placeholder="e.g. 500"
-              className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-4 outline-none text-white placeholder-neutral-500 font-medium focus:border-[#E25238]"
-            />
-          </div>
-          <div>
-            <p className="text-[10px] font-bold tracking-widest uppercase text-neutral-500 mb-1.5">Max ₹</p>
-            <input
-              data-testid="edit-payout-max"
-              type="number"
-              value={form.payout_max}
-              onChange={(e) => setForm({ ...form, payout_max: e.target.value })}
-              placeholder="e.g. 2000"
-              className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-4 outline-none text-white placeholder-neutral-500 font-medium focus:border-[#E25238]"
-            />
-          </div>
-        </div>
-        <p className="text-[11px] text-neutral-500 mt-1.5 font-medium">Set both min and max for a range, or just one for a fixed budget</p>
-      </Field>
-
       <div className="grid grid-cols-2 gap-3">
         <Field label="Payout (₹)">
           <input
@@ -462,8 +409,7 @@ const EditForm = ({ form, setForm }) => {
             type="number"
             value={form.payout}
             onChange={(e) => setForm({ ...form, payout: e.target.value })}
-            placeholder="Fixed payout (optional)"
-            className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-4 outline-none text-white placeholder-neutral-500 font-medium focus:border-[#E25238]"
+            className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-4 outline-none text-white font-medium focus:border-[#E25238]"
           />
         </Field>
         <Field label="Creators Needed">

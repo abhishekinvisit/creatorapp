@@ -202,14 +202,14 @@ class ApplyIn(BaseModel):
     counter_amount: Optional[int] = None
 
 class AudienceInsightsIn(BaseModel):
-    gender_male: Optional[float] = None
-    gender_female: Optional[float] = None
-    gender_other: Optional[float] = None
-    age_13_17: Optional[float] = None
-    age_18_24: Optional[float] = None
-    age_25_34: Optional[float] = None
-    age_35_44: Optional[float] = None
-    age_45_plus: Optional[float] = None
+    gender_male: Optional[float] = 0
+    gender_female: Optional[float] = 0
+    gender_other: Optional[float] = 0
+    age_13_17: Optional[float] = 0
+    age_18_24: Optional[float] = 0
+    age_25_34: Optional[float] = 0
+    age_35_44: Optional[float] = 0
+    age_45_plus: Optional[float] = 0
     top_countries: Optional[List[Any]] = []
     top_cities: Optional[List[Any]] = []
     top_states: Optional[List[Any]] = []
@@ -325,10 +325,9 @@ def _serialize_ai(row) -> Optional[dict]:
     for col in ["gender_male", "gender_female", "gender_other",
                 "age_13_17", "age_18_24", "age_25_34", "age_35_44", "age_45_plus"]:
         if col in d and d[col] is not None:
-            val = float(d[col])
-            d[col] = val if val > 0 else None
+            d[col] = float(d[col])
         else:
-            d[col] = None
+            d[col] = 0.0
     return d
 
 
@@ -1258,14 +1257,9 @@ async def update_audience_insights(body: AudienceInsightsIn, user=Depends(curren
                 source_platforms=$13, last_uploaded_at=NOW(), updated_at=NOW()
         """,
             user["id"],
-            body.gender_male if body.gender_male is not None else None,
-            body.gender_female if body.gender_female is not None else None,
-            body.gender_other if body.gender_other is not None else None,
-            body.age_13_17 if body.age_13_17 is not None else None,
-            body.age_18_24 if body.age_18_24 is not None else None,
-            body.age_25_34 if body.age_25_34 is not None else None,
-            body.age_35_44 if body.age_35_44 is not None else None,
-            body.age_45_plus if body.age_45_plus is not None else None,
+            body.gender_male or 0, body.gender_female or 0, body.gender_other or 0,
+            body.age_13_17 or 0, body.age_18_24 or 0, body.age_25_34 or 0,
+            body.age_35_44 or 0, body.age_45_plus or 0,
             json.dumps(body.top_countries or []),
             json.dumps(body.top_cities or []),
             json.dumps(body.top_states or []),

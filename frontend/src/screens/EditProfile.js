@@ -78,9 +78,6 @@ export default function EditProfile() {
 
   const avatarRef = useRef(null);
 
-  const [loadingProfile, setLoadingProfile] = useState(true);
-  const [saving, setSaving] = useState(false);
-
   // Load fresh profile data from the API on mount — overrides any stale AppContext state
   useEffect(() => {
     const loader = accountType === "brand" ? profileApi.getBrand() : profileApi.getCreator();
@@ -110,7 +107,7 @@ export default function EditProfile() {
         const av = p.avatar_url || "";
         setAvatar(isValidImg(av) ? av : "");
       }
-    }).catch(() => {}).finally(() => setLoadingProfile(false));
+    }).catch(() => {});
   }, [accountType]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -132,7 +129,6 @@ export default function EditProfile() {
   };
 
   const save = async () => {
-    setSaving(true);
     if (accountType === "brand") {
       setUser((prev) => ({
         ...prev,
@@ -151,7 +147,6 @@ export default function EditProfile() {
         navigate(-1);
       } catch (_) {
         toast.error("Failed to save profile. Please try again.");
-        setSaving(false);
       }
     } else {
       const workedWithPayload = workedWith.map((b) => ({
@@ -196,7 +191,6 @@ export default function EditProfile() {
         navigate(-1);
       } catch (_) {
         toast.error("Failed to save profile. Please try again.");
-        setSaving(false);
       }
     }
   };
@@ -244,14 +238,6 @@ export default function EditProfile() {
     setEditingReel(null);
   };
 
-  if (loadingProfile) {
-    return (
-      <div data-testid="edit-profile" className="min-h-full bg-[#F9F9F8] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#E5E5E5] border-t-[#E25238] rounded-full animate-spin" />
-      </div>
-    );
-  }
-
   return (
     <div data-testid="edit-profile" className="min-h-full bg-[#F9F9F8] pb-10">
       <TopBar
@@ -260,10 +246,9 @@ export default function EditProfile() {
           <button
             data-testid="save-profile"
             onClick={save}
-            disabled={saving}
-            className="px-5 py-2 bg-[#0A0A0A] text-white rounded-full text-xs font-bold uppercase tracking-[0.15em] active:scale-[0.98] transition-all disabled:opacity-60"
+            className="px-5 py-2 bg-[#0A0A0A] text-white rounded-full text-xs font-bold uppercase tracking-[0.15em]"
           >
-            {saving ? "Saving…" : "Save"}
+            Save
           </button>
         }
       />

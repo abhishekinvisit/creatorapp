@@ -157,7 +157,7 @@ export default function PostOpportunity() {
           <button
             data-testid="post-continue"
             onClick={handleContinue}
-            className="w-full bg-[#E25238] text-white rounded-full py-5 font-bold hover:bg-[#C9452D] active:scale-[0.98] transition-all"
+            className="w-full bg-[#E25238] text-white rounded-full py-5 font-bold hover:bg-[#C9452D] transition-colors"
           >
             Continue →
           </button>

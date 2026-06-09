@@ -44,16 +44,13 @@ export default function HomeFeed() {
   const navigate = useNavigate();
   const { opportunities, mergeOpportunities, isSaved, toggleSave, user, accountType, applications, unreadNotifications } = useApp();
   const [activeCat, setActiveCat] = useState("All");
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     opportunitiesApi.list()
       .then((opps) => {
         if (opps.length > 0) mergeOpportunities(opps.map(mapApiOpp));
       })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+      .catch(() => {});
   }, []);
   const [search, setSearch] = useState("");
   const [showFilters, setShowFilters] = useState(false);
@@ -281,12 +278,7 @@ export default function HomeFeed() {
 
       {/* Opportunity cards */}
       <div className="px-5 space-y-3">
-        {loading ? (
-          <div className="pt-12 flex justify-center">
-            <div className="w-8 h-8 border-4 border-[#E5E5E5] border-t-[#E25238] rounded-full animate-spin" />
-          </div>
-        ) : (
-          filtered.map((op, idx) => {
+        {filtered.map((op, idx) => {
           const saved = isSaved(op.id);
           return (
             <div key={op.id} className="relative animate-fade-up" style={{ animationDelay: `${idx * 60}ms` }}>
@@ -376,7 +368,7 @@ export default function HomeFeed() {
               </button>
             </div>
           );
-        }))}
+        })}
 
         {filtered.length === 0 && (
           <div className="text-center py-16">

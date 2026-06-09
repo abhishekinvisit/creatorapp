@@ -57,6 +57,7 @@ CREATE TABLE IF NOT EXISTS creator_profiles (
     followers_count INTEGER DEFAULT 0,
     years_experience INTEGER DEFAULT 0,
     avatar_url TEXT DEFAULT '',
+    engagement_rate DECIMAL(5,2) DEFAULT 0,
     collaborations_count INTEGER DEFAULT 0,
     worked_with JSONB DEFAULT '[]',
     updated_at TIMESTAMPTZ DEFAULT NOW()

@@ -255,7 +255,7 @@ export default function OpportunityDetails() {
               <button
                 data-testid="apply-now-btn"
                 onClick={() => setShowApply(true)}
-                className="w-full bg-[#0A0A0A] text-white rounded-full py-5 font-bold text-base hover:bg-[#E25238] active:scale-[0.98] transition-all shadow-xl"
+                className="w-full bg-[#0A0A0A] text-white rounded-full py-5 font-bold text-base hover:bg-[#E25238] transition-colors shadow-xl"
               >
                 Send My Profile
               </button>
