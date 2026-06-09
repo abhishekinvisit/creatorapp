@@ -40,6 +40,7 @@ export default function MyApplications() {
           opportunityId: a.opportunity_id,
           brandName: a.brand_name || "Brand",
           brandId: a.brand_id,
+          brandLogo: a.brand_logo || "",
           opportunityTitle: a.opportunity_title,
           appliedOn: formatDate(a.applied_at),
           status: a.status || "applied",
@@ -113,7 +114,7 @@ export default function MyApplications() {
                     onClick={() => navigate(`/application/${a.id}`)}
                     className="flex items-center gap-4 flex-1 min-w-0 text-left"
                   >
-                    <BrandLogo name={a.brandName} size={48} />
+                    <BrandLogo name={a.brandName} size={48} src={a.brandLogo || undefined} />
                     <div className="flex-1 min-w-0">
                       <h3 className="font-display font-bold text-[#0A0A0A] truncate">{a.brandName}</h3>
                       {a.opportunityTitle && (

@@ -45,7 +45,12 @@ export default function ChatScreen() {
   const pollRef = useRef(null);
 
   const threadName = thread?.name || (accountType === "creator" ? "Brand" : "Creator");
-  const threadAvatar = thread?.avatarSrc || null;
+  const _validSrc = (s) => s && (s.startsWith("data:") || s.startsWith("http"));
+  const threadAvatar = thread?.avatarSrc
+    || (accountType === "creator"
+      ? (_validSrc(thread?.brand_logo_data) ? thread.brand_logo_data : null)
+      : (_validSrc(thread?.creator_avatar_url) ? thread.creator_avatar_url : null))
+    || null;
   const role = accountType === "brand" ? "Creator" : "Brand";
 
   const loadMessages = useCallback(() => {

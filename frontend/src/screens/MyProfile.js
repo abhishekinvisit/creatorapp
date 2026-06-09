@@ -425,7 +425,10 @@ export default function MyProfile() {
           </button>
           <button
             data-testid="share-profile-btn"
-            onClick={() => shareProfile(`${window.location.origin}/creator/${(c.handle || "").replace(/^@/, "")}`, c.name)}
+            onClick={() => {
+              const handle = (c.handle || "").replace(/^@/, "");
+              shareProfile(`${window.location.origin}/creator/${handle || currentUserId}`, c.name);
+            }}
             className="px-5 py-3 rounded-full bg-[#0A0A0A] text-white font-bold text-sm flex items-center justify-center gap-2"
           >
             <Share2 size={14} /> Share

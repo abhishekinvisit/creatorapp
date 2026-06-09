@@ -6,7 +6,7 @@ export default function SplashScreen() {
   return (
     <div
       data-testid="splash-screen"
-      className="min-h-full flex flex-col bg-[#0A0A0A] relative overflow-hidden"
+      className="min-h-screen flex flex-col bg-[#0A0A0A] relative overflow-hidden"
     >
       {/* Background glows */}
       <div className="absolute top-[-80px] right-[-80px] w-72 h-72 rounded-full bg-[#E25238] opacity-20 blur-3xl pointer-events-none" />

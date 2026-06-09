@@ -170,7 +170,12 @@ export function AudienceInsightsModal({ open, onClose, isOwner = false, initialD
           toast.success("Data extracted! Review and save.");
         }
       } catch (err) {
-        toast.error(err.message || "Extraction failed. Try entering data manually.");
+        const msg = err.message || "";
+        if (msg.toLowerCase().includes("openai_api_key") || msg.includes("503") || msg.includes("not configured")) {
+          toast.error("AI extraction needs an OpenAI API key. Add OPENAI_API_KEY to your Replit Secrets to enable this.", { duration: 8000 });
+        } else {
+          toast.error(msg || "Extraction failed. Try a clearer screenshot or enter data manually.");
+        }
       } finally {
         setExtracting(false);
         if (fileInputRef.current) fileInputRef.current.value = "";

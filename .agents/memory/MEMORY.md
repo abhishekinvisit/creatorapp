@@ -23,3 +23,7 @@
 - [Creator discovery filters](creator-discovery.md) — list_creators must JOIN users and filter u.account_type='creator' AND u.onboarding_complete=TRUE or brand accounts and incomplete profiles appear
 - [Denorm thread sync](denorm-thread-sync.md) — update_brand_profile syncs brand_name to both opportunities AND threads; update_creator_profile syncs creator_name to threads when full_name changes
 - [Audience insights OCR](audience-insights-ocr.md) — POST /api/audience-insights/extract: base64 image → OpenAI gpt-4o-mini vision → structured JSON; requires OPENAI_API_KEY secret; openai+pillow installed in .pythonlibs
+- [Opportunities brand_logo](opp-brand-logo.md) — list opportunities query must JOIN brand_profiles ON brand_id to include brand_logo; plain SELECT * has no logo column; same pattern needed for my_applications
+- [SplashScreen height](splash-height.md) — SplashScreen must use min-h-screen not min-h-full; parent .App only has min-height:100vh (not fixed height) so min-h-full resolves to 0
+- [Share URL handle fallback](share-url.md) — share URL uses handle when set; falls back to currentUserId (UUID) when handle is empty; both /creator/:handle and /creator/:uuid are valid public routes
+- [ChatScreen thread avatar](chat-avatar.md) — ChatScreen finds thread from AppContext threads (no avatarSrc); must compute from thread.brand_logo_data (creator view) or thread.creator_avatar_url (brand view) as fallback

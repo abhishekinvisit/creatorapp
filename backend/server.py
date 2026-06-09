@@ -722,7 +722,12 @@ async def list_opportunities(
         params.append(f"%{search}%"); i += 1
     where = " AND ".join(filters)
     async with pool.acquire() as conn:
-        rows = await conn.fetch(f"SELECT * FROM opportunities WHERE {where} ORDER BY created_at DESC", *params)
+        rows = await conn.fetch(f"""
+            SELECT o.*, COALESCE(bp.logo_data, '') AS brand_logo
+            FROM opportunities o
+            LEFT JOIN brand_profiles bp ON bp.user_id = o.brand_id
+            WHERE {where} ORDER BY o.created_at DESC
+        """, *params)
     return [_opp_row(r) for r in rows]
 
 
@@ -860,10 +865,12 @@ async def apply(body: ApplyIn, user=Depends(current_user)):
 async def my_applications(user=Depends(current_user)):
     pool = await get_pool()
     async with pool.acquire() as conn:
-        rows = await conn.fetch(
-            "SELECT * FROM applications WHERE creator_id=$1::uuid ORDER BY applied_at DESC",
-            user["id"],
-        )
+        rows = await conn.fetch("""
+            SELECT a.*, COALESCE(bp.logo_data, '') AS brand_logo
+            FROM applications a
+            LEFT JOIN brand_profiles bp ON bp.user_id = a.brand_id
+            WHERE a.creator_id=$1::uuid ORDER BY a.applied_at DESC
+        """, user["id"])
     return [_app_row(r) for r in rows]
 
 
