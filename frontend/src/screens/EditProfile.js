@@ -78,6 +78,38 @@ export default function EditProfile() {
 
   const avatarRef = useRef(null);
 
+  // Load fresh profile data from the API on mount — overrides any stale AppContext state
+  useEffect(() => {
+    const loader = accountType === "brand" ? profileApi.getBrand() : profileApi.getCreator();
+    loader.then((p) => {
+      if (accountType === "brand") {
+        setName(p.brand_name || "");
+        setBio(p.bio || "");
+        setBrandInstagramUrl(p.instagram_url || "");
+        setBrandWebsiteUrl(p.website_url || "");
+        const logo = p.logo_data || "";
+        setAvatar(isValidImg(logo) ? logo : "");
+      } else {
+        setName(p.full_name || "");
+        setBio(p.bio || "");
+        setHandle(p.handle || "");
+        setLocation(p.location || "");
+        setInstagramUrl(p.instagram_url || "");
+        setYoutubeUrl(p.youtube_url || "");
+        setLinkedinUrl(p.linkedin_url || "");
+        setTiktokUrl(p.tiktok_url || "");
+        setWebsiteUrl(p.website_url || "");
+        setFollowersCount(String(p.followers_count || ""));
+        setCollaborations(String(p.collaborations_count || ""));
+        setCats(Array.isArray(p.categories) ? p.categories : []);
+        setLanguages(Array.isArray(p.languages) ? p.languages : []);
+        setIsPublic(p.is_public !== false);
+        const av = p.avatar_url || "";
+        setAvatar(isValidImg(av) ? av : "");
+      }
+    }).catch(() => {});
+  }, [accountType]); // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     if (accountType !== "creator") { setReelsLoading(false); return; }
     reelsApi.list()

@@ -46,43 +46,48 @@ function mapCreatorProfile(prev, p) {
     ...prev,
     creator: {
       ...prev.creator,
-      name:             p.full_name    || prev.creator.name,
-      handle:           p.handle       || prev.creator.handle,
-      bio:              p.bio          || prev.creator.bio,
-      location:         p.location     || prev.creator.location,
-      gender:           p.gender       || prev.creator.gender,
-      age:              p.age          || prev.creator.age,
-      category:         p.categories?.length ? p.categories : prev.creator.category,
-      language:         p.languages?.length  ? p.languages  : prev.creator.language,
-      instagramUrl:     p.instagram_url || prev.creator.instagramUrl,
-      youtubeUrl:       p.youtube_url   || prev.creator.youtubeUrl  || "",
-      linkedinUrl:      p.linkedin_url  || prev.creator.linkedinUrl || "",
-      tiktokUrl:        p.tiktok_url    || prev.creator.tiktokUrl   || "",
-      websiteUrl:       p.website_url   || prev.creator.websiteUrl  || "",
-      followers:        formatFollowers(p.followers_count) || prev.creator.followers,
-      followersCount:   p.followers_count || prev.creator.followersCount || 0,
+      name:             p.full_name    != null ? p.full_name    : prev.creator.name,
+      handle:           p.handle       != null ? p.handle       : prev.creator.handle,
+      bio:              p.bio          != null ? p.bio          : prev.creator.bio,
+      location:         p.location     != null ? p.location     : prev.creator.location,
+      gender:           p.gender       != null ? p.gender       : prev.creator.gender,
+      age:              p.age          != null ? p.age          : prev.creator.age,
+      category:         p.categories   != null ? (p.categories.length ? p.categories : []) : prev.creator.category,
+      language:         p.languages    != null ? (p.languages.length ? p.languages : [])   : prev.creator.language,
+      instagramUrl:     p.instagram_url != null ? p.instagram_url : prev.creator.instagramUrl,
+      youtubeUrl:       p.youtube_url   != null ? p.youtube_url   : (prev.creator.youtubeUrl  || ""),
+      linkedinUrl:      p.linkedin_url  != null ? p.linkedin_url  : (prev.creator.linkedinUrl || ""),
+      tiktokUrl:        p.tiktok_url    != null ? p.tiktok_url    : (prev.creator.tiktokUrl   || ""),
+      websiteUrl:       p.website_url   != null ? p.website_url   : (prev.creator.websiteUrl  || ""),
+      followers:        p.followers_count != null ? formatFollowers(p.followers_count) : prev.creator.followers,
+      followersCount:   p.followers_count != null ? p.followers_count : (prev.creator.followersCount || 0),
       collaborations:   p.collaborations_count != null ? p.collaborations_count : (prev.creator.collaborations || 0),
-      avatar:           p.avatar_url    || prev.creator.avatar,
+      avatar:           p.avatar_url    != null ? p.avatar_url    : prev.creator.avatar,
       isPublic:         p.is_public !== false,
     },
     workedWith: workedWith.length ? workedWith : prev.workedWith,
   };
 }
 
+function isValidLogoData(s) {
+  return s && (s.startsWith("data:") || s.startsWith("http"));
+}
+
 function mapBrandProfile(prev, p) {
+  const logoRaw = p.logo_data != null ? p.logo_data : prev.brand.logo;
   return {
     ...prev,
     brand: {
       ...prev.brand,
-      name:           p.brand_name    || prev.brand.name,
-      handle:         p.handle        || "",
-      bio:            p.bio           || prev.brand.bio,
-      category:       p.category ? [p.category] : prev.brand.category,
-      customCategory: p.custom_category || prev.brand.customCategory || "",
-      instagramUrl:   p.instagram_url || prev.brand.instagramUrl || "",
-      websiteUrl:     p.website_url   || prev.brand.websiteUrl   || "",
-      logo:           (p.logo_data && (p.logo_data.startsWith("data:") || p.logo_data.startsWith("http"))) ? p.logo_data : ((prev.brand.logo && (prev.brand.logo.startsWith("data:") || prev.brand.logo.startsWith("http"))) ? prev.brand.logo : ""),
-      gstNumber:      p.gst_number    || "",
+      name:           p.brand_name     != null ? p.brand_name     : prev.brand.name,
+      handle:         p.handle         != null ? p.handle         : (prev.brand.handle || ""),
+      bio:            p.bio            != null ? p.bio            : prev.brand.bio,
+      category:       p.category       != null ? (p.category ? [p.category] : []) : prev.brand.category,
+      customCategory: p.custom_category != null ? p.custom_category : (prev.brand.customCategory || ""),
+      instagramUrl:   p.instagram_url  != null ? p.instagram_url  : (prev.brand.instagramUrl || ""),
+      websiteUrl:     p.website_url    != null ? p.website_url    : (prev.brand.websiteUrl   || ""),
+      logo:           isValidLogoData(logoRaw) ? logoRaw : "",
+      gstNumber:      p.gst_number     != null ? p.gst_number     : "",
     },
   };
 }

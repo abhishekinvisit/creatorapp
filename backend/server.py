@@ -6,7 +6,7 @@ from starlette.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 from typing import List, Optional, Any
-import os, logging, json
+import os, logging, json, base64
 from pathlib import Path
 from database import get_pool, init_db, close_pool
 from auth import hash_password, verify_password, create_access_token, decode_token
@@ -215,6 +215,10 @@ class AudienceInsightsIn(BaseModel):
     top_states: Optional[List[Any]] = []
     source_platforms: Optional[List[str]] = []
 
+class AudienceInsightsImageIn(BaseModel):
+    image_data: str
+    platform: Optional[str] = "Instagram"
+
 class ApplicationStatusIn(BaseModel):
     status: str  # applied | shortlisted | accepted | rejected
 
@@ -421,6 +425,11 @@ async def update_creator_profile(body: CreatorProfileIn, user=Depends(current_us
             f"UPDATE creator_profiles SET {cols}, updated_at=NOW() WHERE user_id=$1::uuid",
             user["id"], *vals,
         )
+        if "full_name" in updates and updates["full_name"]:
+            await conn.execute(
+                "UPDATE threads SET creator_name=$1 WHERE creator_id=$2::uuid",
+                updates["full_name"], user["id"]
+            )
     return {"success": True}
 
 
@@ -459,6 +468,10 @@ async def update_brand_profile(body: BrandProfileIn, user=Depends(current_user))
                 await conn.execute(
                     "UPDATE opportunities SET brand_name=$1, brand_category=$2 WHERE brand_id=$3::uuid",
                     brand["brand_name"], brand["category"] or "", user["id"]
+                )
+                await conn.execute(
+                    "UPDATE threads SET brand_name=$1 WHERE brand_id=$2::uuid",
+                    brand["brand_name"], user["id"]
                 )
     return {"success": True}
 
@@ -569,6 +582,8 @@ async def list_creators(
         "name": "cp.full_name ASC",
     }
     order = order_map.get(sort_by, "cp.followers_count DESC NULLS LAST")
+    conditions.insert(0, "u.onboarding_complete = TRUE")
+    conditions.insert(0, "u.account_type = 'creator'")
     conditions.insert(0, "cp.is_public IS NOT FALSE")
     where = "WHERE " + " AND ".join(conditions)
 
@@ -672,6 +687,10 @@ def _opp_row(row):
     d["brand_id"] = str(d["brand_id"])
     d["requirements"] = list(d.get("requirements") or [])
     d["languages"] = list(d.get("languages") or [])
+    d["payout_min"] = d.get("payout_min") or 0
+    d["payout_max"] = d.get("payout_max") or 0
+    d["followers_min"] = d.get("followers_min") or 0
+    d["followers_max"] = d.get("followers_max") or 0
     if "created_at" in d and hasattr(d["created_at"], "isoformat"):
         d["created_at"] = d["created_at"].isoformat()
     return d
@@ -1243,6 +1262,86 @@ async def update_audience_insights(body: AudienceInsightsIn, user=Depends(curren
 # ─────────────────────────────────────────────────────────────────────────────
 # CATEGORIES
 # ─────────────────────────────────────────────────────────────────────────────
+
+@api_router.post("/audience-insights/extract")
+async def extract_audience_insights_from_image(body: AudienceInsightsImageIn, user=Depends(current_user)):
+    """Extract audience insights from an analytics screenshot using OpenAI Vision."""
+    if user["account_type"] != "creator":
+        raise HTTPException(status_code=403, detail="Creators only")
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        raise HTTPException(
+            status_code=503,
+            detail="AI extraction requires an OPENAI_API_KEY secret. Add it in your project secrets, or enter data manually."
+        )
+    try:
+        from openai import AsyncOpenAI
+        client = AsyncOpenAI(api_key=api_key)
+        img_data = body.image_data
+        if "," in img_data:
+            img_data = img_data.split(",", 1)[1]
+        prompt = (
+            "You are analyzing a social media analytics screenshot. "
+            "Extract ALL audience demographic data visible and return ONLY a valid JSON object with these exact fields "
+            "(use 0.0 for unknown numbers, empty arrays [] for unknown lists):\n"
+            "{\n"
+            "  \"gender_male\": <float percentage e.g. 62.5>,\n"
+            "  \"gender_female\": <float percentage>,\n"
+            "  \"gender_other\": <float percentage>,\n"
+            "  \"age_13_17\": <float percentage>,\n"
+            "  \"age_18_24\": <float percentage>,\n"
+            "  \"age_25_34\": <float percentage>,\n"
+            "  \"age_35_44\": <float percentage>,\n"
+            "  \"age_45_plus\": <float percentage>,\n"
+            "  \"top_cities\": [\"City1\", \"City2\"],\n"
+            "  \"top_states\": [\"State1\", \"State2\"],\n"
+            "  \"top_countries\": [\"Country1\", \"Country2\"],\n"
+            f"  \"source_platforms\": [\"{body.platform}\"]\n"
+            "}\n"
+            "Return only the JSON, no markdown, no explanation."
+        )
+        response = await client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": prompt},
+                    {"type": "image_url", "image_url": {
+                        "url": f"data:image/jpeg;base64,{img_data}",
+                        "detail": "high"
+                    }}
+                ]
+            }],
+            max_tokens=600,
+        )
+        raw = response.choices[0].message.content.strip()
+        if "```" in raw:
+            parts = raw.split("```")
+            raw = parts[1] if len(parts) > 1 else parts[0]
+            if raw.startswith("json"):
+                raw = raw[4:]
+        result = json.loads(raw.strip())
+        safe = {
+            "gender_male":  float(result.get("gender_male", 0)),
+            "gender_female": float(result.get("gender_female", 0)),
+            "gender_other": float(result.get("gender_other", 0)),
+            "age_13_17":    float(result.get("age_13_17", 0)),
+            "age_18_24":    float(result.get("age_18_24", 0)),
+            "age_25_34":    float(result.get("age_25_34", 0)),
+            "age_35_44":    float(result.get("age_35_44", 0)),
+            "age_45_plus":  float(result.get("age_45_plus", 0)),
+            "top_cities":   list(result.get("top_cities", [])),
+            "top_states":   list(result.get("top_states", [])),
+            "top_countries": list(result.get("top_countries", [])),
+            "source_platforms": list(result.get("source_platforms", [body.platform])),
+        }
+        return {"success": True, "data": safe}
+    except json.JSONDecodeError as e:
+        raise HTTPException(status_code=422, detail=f"Could not parse AI response. Try a clearer screenshot.")
+    except Exception as e:
+        logger.error(f"Audience insights extraction error: {e}")
+        raise HTTPException(status_code=500, detail=f"Extraction failed: {str(e)[:150]}")
+
 
 @api_router.get("/categories")
 async def list_categories():

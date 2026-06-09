@@ -140,6 +140,7 @@ export const savedCreatorsApi = {
 
 // ── Audience Insights ─────────────────────────────────────────────────────────
 export const audienceInsightsApi = {
-  get:  ()     => api.get("/audience-insights"),
-  save: (data) => api.put("/audience-insights", data),
+  get:     ()          => api.get("/audience-insights"),
+  save:    (data)      => api.put("/audience-insights", data),
+  extract: (imageData) => api.post("/audience-insights/extract", { image_data: imageData }),
 };

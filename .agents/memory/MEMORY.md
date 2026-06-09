@@ -18,3 +18,8 @@
 - [Brand logo validity](brand-logo-validity.md) — always guard with isValidImg(s) before rendering <img> for brand logos; DEFAULT_USER has logo="GLOW" (text, not image)
 - [Applications persistence](applications-persistence.md) — must call applicationsApi.myApplications() in both restoreSession and loginWithToken for creator accounts; context exports hasApplied(id) and loadMyApplications
 - [ApplicantsList UUID guard](applicants-uuid-guard.md) — use full UUID regex (not just includes("-")) to validate opportunityId; fake local IDs like "p-1234567890" contain hyphens but are not UUIDs
+- [Profile mapping null-safety](profile-mapping.md) — mapBrandProfile/mapCreatorProfile use `!= null ?` not `||`; empty string clears a field, `||` would keep stale value
+- [EditProfile fresh load](editprofile-fresh.md) — EditProfile adds a useEffect on mount calling profileApi.getBrand()/getCreator() to override stale AppContext initial state
+- [Creator discovery filters](creator-discovery.md) — list_creators must JOIN users and filter u.account_type='creator' AND u.onboarding_complete=TRUE or brand accounts and incomplete profiles appear
+- [Denorm thread sync](denorm-thread-sync.md) — update_brand_profile syncs brand_name to both opportunities AND threads; update_creator_profile syncs creator_name to threads when full_name changes
+- [Audience insights OCR](audience-insights-ocr.md) — POST /api/audience-insights/extract: base64 image → OpenAI gpt-4o-mini vision → structured JSON; requires OPENAI_API_KEY secret; openai+pillow installed in .pythonlibs

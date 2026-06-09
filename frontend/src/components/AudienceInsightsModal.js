@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { X, Save, BarChart2, Users, MapPin, Plus, Trash2 } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { X, Save, BarChart2, Users, MapPin, Plus, Upload } from "lucide-react";
 import { audienceInsightsApi } from "@/lib/api";
 import { toast } from "sonner";
 import {
@@ -62,6 +62,8 @@ export function AudienceInsightsModal({ open, onClose, isOwner = false, initialD
   const [form, setForm] = useState({ ...EMPTY });
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [extracting, setExtracting] = useState(false);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     if (!open) return;
@@ -135,6 +137,48 @@ export function AudienceInsightsModal({ open, onClose, isOwner = false, initialD
     }
   };
 
+  const handleExtract = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Screenshot must be under 10 MB");
+      return;
+    }
+    setExtracting(true);
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      try {
+        const imageData = ev.target.result;
+        const res = await audienceInsightsApi.extract(imageData);
+        if (res?.data) {
+          const d = res.data;
+          setForm((f) => ({
+            ...f,
+            gender_male:  parseFloat(d.gender_male)  || f.gender_male,
+            gender_female: parseFloat(d.gender_female) || f.gender_female,
+            gender_other: parseFloat(d.gender_other) || f.gender_other,
+            age_13_17:    parseFloat(d.age_13_17)    || f.age_13_17,
+            age_18_24:    parseFloat(d.age_18_24)    || f.age_18_24,
+            age_25_34:    parseFloat(d.age_25_34)    || f.age_25_34,
+            age_35_44:    parseFloat(d.age_35_44)    || f.age_35_44,
+            age_45_plus:  parseFloat(d.age_45_plus)  || f.age_45_plus,
+            top_cities:    d.top_cities?.length    ? d.top_cities    : f.top_cities,
+            top_states:    d.top_states?.length    ? d.top_states    : f.top_states,
+            top_countries: d.top_countries?.length ? d.top_countries : f.top_countries,
+            source_platforms: d.source_platforms?.length ? d.source_platforms : f.source_platforms,
+          }));
+          toast.success("Data extracted! Review and save.");
+        }
+      } catch (err) {
+        toast.error(err.message || "Extraction failed. Try entering data manually.");
+      } finally {
+        setExtracting(false);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   if (!open) return null;
 
   const genderData = [
@@ -171,9 +215,26 @@ export function AudienceInsightsModal({ open, onClose, isOwner = false, initialD
             </button>
           </div>
           {isOwner && (
-            <p className="text-xs text-[#525252] mt-1 font-medium">
-              Enter your analytics data manually to showcase your audience to brands.
-            </p>
+            <div className="mt-2 flex items-center justify-between gap-3">
+              <p className="text-xs text-[#525252] font-medium">
+                Enter data manually or scan a screenshot from Instagram / YouTube Analytics.
+              </p>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={extracting}
+                className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#0A0A0A] bg-white text-xs font-bold text-[#0A0A0A] hover:bg-[#F3F3F3] transition-colors disabled:opacity-50 whitespace-nowrap"
+              >
+                <Upload size={12} />
+                {extracting ? "Scanning…" : "Scan Screenshot"}
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleExtract}
+              />
+            </div>
           )}
         </div>
 
@@ -368,16 +429,24 @@ export function AudienceInsightsModal({ open, onClose, isOwner = false, initialD
               </Section>
             )}
 
-            {/* Save button */}
+            {/* Action buttons */}
             {isOwner && (
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="w-full py-4 rounded-full bg-[#E25238] text-white font-bold text-sm hover:bg-[#C9452D] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
-              >
-                <Save size={16} />
-                {saving ? "Saving..." : "Save Audience Insights"}
-              </button>
+              <div className="space-y-3 pt-1">
+                {extracting && (
+                  <div className="flex items-center justify-center gap-2 py-3 rounded-2xl bg-[#F3F3F3] text-sm text-[#525252] font-medium">
+                    <div className="w-4 h-4 border-2 border-[#E5E5E5] border-t-[#E25238] rounded-full animate-spin" />
+                    Reading screenshot with AI…
+                  </div>
+                )}
+                <button
+                  onClick={handleSave}
+                  disabled={saving || extracting}
+                  className="w-full py-4 rounded-full bg-[#E25238] text-white font-bold text-sm hover:bg-[#C9452D] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+                >
+                  <Save size={16} />
+                  {saving ? "Saving..." : "Save Audience Insights"}
+                </button>
+              </div>
             )}
           </div>
         )}

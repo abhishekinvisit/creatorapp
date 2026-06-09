@@ -1,0 +1,171 @@
+Implement the following critical fixes:
+
+**Creator Discovery**
+
+* Brands cannot discover creators on the Discover Creators page.
+* Fix creator retrieval queries, filters, pagination, and search functionality.
+* Ensure all eligible creators are visible to brands.
+* Verify category filters, location filters, sorting, and search work correctly.
+
+**User Identity Visibility**
+
+* Show the real profile picture and name
+* This should work consistently for both Creators and Brands.
+
+Areas to verify:
+
+* Chat list
+* Chat messages
+* Creator profiles
+* Brand profiles
+* Discover Creators
+* Saved Creators
+* Opportunity cards
+* Opportunity details
+* Applicant lists
+* Application details
+* Notifications
+* Shared profiles
+* Search results
+* Any other screen where users interact
+
+**Profile Pictures**
+
+* Profile pictures must load correctly across the entire app.
+* Changes to profile pictures should update instantly everywhere.
+* Profile pictures must persist after refresh, logout, and login.
+* Remove all placeholder, dummy, or broken avatar states.
+
+**Names & User Data**
+
+* Ensure the correct creator/brand name is displayed everywhere.
+* Remove any hardcoded, dummy, or fallback profile data.
+* Fix database joins and user mappings causing incorrect or missing user information.
+
+**Testing**
+
+* Perform a full audit of all Creator and Brand flows.
+* Verify every screen displays the correct user identity and profile information.
+* Fix any related database, API, authentication, caching, state management, or permission issues discovered during testing.
+
+**Profile Sharing**
+
+* Fix the Profile Share functionality.
+* Shared creator profile links are currently not working.
+* Generate a valid public URL for every creator profile.
+* Anyone opening a shared creator profile should be able to view it without login/signup.
+* Ensure the shared profile loads the correct creator data.
+* Verify shared links work after refresh, logout, login, and across devices.
+
+**Audience Insights OCR**
+
+* Fix Audience Insights extraction from uploaded screenshots.
+* Creators are currently unable to scrape audience insights from uploaded images.
+* Audit OCR, image upload, AI extraction, database storage, and API flow.
+* Extract and save:
+
+  * Gender Split
+  * Age Groups
+  * Top Cities
+  * Top Countries
+  * Followers
+  * Reach
+  * Impressions
+  * Engagement Metrics
+  * Any other available audience insights
+
+**Audience Insights Visibility**
+
+* Audience Insights should be visible on:
+
+  * Creator Profile
+  * Brand View of Creator Profile
+  * Shared Public Creator Profile
+  * Creator Edit Profile
+
+* Ensure extracted insights are saved to the database and persist after refresh, logout, and login.
+
+* When a creator uploads a new audience insights screenshot, existing data should update correctly.
+
+* Remove any dummy audience insights data and display only real extracted information.
+
+**Testing**
+
+* Test the complete Audience Insights flow:
+
+  * Upload screenshot
+  * OCR extraction
+  * Database save
+  * Creator profile display
+  * Brand profile view
+  * Shared public profile view
+  * Refresh/logout/login persistence
+
+* Verify profile sharing and audience insights work correctly across the entire platform.
+
+
+**Brand Edit Profile Data Sync Fix**
+
+Current issue:
+
+* Brands update profile fields successfully.
+* When they reopen Edit Profile, old values are shown instead of the latest saved values.
+* Some updated fields are not reflected across the app.
+* Edit forms, profile pages, opportunities, chat, search results, and public views are showing inconsistent data.
+
+Fix requirements:
+
+* Connect all profile fields to the database as the single source of truth.
+* Ensure Edit Profile always loads the latest saved data from the database.
+* Remove any hardcoded, cached, local state, dummy, or fallback values.
+* After a profile update, immediately refresh all related screens with the latest data.
+
+Verify synchronization across:
+
+* Brand Profile
+* Edit Profile
+* Opportunity Cards
+* Opportunity Details
+* Applicant Pages
+* Chat
+* Notifications
+* Discover Pages
+* Search Results
+* Shared/Public Profiles
+* Saved Creators
+* Dashboard
+* Any other screen displaying brand information
+
+Fields to verify:
+
+* Brand Name
+* Logo/Profile Picture
+* Bio
+* Categories
+* Website
+* Instagram
+* Location
+* Any custom profile fields
+
+Audit and fix:
+
+* Database writes
+* Database reads
+* API endpoints
+* Frontend state management
+* Cache invalidation
+* Authentication mapping
+* Data relationships
+* Real-time updates
+
+Testing:
+
+1. Update multiple profile fields.
+2. Save changes.
+3. Refresh page.
+4. Logout and login.
+5. Open Edit Profile again.
+6. Verify all updated values are loaded.
+7. Verify the same updated values appear consistently across the entire platform.
+
+Fix all related data sync issues and ensure one update propagates everywhere automatically.
