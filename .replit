@@ -11,6 +11,7 @@ packages = ["cargo", "libiconv", "libxcrypt", "postgresql", "rustc"]
 
 [userenv.shared]
 CORS_ORIGINS = "*"
+JWT_SECRET = "replit-ollcollab-jwt-secret-2024"
 
 [workflows]
 runButton = "Project"
@@ -37,7 +38,7 @@ outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd frontend && PORT=5000 BROWSER=none npx craco start"
+args = "cd frontend && PORT=5000 BROWSER=none npm start"
 waitForPort = 5000
 
 [[workflows.workflow]]
@@ -49,7 +50,7 @@ outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd backend && PATH=$PATH:/home/runner/workspace/.pythonlibs/bin python3 -m uvicorn server:app --host 0.0.0.0 --port 8000 --reload"
+args = "cd backend && python3 -m uvicorn server:app --host 0.0.0.0 --port 8000 --reload"
 waitForPort = 8000
 
 [[ports]]
