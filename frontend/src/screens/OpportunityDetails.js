@@ -161,6 +161,9 @@ export default function OpportunityDetails() {
         {/* Campaign */}
         <div className="mb-6">
           <p className="text-xs font-bold tracking-[0.2em] uppercase text-[#E25238] mb-2">Campaign Details</p>
+          {op.title && (
+            <h2 className="font-display font-black text-xl text-[#0A0A0A] tracking-tight mb-2">{op.title}</h2>
+          )}
           <p className="text-sm text-[#0A0A0A] leading-relaxed font-medium">{op.description || op.pitch}</p>
         </div>
 

@@ -313,7 +313,7 @@ export default function HomeFeed() {
                   </div>
 
                   <p className="text-xs font-medium text-[#0A0A0A] leading-snug line-clamp-2 mb-2">
-                    {op.pitch}
+                    {op.title}
                   </p>
 
                   <div className="flex items-center gap-3 text-[11px] text-[#525252] flex-wrap">
