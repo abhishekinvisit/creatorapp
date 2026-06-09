@@ -53,8 +53,8 @@ function TagInput({ values, onChange, placeholder }) {
 }
 
 const EMPTY = {
-  gender_male: 0, gender_female: 0, gender_other: 0,
-  age_13_17: 0, age_18_24: 0, age_25_34: 0, age_35_44: 0, age_45_plus: 0,
+  gender_male: "", gender_female: "", gender_other: "",
+  age_13_17: "", age_18_24: "", age_25_34: "", age_35_44: "", age_45_plus: "",
   top_countries: [], top_cities: [], top_states: [], source_platforms: [],
 };
 
@@ -69,14 +69,14 @@ export function AudienceInsightsModal({ open, onClose, isOwner = false, initialD
     if (!open) return;
     if (initialData) {
       setForm({
-        gender_male: parseFloat(initialData.gender_male) || 0,
-        gender_female: parseFloat(initialData.gender_female) || 0,
-        gender_other: parseFloat(initialData.gender_other) || 0,
-        age_13_17: parseFloat(initialData.age_13_17) || 0,
-        age_18_24: parseFloat(initialData.age_18_24) || 0,
-        age_25_34: parseFloat(initialData.age_25_34) || 0,
-        age_35_44: parseFloat(initialData.age_35_44) || 0,
-        age_45_plus: parseFloat(initialData.age_45_plus) || 0,
+        gender_male: initialData.gender_male != null ? parseFloat(initialData.gender_male) : "",
+        gender_female: initialData.gender_female != null ? parseFloat(initialData.gender_female) : "",
+        gender_other: initialData.gender_other != null ? parseFloat(initialData.gender_other) : "",
+        age_13_17: initialData.age_13_17 != null ? parseFloat(initialData.age_13_17) : "",
+        age_18_24: initialData.age_18_24 != null ? parseFloat(initialData.age_18_24) : "",
+        age_25_34: initialData.age_25_34 != null ? parseFloat(initialData.age_25_34) : "",
+        age_35_44: initialData.age_35_44 != null ? parseFloat(initialData.age_35_44) : "",
+        age_45_plus: initialData.age_45_plus != null ? parseFloat(initialData.age_45_plus) : "",
         top_countries: Array.isArray(initialData.top_countries) ? initialData.top_countries : [],
         top_cities: Array.isArray(initialData.top_cities) ? initialData.top_cities : [],
         top_states: Array.isArray(initialData.top_states) ? initialData.top_states : [],
@@ -88,14 +88,14 @@ export function AudienceInsightsModal({ open, onClose, isOwner = false, initialD
         .then((data) => {
           if (data && data.creator_id) {
             setForm({
-              gender_male: parseFloat(data.gender_male) || 0,
-              gender_female: parseFloat(data.gender_female) || 0,
-              gender_other: parseFloat(data.gender_other) || 0,
-              age_13_17: parseFloat(data.age_13_17) || 0,
-              age_18_24: parseFloat(data.age_18_24) || 0,
-              age_25_34: parseFloat(data.age_25_34) || 0,
-              age_35_44: parseFloat(data.age_35_44) || 0,
-              age_45_plus: parseFloat(data.age_45_plus) || 0,
+              gender_male: data.gender_male != null ? parseFloat(data.gender_male) : "",
+              gender_female: data.gender_female != null ? parseFloat(data.gender_female) : "",
+              gender_other: data.gender_other != null ? parseFloat(data.gender_other) : "",
+              age_13_17: data.age_13_17 != null ? parseFloat(data.age_13_17) : "",
+              age_18_24: data.age_18_24 != null ? parseFloat(data.age_18_24) : "",
+              age_25_34: data.age_25_34 != null ? parseFloat(data.age_25_34) : "",
+              age_35_44: data.age_35_44 != null ? parseFloat(data.age_35_44) : "",
+              age_45_plus: data.age_45_plus != null ? parseFloat(data.age_45_plus) : "",
               top_countries: Array.isArray(data.top_countries) ? data.top_countries : [],
               top_cities: Array.isArray(data.top_cities) ? data.top_cities : [],
               top_states: Array.isArray(data.top_states) ? data.top_states : [],

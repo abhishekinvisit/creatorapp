@@ -143,13 +143,10 @@ export default function LoginScreen() {
           data-testid="login-continue"
           onClick={step === "email" ? handleEmail : handleAuth}
           disabled={loading}
-          className="w-full mt-2 bg-[#0A0A0A] text-white rounded-2xl py-4 font-bold hover:bg-[#E25238] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+          className="w-full mt-2 bg-[#0A0A0A] text-white rounded-2xl py-4 font-bold hover:bg-[#E25238] active:scale-[0.98] transition-all disabled:opacity-60 flex items-center justify-center gap-2"
         >
           {loading ? (
-            <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 100 16v-4l-3 3 3 3v-4a8 8 0 01-8-8z"/>
-            </svg>
+            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
           ) : (
             <>
               {step === "email" ? "Continue" : isNew ? "Create Account" : "Sign In"}

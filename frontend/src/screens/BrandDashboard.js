@@ -7,6 +7,7 @@ import { opportunitiesApi } from "@/lib/api";
 export default function BrandDashboard() {
   const navigate = useNavigate();
   const { user, activePosts, setActivePosts, savedCreatorsCount } = useApp();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     opportunitiesApi.myPosts()
@@ -28,7 +29,9 @@ export default function BrandDashboard() {
         }));
         setActivePosts(mapped);
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const totalApplicants = activePosts.reduce((sum, p) => sum + (p.applicants || 0), 0);
@@ -46,6 +49,12 @@ export default function BrandDashboard() {
       </div>
 
       <div className="px-5">
+        {loading ? (
+          <div className="pt-12 flex justify-center">
+            <div className="w-8 h-8 border-4 border-white/10 border-t-[#E25238] rounded-full animate-spin" />
+          </div>
+        ) : (
+          <>
         <p className="text-xs font-bold tracking-[0.25em] uppercase text-[#E25238] mb-2">Welcome back</p>
         <h1 className="font-display font-black text-3xl tracking-tight leading-tight mb-6">
           {user.brand.name}
@@ -107,11 +116,13 @@ export default function BrandDashboard() {
         <button
           data-testid="new-post-btn"
           onClick={() => navigate("/brand/post")}
-          className="w-full bg-[#E25238] text-white rounded-full py-4 font-bold flex items-center justify-center gap-2 hover:bg-[#C9452D] transition-colors"
+          className="w-full bg-[#E25238] text-white rounded-full py-4 font-bold flex items-center justify-center gap-2 hover:bg-[#C9452D] active:scale-[0.98] transition-all"
         >
           <Plus size={20} strokeWidth={2.6} />
           Post New Opportunity
         </button>
+      </>
+      )}
       </div>
     </div>
   );

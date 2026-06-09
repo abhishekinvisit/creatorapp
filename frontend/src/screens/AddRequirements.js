@@ -205,7 +205,7 @@ export default function AddRequirements() {
             data-testid="publish-opportunity"
             onClick={handlePublish}
             disabled={saving}
-            className="w-full bg-[#E25238] text-white rounded-full py-5 font-bold hover:bg-[#C9452D] transition-colors disabled:opacity-60"
+            className="w-full bg-[#E25238] text-white rounded-full py-5 font-bold hover:bg-[#C9452D] active:scale-[0.98] transition-all disabled:opacity-60"
           >
             {saving ? "Publishing..." : "Publish Opportunity"}
           </button>

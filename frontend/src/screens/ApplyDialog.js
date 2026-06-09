@@ -67,8 +67,8 @@ export const ApplyDialog = ({ opportunity, onClose, onApplied }) => {
         <div className="grid grid-cols-3 gap-3 mb-5">
           {[
             { label: "Followers", value: user.creator.followers },
-            { label: "Engagement", value: user.creator.engagement },
             { label: "Collabs", value: user.creator.collaborations },
+            { label: "Niche", value: (user.creator.category || [])[0] || "—" },
           ].map((s) => (
             <div key={s.label} className="bg-[#F9F9F8] rounded-2xl p-3 text-center border border-[#E5E5E5]">
               <p className="font-display font-black text-lg text-[#0A0A0A]">{s.value}</p>
@@ -115,7 +115,7 @@ export const ApplyDialog = ({ opportunity, onClose, onApplied }) => {
             data-testid="apply-submit"
             onClick={handleApply}
             disabled={loading}
-            className="flex-1 py-4 rounded-full bg-[#0A0A0A] text-white font-bold text-sm hover:bg-[#E25238] transition-colors disabled:opacity-60"
+            className="flex-1 py-4 rounded-full bg-[#0A0A0A] text-white font-bold text-sm hover:bg-[#E25238] active:scale-[0.98] transition-all disabled:opacity-60"
           >
             {loading ? "Sending..." : "Send Profile"}
           </button>

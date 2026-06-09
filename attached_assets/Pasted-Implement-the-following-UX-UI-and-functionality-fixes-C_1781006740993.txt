@@ -1,0 +1,79 @@
+Implement the following UX, UI, and functionality fixes:
+
+**Creator Onboarding**
+
+* Remove the Engagement Rate field/box completely from Creator Onboarding.
+* Remove Engagement Rate from the "Send My Profile" page.
+* Remove all references, calculations, validations, and database dependencies related to Engagement Rate where it is no longer required.
+
+**Audience Insights**
+
+* While editing Audience Insights, remove default zero values (0, 0%, etc.).
+* Empty fields should remain blank until data exists.
+* Only show metrics that contain actual data.
+* Prevent placeholder values from being saved to the database.
+
+**Loading States**
+
+* Add proper loading states across the entire platform.
+* Show skeleton loaders, spinners, or placeholders while:
+
+  * Loading profiles
+  * Loading opportunities
+  * Loading applications
+  * Loading chats
+  * Loading search results
+  * Loading creator and brand data
+  * Loading audience insights
+  * Uploading files/images
+
+**Saving States**
+
+* Show clear saving states whenever a user updates data.
+* Examples:
+
+  * Saving profile...
+  * Updating opportunity...
+  * Uploading image...
+  * Applying...
+  * Sending message...
+* Disable buttons while requests are in progress to prevent duplicate actions.
+* Show success confirmation after completion.
+
+**Micro Interactions**
+Add polished micro-interactions throughout the platform for both Brands and Creators:
+
+* Button press animations
+* Hover states
+* Success animations
+* Save confirmations
+* Upload progress indicators
+* Notification animations
+* Like/save state transitions
+* Application submitted feedback
+* Shortlist/Accept/Reject feedback
+* Smooth page transitions
+* Empty states
+* Error states
+
+The platform should feel modern, responsive, and production-ready.
+
+**Opportunity Budget Fix**
+
+* Brands are still unable to edit the opportunity amount/budget range.
+
+* Fix editing, validation, saving, and database updates for:
+
+  * Minimum Budget
+  * Maximum Budget
+  * Fixed Budget
+  * Budget Type
+
+* Ensure budget changes save correctly and persist after refresh, logout, and login.
+
+* Verify edited budget values appear correctly on opportunity cards, details pages, applications, and dashboards.
+
+**Audit**
+
+* Review all related APIs, forms, database fields, validation logic, state management, and caching.
+* Perform complete end-to-end testing and fix any related issues discovered during implementation.

@@ -239,7 +239,7 @@ export default function ChatScreen() {
             data-testid="chat-send"
             onClick={send}
             disabled={!text.trim() || sending}
-            className="w-9 h-9 rounded-full bg-[#E25238] flex items-center justify-center text-white hover:bg-[#C9452D] transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0 mb-0.5"
+            className="w-9 h-9 rounded-full bg-[#E25238] flex items-center justify-center text-white hover:bg-[#C9452D] active:scale-[0.95] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0 mb-0.5"
           >
             <Send size={15} strokeWidth={2.5} />
           </button>

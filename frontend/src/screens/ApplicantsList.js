@@ -175,7 +175,7 @@ export default function ApplicantsList() {
                       key={action.value}
                       onClick={() => handleStatus(c.id, action.value)}
                       disabled={updating === c.id}
-                      className={`px-4 py-2 rounded-full text-xs font-bold transition-colors disabled:opacity-60 ${action.cls}`}
+                      className={`px-4 py-2 rounded-full text-xs font-bold active:scale-[0.95] transition-all disabled:opacity-60 ${action.cls}`}
                     >
                       {updating === c.id ? "…" : action.label}
                     </button>
