@@ -414,6 +414,8 @@ async def update_creator_profile(body: CreatorProfileIn, user=Depends(current_us
             continue
         if k == "worked_with":
             updates[k] = json.dumps(v) if not isinstance(v, str) else v
+        elif k == "handle":
+            updates[k] = v.lstrip("@") if isinstance(v, str) else v
         else:
             updates[k] = v
     if not updates:
@@ -611,7 +613,7 @@ async def get_creator_by_handle(handle: str, user=Depends(optional_user)):
     pool = await get_pool()
     async with pool.acquire() as conn:
         cp = await conn.fetchrow(
-            "SELECT * FROM creator_profiles WHERE LOWER(handle)=LOWER($1)", handle
+            "SELECT * FROM creator_profiles WHERE LOWER(LTRIM(handle, '@'))=LOWER(LTRIM($1, '@'))", handle
         )
         if not cp:
             raise HTTPException(status_code=404, detail="Creator not found")
