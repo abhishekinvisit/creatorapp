@@ -21,7 +21,6 @@ export default function BrandPostDetail() {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState(null);
 
-  // Fetch from API if not in context
   useEffect(() => {
     if (post) {
       setForm(buildForm(post));
@@ -44,6 +43,8 @@ export default function BrandPostDetail() {
           status: p.status || "active",
           languages: p.languages || [],
           requirements: p.requirements || [],
+          followers_min: p.followers_min || 0,
+          followers_max: p.followers_max || 0,
         };
         setPost(mapped);
         setForm(buildForm(mapped));
@@ -52,7 +53,6 @@ export default function BrandPostDetail() {
       .finally(() => setLoading(false));
   }, [id]); // eslint-disable-line
 
-  // Sync form when post updates from context
   useEffect(() => {
     const ctx = activePosts.find((p) => p.id === id);
     if (ctx && !post) {
@@ -87,6 +87,13 @@ export default function BrandPostDetail() {
     if (!form.title?.trim()) { toast.error("Campaign title is required"); return; }
     setSaving(true);
     try {
+      const builtRequirements = [
+        form.age && form.age !== "Any Age" ? `Age: ${form.age}` : "",
+        form.gender && form.gender !== "All" ? `Gender: ${form.gender}` : "",
+        form.location ? `Location: ${form.location}` : "",
+        ...(form.requirements || []),
+      ].filter(Boolean);
+
       await opportunitiesApi.update(id, {
         title: form.title,
         pitch: form.description,
@@ -97,14 +104,18 @@ export default function BrandPostDetail() {
         cover_url: form.cover_url || "",
         category: form.category || "",
         languages: form.languages || [],
-        requirements: form.requirements || [],
+        requirements: builtRequirements,
+        followers_min: parseInt(form.followers_min) || 0,
+        followers_max: parseInt(form.followers_max) || 0,
       });
       const updated = {
         ...post, ...form,
         payout: parseInt(form.payout) || 0,
         needed: parseInt(form.needed) || 1,
         category: form.category || "",
-        requirements: form.requirements || [],
+        requirements: builtRequirements,
+        followers_min: parseInt(form.followers_min) || 0,
+        followers_max: parseInt(form.followers_max) || 0,
       };
       setPost(updated);
       setActivePosts((prev) => prev.map((p) => p.id === id ? updated : p));
@@ -171,14 +182,12 @@ export default function BrandPostDetail() {
       />
 
       <div className="px-5">
-        {/* Cover image */}
         {post.cover_url && !editing && (
           <div className="w-full h-40 rounded-2xl overflow-hidden mb-4">
             <img src={post.cover_url} alt="cover" className="w-full h-full object-cover" />
           </div>
         )}
 
-        {/* Status banner */}
         <div className="flex items-center justify-between mb-4">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#22C55E]/15 text-[#22C55E] text-xs font-bold uppercase tracking-[0.15em]">
             <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E]" />
@@ -213,7 +222,23 @@ export default function BrandPostDetail() {
   );
 }
 
+function parseRequirements(reqs) {
+  const ageReq = reqs.find((r) => r.startsWith("Age: "));
+  const genderReq = reqs.find((r) => r.startsWith("Gender: "));
+  const locationReq = reqs.find((r) => r.startsWith("Location: "));
+  const others = reqs.filter(
+    (r) => !r.startsWith("Age: ") && !r.startsWith("Gender: ") && !r.startsWith("Location: ")
+  );
+  return {
+    age: ageReq ? ageReq.replace("Age: ", "") : "",
+    gender: genderReq ? genderReq.replace("Gender: ", "") : "",
+    location: locationReq ? locationReq.replace("Location: ", "") : "",
+    others,
+  };
+}
+
 function buildForm(post) {
+  const { age, gender, location, others } = parseRequirements(post.requirements || []);
   return {
     title: post.title || "",
     description: post.description || post.pitch || "",
@@ -223,46 +248,70 @@ function buildForm(post) {
     cover_url: post.cover_url || "",
     category: post.category || "",
     languages: post.languages || [],
-    requirements: post.requirements || [],
+    requirements: others,
+    followers_min: post.followers_min || post.followersMin || "",
+    followers_max: post.followers_max || post.followersMax || "",
+    age,
+    gender,
+    location,
   };
 }
 
-const ViewBody = ({ post }) => (
-  <>
-    <h1 className="font-display font-black text-3xl tracking-tight leading-tight">{post.title}</h1>
-    {post.description && (
-      <p className="text-sm text-neutral-400 font-medium leading-relaxed mt-3">{post.description}</p>
-    )}
+const ViewBody = ({ post }) => {
+  const { age, gender, location, others } = parseRequirements(post.requirements || []);
+  return (
+    <>
+      <h1 className="font-display font-black text-3xl tracking-tight leading-tight">{post.title}</h1>
+      {post.description && (
+        <p className="text-sm text-neutral-400 font-medium leading-relaxed mt-3">{post.description}</p>
+      )}
 
-    <div className="grid grid-cols-3 gap-3 mt-6">
-      <Stat icon={Wallet} label="Payout" value={post.payout ? `₹${post.payout}` : "—"} />
-      <Stat icon={Users} label="Needed" value={post.needed || "—"} />
-      <Stat icon={Calendar} label="Deadline" value={post.deadline || "—"} />
-    </div>
-
-    <div className="mt-7">
-      <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#E25238] mb-3">Details</p>
-      <div className="bg-white/5 border border-white/10 rounded-3xl divide-y divide-white/10">
-        <Row icon={Tag} label="Category" value={post.category} />
-        <LanguageRow langs={post.languages} />
+      <div className="grid grid-cols-3 gap-3 mt-6">
+        <Stat icon={Wallet} label="Payout" value={post.payout ? `₹${post.payout}` : "—"} />
+        <Stat icon={Users} label="Needed" value={post.needed || "—"} />
+        <Stat icon={Calendar} label="Deadline" value={post.deadline || "—"} />
       </div>
-    </div>
 
-    {post.requirements?.length > 0 && (
-      <div className="mt-5">
-        <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#E25238] mb-3">Requirements</p>
+      <div className="mt-7">
+        <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#E25238] mb-3">Details</p>
         <div className="bg-white/5 border border-white/10 rounded-3xl divide-y divide-white/10">
-          {post.requirements.map((req, i) => (
-            <div key={i} className="flex items-center px-5 py-4 gap-3">
-              <Filter size={14} className="text-[#E25238] flex-shrink-0" />
-              <span className="text-sm font-medium text-white">{req}</span>
-            </div>
-          ))}
+          <Row icon={Tag} label="Category" value={post.category} />
+          <LanguageRow langs={post.languages} />
+          {(post.followers_min || post.followers_max) ? (
+            <Row
+              icon={Users}
+              label="Followers"
+              value={
+                post.followers_min && post.followers_max
+                  ? `${post.followers_min.toLocaleString()} – ${post.followers_max.toLocaleString()}`
+                  : post.followers_min
+                  ? `Min ${post.followers_min.toLocaleString()}`
+                  : `Max ${post.followers_max.toLocaleString()}`
+              }
+            />
+          ) : null}
+          {age ? <Row icon={Filter} label="Age Group" value={age} /> : null}
+          {gender ? <Row icon={Filter} label="Gender" value={gender} /> : null}
+          {location ? <Row icon={MapPin} label="Location" value={location} /> : null}
         </div>
       </div>
-    )}
-  </>
-);
+
+      {others.length > 0 && (
+        <div className="mt-5">
+          <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#E25238] mb-3">Requirements</p>
+          <div className="bg-white/5 border border-white/10 rounded-3xl divide-y divide-white/10">
+            {others.map((req, i) => (
+              <div key={i} className="flex items-center px-5 py-4 gap-3">
+                <Filter size={14} className="text-[#E25238] flex-shrink-0" />
+                <span className="text-sm font-medium text-white">{req}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
 
 const Stat = ({ icon: Icon, label, value }) => (
   <div className="bg-white/5 border border-white/10 rounded-2xl p-3">
@@ -299,9 +348,6 @@ const LanguageRow = ({ langs }) => (
 );
 
 const EditForm = ({ form, setForm }) => {
-  const coverRef = useState(null)[0];
-  const inputRef = { current: null };
-
   const handleCoverFile = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -314,7 +360,6 @@ const EditForm = ({ form, setForm }) => {
 
   return (
     <div className="space-y-5">
-      {/* Cover image upload */}
       <Field label="Cover Image">
         <div
           className="w-full h-36 rounded-2xl overflow-hidden border-2 border-dashed border-white/20 flex items-center justify-center cursor-pointer hover:border-[#E25238] transition-colors relative"
@@ -346,6 +391,7 @@ const EditForm = ({ form, setForm }) => {
           className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-4 outline-none text-white font-medium focus:border-[#E25238]"
         />
       </Field>
+
       <Field label="Campaign Description">
         <textarea
           data-testid="edit-desc"
@@ -355,6 +401,7 @@ const EditForm = ({ form, setForm }) => {
           className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-4 outline-none text-white font-medium resize-none focus:border-[#E25238]"
         />
       </Field>
+
       <div className="grid grid-cols-2 gap-3">
         <Field label="Payout (₹)">
           <input
@@ -375,6 +422,7 @@ const EditForm = ({ form, setForm }) => {
           />
         </Field>
       </div>
+
       <Field label="Deadline">
         <input
           data-testid="edit-deadline"
@@ -387,6 +435,78 @@ const EditForm = ({ form, setForm }) => {
 
       <Field label="Category">
         <CategoryPicker form={form} setForm={setForm} />
+      </Field>
+
+      <Field label="Follower Range Required">
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <p className="text-[10px] font-bold tracking-widest uppercase text-neutral-500 mb-1.5">Min Followers</p>
+            <input
+              data-testid="edit-followers-min"
+              type="number"
+              value={form.followers_min}
+              onChange={(e) => setForm({ ...form, followers_min: e.target.value })}
+              placeholder="e.g. 5000"
+              className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-4 outline-none text-white placeholder-neutral-500 font-medium focus:border-[#E25238]"
+            />
+          </div>
+          <div>
+            <p className="text-[10px] font-bold tracking-widest uppercase text-neutral-500 mb-1.5">Max Followers</p>
+            <input
+              data-testid="edit-followers-max"
+              type="number"
+              value={form.followers_max}
+              onChange={(e) => setForm({ ...form, followers_max: e.target.value })}
+              placeholder="e.g. 100000"
+              className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-4 outline-none text-white placeholder-neutral-500 font-medium focus:border-[#E25238]"
+            />
+          </div>
+        </div>
+        <p className="text-[11px] text-neutral-500 mt-1.5 font-medium">Leave blank to accept all follower counts</p>
+      </Field>
+
+      <Field label="Audience Age Group">
+        <div className="flex flex-wrap gap-2">
+          {AGES.map((a) => (
+            <button
+              key={a}
+              type="button"
+              onClick={() => setForm({ ...form, age: form.age === a ? "" : a })}
+              className={`px-4 py-2.5 rounded-full text-sm font-bold transition-all ${
+                form.age === a ? "bg-[#E25238] text-white" : "bg-white/5 text-neutral-300 border border-white/10 hover:border-white/30"
+              }`}
+            >
+              {a}
+            </button>
+          ))}
+        </div>
+      </Field>
+
+      <Field label="Gender (Audience)">
+        <div className="flex flex-wrap gap-2">
+          {GENDERS.map((g) => (
+            <button
+              key={g}
+              type="button"
+              onClick={() => setForm({ ...form, gender: form.gender === g ? "" : g })}
+              className={`px-4 py-2.5 rounded-full text-sm font-bold transition-all ${
+                form.gender === g ? "bg-[#E25238] text-white" : "bg-white/5 text-neutral-300 border border-white/10 hover:border-white/30"
+              }`}
+            >
+              {g}
+            </button>
+          ))}
+        </div>
+      </Field>
+
+      <Field label="Location (Preferred)">
+        <input
+          data-testid="edit-location"
+          value={form.location}
+          onChange={(e) => setForm({ ...form, location: e.target.value })}
+          placeholder="e.g. India, Mumbai"
+          className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-4 outline-none text-white placeholder-neutral-500 font-medium focus:border-[#E25238]"
+        />
       </Field>
 
       <Field label="Requirements">
