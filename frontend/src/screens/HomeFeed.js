@@ -43,8 +43,6 @@ function mapApiOpp(o) {
 export default function HomeFeed() {
   const navigate = useNavigate();
   const { opportunities, mergeOpportunities, isSaved, toggleSave, user, accountType, applications, unreadNotifications } = useApp();
-  const [activeCat, setActiveCat] = useState("All");
-
   useEffect(() => {
     opportunitiesApi.list()
       .then((opps) => {
@@ -247,23 +245,6 @@ export default function HomeFeed() {
           </div>
         )}
 
-        {/* Category pills */}
-        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-2">
-          {visibleCats.map((cat) => (
-            <button
-              key={cat}
-              data-testid={`cat-${cat.toLowerCase()}`}
-              onClick={() => setActiveCat(cat)}
-              className={`px-5 py-2.5 rounded-full whitespace-nowrap text-sm font-bold transition-all ${
-                activeCat === cat
-                  ? "bg-[#0A0A0A] text-white"
-                  : "bg-white text-[#525252] border border-[#E5E5E5] hover:border-[#0A0A0A]"
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
       </div>
 
       {/* Results count */}
