@@ -475,22 +475,9 @@ export default function EditProfile() {
           </Section>
         )}
 
-        {/* Profile Visibility + Audience Insights */}
+        {/* Audience Insights */}
         {accountType !== "brand" && (
-          <Section label="Profile Visibility">
-            <div className="flex items-center justify-between px-4 py-4 bg-white border border-[#E5E5E5] rounded-2xl">
-              <div>
-                <p className="font-bold text-sm text-[#0A0A0A]">Public Profile</p>
-                <p className="text-xs text-[#525252] font-medium mt-0.5">Visible to brands in Discover</p>
-              </div>
-              <button
-                data-testid="visibility-toggle"
-                onClick={() => setIsPublic((v) => !v)}
-                className={`relative w-12 h-6 rounded-full transition-colors ${isPublic ? "bg-[#22C55E]" : "bg-[#E5E5E5]"}`}
-              >
-                <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${isPublic ? "translate-x-6" : "translate-x-0.5"}`} />
-              </button>
-            </div>
+          <Section label="Audience Insights">
             <button
               data-testid="audience-insights-edit-btn"
               onClick={() => setShowInsights(true)}

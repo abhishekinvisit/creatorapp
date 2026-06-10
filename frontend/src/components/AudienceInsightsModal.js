@@ -265,9 +265,10 @@ export function AudienceInsightsModal({ open, onClose, isOwner = false, initialD
                         min="0"
                         max="100"
                         step="0.1"
-                        value={form[key]}
+                        value={form[key] || ""}
                         onChange={(e) => setN(key, e.target.value)}
                         className="flex-1 px-3 py-2 rounded-xl bg-[#F3F3F3] border border-[#E5E5E5] text-sm font-medium outline-none focus:border-[#0A0A0A]"
+                        placeholder="0"
                       />
                       <div className="w-16 h-2 bg-[#F3F3F3] rounded-full overflow-hidden">
                         <div
@@ -323,9 +324,10 @@ export function AudienceInsightsModal({ open, onClose, isOwner = false, initialD
                         min="0"
                         max="100"
                         step="0.1"
-                        value={form[key]}
+                        value={form[key] || ""}
                         onChange={(e) => setN(key, e.target.value)}
                         className="flex-1 px-3 py-2 rounded-xl bg-[#F3F3F3] border border-[#E5E5E5] text-sm font-medium outline-none focus:border-[#0A0A0A]"
+                        placeholder="0"
                       />
                     </div>
                   ))}

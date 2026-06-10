@@ -47,13 +47,7 @@ export default function SplashScreen() {
             className="group-hover:translate-x-1 transition-transform"
           />
         </button>
-        <button
-          data-testid="login-link"
-          onClick={() => navigate("/login")}
-          className="w-full py-4 rounded-full border border-white/15 font-bold text-sm text-neutral-300 hover:border-white/30 hover:text-white transition-all"
-        >
-          Already have an account? Log in
-        </button>
+        
         <p className="text-center text-[10px] text-neutral-600 font-medium pt-1">
           By continuing, you agree to our Terms & Privacy Policy
         </p>
