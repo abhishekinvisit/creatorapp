@@ -66,6 +66,7 @@ export default function EditProfile() {
   const [isPublic, setIsPublic] = useState(profile.isPublic !== false);
   const [showInsights, setShowInsights] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
+  const [catOpen, setCatOpen] = useState(false);
 
   // Brand-only form state
   const [brandInstagramUrl, setBrandInstagramUrl] = useState(profile.instagramUrl || "");
@@ -196,7 +197,14 @@ export default function EditProfile() {
     }
   };
 
-  const toggleCat = (c) => setCats((prev) => prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]);
+  const toggleCat = (c) => setCats((prev) => {
+    if (prev.includes(c)) return prev.filter((x) => x !== c);
+    if (prev.length >= 3) {
+      toast.error("You can select up to 3 categories");
+      return prev;
+    }
+    return [...prev, c];
+  });
   const toggleLang = (l) => setLanguages((prev) => prev.includes(l) ? prev.filter((x) => x !== l) : [...prev, l]);
 
   const removeBrand = (id) => setWorkedWith((prev) => prev.filter((b) => b.id !== id));
@@ -427,28 +435,41 @@ export default function EditProfile() {
         {/* Categories */}
         {accountType !== "brand" && (
           <Section label="Categories" hint="Pick up to 3 that describe you best.">
-            <input
-              value={catSearch}
-              onChange={(e) => setCatSearch(e.target.value)}
-              placeholder="Search categories…"
-              className="w-full px-4 py-3 mb-3 bg-[#F9F9F8] border-2 border-[#E5E5E5] rounded-2xl text-[#0A0A0A] font-medium text-sm outline-none focus:border-[#0A0A0A] transition-colors placeholder:text-[#B0B0B0]"
-            />
-            <div className="flex flex-wrap gap-2">
-              {ALL_CATEGORIES.filter((c) => c.toLowerCase().includes(catSearch.toLowerCase())).map((c) => {
-                const active = cats.includes(c);
-                return (
-                  <button
-                    key={c}
-                    data-testid={`cat-${c.toLowerCase()}`}
-                    onClick={() => toggleCat(c)}
-                    className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-[0.15em] transition-all ${
-                      active ? "bg-[#0A0A0A] text-white" : "bg-white border border-[#E5E5E5] text-[#525252] hover:border-[#0A0A0A]"
-                    }`}
-                  >
-                    {c}
-                  </button>
-                );
-              })}
+            <div className="relative">
+              <button
+                onClick={() => setCatOpen((o) => !o)}
+                className="w-full flex items-center justify-between px-4 py-3 bg-white border border-[#E5E5E5] rounded-2xl text-sm font-medium text-[#0A0A0A] hover:border-[#0A0A0A] transition-colors"
+              >
+                <span className={cats.length ? "text-[#0A0A0A]" : "text-[#B0B0B0]"}>
+                  {cats.length ? cats.join(", ") : "Select categories"}
+                </span>
+                <ChevronDown size={16} className={`text-[#525252] transition-transform ${catOpen ? "rotate-180" : ""}`} />
+              </button>
+              {catOpen && (
+                <div className="absolute z-20 mt-1 w-full bg-white border border-[#E5E5E5] rounded-2xl shadow-lg max-h-60 overflow-y-auto p-2">
+                  <input
+                    value={catSearch}
+                    onChange={(e) => setCatSearch(e.target.value)}
+                    placeholder="Search categories…"
+                    className="w-full px-3 py-2 mb-2 bg-[#F9F9F8] border border-[#E5E5E5] rounded-xl text-sm font-medium text-[#0A0A0A] outline-none focus:border-[#0A0A0A] placeholder:text-[#B0B0B0]"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                  {ALL_CATEGORIES.filter((c) => c.toLowerCase().includes(catSearch.toLowerCase())).map((c) => {
+                    const active = cats.includes(c);
+                    return (
+                      <button
+                        key={c}
+                        onClick={() => toggleCat(c)}
+                        className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-all mb-1 ${
+                          active ? "bg-[#0A0A0A] text-white" : "hover:bg-[#F3F3F3] text-[#0A0A0A]"
+                        }`}
+                      >
+                        {c}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </Section>
         )}
