@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Camera, Plus, X, Link2, Pencil, MapPin, BarChart2 } from "lucide-react";
+import { Camera, Plus, X, Link2, Pencil, MapPin, BarChart2, ChevronDown } from "lucide-react";
 
 const InstagramIcon = ({ size = 16, className = "", ...props }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
@@ -65,6 +65,7 @@ export default function EditProfile() {
   const [languages, setLanguages] = useState(profile.language || []);
   const [isPublic, setIsPublic] = useState(profile.isPublic !== false);
   const [showInsights, setShowInsights] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
 
   // Brand-only form state
   const [brandInstagramUrl, setBrandInstagramUrl] = useState(profile.instagramUrl || "");
@@ -455,22 +456,34 @@ export default function EditProfile() {
         {/* Content Languages */}
         {accountType !== "brand" && (
           <Section label="Content Languages" hint="Languages you create content in.">
-            <div className="flex flex-wrap gap-2">
-              {ALL_LANGUAGES.map((l) => {
-                const active = languages.includes(l);
-                return (
-                  <button
-                    key={l}
-                    data-testid={`lang-${l.toLowerCase()}`}
-                    onClick={() => toggleLang(l)}
-                    className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-[0.15em] transition-all ${
-                      active ? "bg-[#0A0A0A] text-white" : "bg-white border border-[#E5E5E5] text-[#525252] hover:border-[#0A0A0A]"
-                    }`}
-                  >
-                    {l}
-                  </button>
-                );
-              })}
+            <div className="relative">
+              <button
+                onClick={() => setLangOpen((o) => !o)}
+                className="w-full flex items-center justify-between px-4 py-3 bg-white border border-[#E5E5E5] rounded-2xl text-sm font-medium text-[#0A0A0A] hover:border-[#0A0A0A] transition-colors"
+              >
+                <span className={languages.length ? "text-[#0A0A0A]" : "text-[#B0B0B0]"}>
+                  {languages.length ? languages.join(", ") : "Select languages"}
+                </span>
+                <ChevronDown size={16} className={`text-[#525252] transition-transform ${langOpen ? "rotate-180" : ""}`} />
+              </button>
+              {langOpen && (
+                <div className="absolute z-20 mt-1 w-full bg-white border border-[#E5E5E5] rounded-2xl shadow-lg max-h-60 overflow-y-auto p-2">
+                  {ALL_LANGUAGES.map((l) => {
+                    const active = languages.includes(l);
+                    return (
+                      <button
+                        key={l}
+                        onClick={() => toggleLang(l)}
+                        className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-all mb-1 ${
+                          active ? "bg-[#0A0A0A] text-white" : "hover:bg-[#F3F3F3] text-[#0A0A0A]"
+                        }`}
+                      >
+                        {l}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </Section>
         )}
