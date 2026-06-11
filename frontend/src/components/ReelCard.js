@@ -23,12 +23,15 @@ export const ReelCard = ({ reel, testId, delay = 0 }) => {
       className="group relative aspect-[9/16] w-full rounded-3xl overflow-hidden bg-[#0A0A0A] text-left animate-fade-up hover:-translate-y-1 transition-all shadow-sm hover:shadow-2xl"
       style={{ animationDelay: `${delay}ms` }}
     >
-      <img
-        src={reel.thumbnail}
-        alt={reel.title}
-        className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-        loading="lazy"
-      />
+      {reel.thumbnail ? (
+        <img
+          src={reel.thumbnail}
+          alt={reel.title}
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          loading="lazy"
+          onError={(e) => { e.target.style.display = "none"; }}
+        />
+      ) : null}
       {/* Top gradient + brand */}
       <div className="absolute top-0 left-0 right-0 p-3 bg-gradient-to-b from-black/70 to-transparent flex items-center justify-between">
         <div className="flex items-center gap-2 min-w-0">
