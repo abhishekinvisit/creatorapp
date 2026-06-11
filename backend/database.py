@@ -238,6 +238,21 @@ MIGRATIONS = [
     "ALTER TABLE creator_profiles ADD COLUMN IF NOT EXISTS email VARCHAR(255) DEFAULT ''",
     "ALTER TABLE creator_profiles ADD COLUMN IF NOT EXISTS state VARCHAR(255) DEFAULT ''",
     "ALTER TABLE brand_profiles ADD COLUMN IF NOT EXISTS official_email VARCHAR(255) DEFAULT ''",
+    """CREATE TABLE IF NOT EXISTS creator_pricing (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        creator_id UUID REFERENCES users(id) ON DELETE CASCADE UNIQUE,
+        currency VARCHAR(10) DEFAULT 'INR',
+        negotiable BOOLEAN DEFAULT FALSE,
+        ig_reel INTEGER,
+        ig_post INTEGER,
+        ig_story INTEGER,
+        reel_story_package INTEGER,
+        ugc_video INTEGER,
+        event_appearance INTEGER,
+        custom_services JSONB DEFAULT '[]',
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+    )""",
+    "CREATE INDEX IF NOT EXISTS idx_creator_pricing_creator_id ON creator_pricing(creator_id)",
 ]
 
 

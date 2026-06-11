@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Settings, BadgeCheck, Pencil, Briefcase, Share2, MapPin, Globe, ChevronRight, Plus, Tag, ExternalLink, Users, Bookmark, BarChart2 } from "lucide-react";
+import { Settings, BadgeCheck, Pencil, Briefcase, Share2, MapPin, Globe, ChevronRight, Plus, Tag, ExternalLink, Users, Bookmark, BarChart2, IndianRupee } from "lucide-react";
 import { toast } from "sonner";
 
 const InstagramIcon = ({ size = 16, className = "", strokeWidth = 2, ...props }) => (
@@ -8,6 +8,7 @@ const InstagramIcon = ({ size = 16, className = "", strokeWidth = 2, ...props })
     <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
   </svg>
 );
+
 import { TopBar } from "@/components/TopBar";
 import { useApp } from "@/context/AppContext";
 import { BrandLogo } from "@/components/BrandLogo";
@@ -15,6 +16,7 @@ import { WorkedWithItem } from "@/components/WorkedWithItem";
 import { ReelCard } from "@/components/ReelCard";
 import { reelsApi } from "@/lib/api";
 import { AudienceInsightsModal } from "@/components/AudienceInsightsModal";
+import { ServicePricingModal } from "@/components/ServicePricingModal";
 
 async function shareProfile(url, name) {
   if (navigator.share) {
@@ -49,12 +51,14 @@ export default function MyProfile() {
   const { user, accountType, workedWith, currentUserId, activePosts, savedCreatorsCount } = useApp();
   const [reels, setReels] = useState([]);
   const [showInsights, setShowInsights] = useState(false);
+  const [showPricing, setShowPricing] = useState(false);
 
   useEffect(() => {
     if (accountType !== "creator") return;
     reelsApi.list().then(setReels).catch(() => setReels([]));
   }, [accountType]);
 
+  // ─── Brand Profile ────────────────────────────────────────────────────────
   if (accountType === "brand") {
     const b = user.brand;
     const activePostCount = activePosts.filter((p) => p.status === "active").length;
@@ -63,7 +67,6 @@ export default function MyProfile() {
 
     return (
       <div data-testid="my-profile-brand" className="min-h-full bg-[#0A0A0A] text-white pb-8">
-        {/* Header */}
         <div className="sticky top-0 z-30 bg-[#0A0A0A] px-5 py-4 flex items-center justify-between">
           <h2 className="font-display font-bold text-lg tracking-tight">Profile</h2>
           <button
@@ -75,10 +78,8 @@ export default function MyProfile() {
           </button>
         </div>
 
-        {/* Identity Header */}
         <div className="px-5 pt-2 pb-1">
           <div className="flex items-center gap-4 mb-4">
-            {/* Logo */}
             <div className="ring-2 ring-white/10 rounded-[24px] shadow-xl flex-shrink-0">
               {b.logo && (b.logo.startsWith("data:") || b.logo.startsWith("http")) ? (
                 <img src={b.logo} alt={b.name} className="w-20 h-20 rounded-[24px] object-cover" />
@@ -86,7 +87,6 @@ export default function MyProfile() {
                 <BrandLogo name={b.name} size={80} dark />
               )}
             </div>
-            {/* Action buttons */}
             <div className="flex-1 flex justify-end gap-2">
               <button
                 data-testid="edit-profile-btn"
@@ -105,7 +105,6 @@ export default function MyProfile() {
             </div>
           </div>
 
-          {/* Name + meta */}
           <div className="mb-5">
             <div className="flex items-center gap-2 mb-0.5">
               <h2 className="font-display font-black text-2xl tracking-tight">{b.name}</h2>
@@ -114,7 +113,7 @@ export default function MyProfile() {
             {b.handle && (
               <p className="text-sm text-neutral-500 font-medium">@{b.handle.replace(/^@/, "")}</p>
             )}
-            {(b.location) && (
+            {b.location && (
               <div className="flex items-center gap-1 mt-1.5">
                 <MapPin size={11} className="text-neutral-500" />
                 <span className="text-xs text-neutral-500 font-medium">{b.location}</span>
@@ -123,7 +122,6 @@ export default function MyProfile() {
           </div>
         </div>
 
-        {/* Stats strip */}
         <div className="px-5 mb-6">
           <div className="grid grid-cols-3 divide-x divide-white/10 bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
             <div className="px-3 py-4 text-center">
@@ -141,7 +139,6 @@ export default function MyProfile() {
           </div>
         </div>
 
-        {/* About section */}
         {(b.bio || b.categories?.length > 0) && (
           <div className="px-5 mb-6">
             <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-neutral-500 mb-3">About</p>
@@ -160,7 +157,6 @@ export default function MyProfile() {
           </div>
         )}
 
-        {/* Links section */}
         {(b.instagramUrl || b.websiteUrl) && (
           <div className="px-5 mb-6">
             <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-neutral-500 mb-3">Links</p>
@@ -197,7 +193,6 @@ export default function MyProfile() {
           </div>
         )}
 
-        {/* Active Opportunities */}
         <div className="px-5 mb-6">
           <div className="flex items-center justify-between mb-3">
             <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-neutral-500">Active Opportunities</p>
@@ -242,7 +237,6 @@ export default function MyProfile() {
           )}
         </div>
 
-        {/* Saved Creators shortcut */}
         <div className="px-5">
           <button
             onClick={() => navigate("/brand/saved-creators")}
@@ -264,12 +258,11 @@ export default function MyProfile() {
     );
   }
 
-  // ----- Creator profile (own view) -----
+  // ─── Creator Profile ──────────────────────────────────────────────────────
   const c = user.creator;
-  const openInstagram = () => window.open(c.instagramUrl, "_blank", "noopener,noreferrer");
 
   return (
-    <div data-testid="my-profile-creator" className="min-h-full bg-[#F9F9F8] pb-6">
+    <div data-testid="my-profile-creator" className="min-h-full bg-[#F9F9F8] pb-8">
       <TopBar
         title="Profile"
         dark={false}
@@ -280,24 +273,23 @@ export default function MyProfile() {
         }
       />
 
-      {/* HEADER */}
-      <div className="px-5">
-        {/* Avatar + identity */}
+      {/* ── Hero: avatar + name + actions ── */}
+      <div className="px-5 pt-2 pb-5">
         <div className="flex items-center gap-4">
           <img
             src={c.avatar}
             alt={c.name}
-            className="w-[72px] h-[72px] rounded-[22px] object-cover ring-4 ring-white shadow-md flex-shrink-0"
+            className="w-[72px] h-[72px] rounded-[22px] object-cover ring-2 ring-white shadow-md flex-shrink-0"
           />
           <div className="flex-1 min-w-0">
-            <h2 className="font-display font-black text-xl text-[#0A0A0A] tracking-tight leading-tight">
+            <h2 className="font-display font-black text-xl text-[#0A0A0A] tracking-tight leading-tight truncate">
               {c.name}
             </h2>
             <div className="flex items-center gap-1.5 mt-0.5">
               <p className="text-sm text-[#525252] font-medium truncate">{c.handle}</p>
               <button
                 data-testid="ig-link"
-                onClick={openInstagram}
+                onClick={() => window.open(c.instagramUrl, "_blank", "noopener,noreferrer")}
                 aria-label="Open Instagram"
                 className="w-5 h-5 rounded-[6px] bg-gradient-to-tr from-[#E25238] via-[#F59E0B] to-[#E25238] flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform"
               >
@@ -313,10 +305,10 @@ export default function MyProfile() {
           </div>
         </div>
 
-        {/* Stats row — full width, outside the avatar flex */}
+        {/* Stats strip */}
         <div className="flex items-center gap-6 mt-4 pt-4 border-t border-[#EBEBEB]">
           <div data-testid="stat-followers">
-            <p className="font-display font-black text-base text-[#0A0A0A] leading-none">{c.followers}</p>
+            <p className="font-display font-black text-lg text-[#0A0A0A] leading-none">{c.followers}</p>
             <div className="flex items-center gap-1 mt-1">
               <div className="w-3 h-3 rounded-[3px] bg-gradient-to-tr from-[#E25238] via-[#F59E0B] to-[#E25238] flex items-center justify-center">
                 <InstagramIcon size={7} className="text-white" strokeWidth={2.8} />
@@ -326,45 +318,101 @@ export default function MyProfile() {
           </div>
           <div className="w-px h-7 bg-[#E5E5E5]" />
           <div data-testid="stat-collaborations">
-            <p className="font-display font-black text-base text-[#0A0A0A] leading-none">{c.collaborations}</p>
-            <p className="text-[10px] font-bold tracking-[0.15em] uppercase text-[#525252] mt-1">Collaborations</p>
+            <p className="font-display font-black text-lg text-[#0A0A0A] leading-none">{c.collaborations}</p>
+            <p className="text-[10px] font-bold tracking-[0.15em] uppercase text-[#525252] mt-1">Collabs</p>
           </div>
+          {c.category?.length > 0 && (
+            <>
+              <div className="w-px h-7 bg-[#E5E5E5]" />
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] font-bold tracking-[0.15em] uppercase text-[#525252] mb-1">Niche</p>
+                <p className="text-xs font-bold text-[#0A0A0A] truncate">{c.category[0]}</p>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Bio */}
-        <p className="text-sm font-medium text-[#0A0A0A] mt-4 leading-relaxed">{c.bio}</p>
-
-        {/* Categories */}
-        <div className="flex flex-wrap gap-2 mt-4">
-          
-          {c.category.map((cat) => (
-            <span
-              key={cat}
-              className="px-3 py-1.5 rounded-full bg-white border border-[#E5E5E5] text-[10px] font-bold uppercase tracking-[0.15em]"
-            >
-              {cat}
-            </span>
-          ))}
-        </div>
-
-        {/* Languages */}
-        {c.language && c.language.length > 0 && (
-          <div className="flex items-center gap-2 mt-3 flex-wrap">
-            <Globe size={12} className="text-[#525252] flex-shrink-0" />
-            {c.language.map((lang) => (
-              <span
-                key={lang}
-                className="px-3 py-1 rounded-full bg-[#F9F9F8] border border-[#E5E5E5] text-[10px] font-bold uppercase tracking-[0.12em] text-[#525252]"
-              >
-                {lang}
-              </span>
-            ))}
-          </div>
+        {c.bio && (
+          <p className="text-sm font-medium text-[#525252] mt-4 leading-relaxed">{c.bio}</p>
         )}
 
-        {/* Social links row */}
-        {(c.youtubeUrl || c.tiktokUrl || c.linkedinUrl || c.websiteUrl) && (
-          <div className="flex items-center gap-2 mt-3 flex-wrap">
+        {/* Action row */}
+        <div className="flex gap-2 mt-5">
+          <button
+            data-testid="edit-profile-btn"
+            onClick={() => navigate("/profile/edit")}
+            className="flex-1 py-2.5 rounded-full border-2 border-[#0A0A0A] font-bold text-sm flex items-center justify-center gap-1.5 hover:bg-[#0A0A0A] hover:text-white transition-colors"
+          >
+            <Pencil size={13} /> Edit Profile
+          </button>
+          <button
+            data-testid="share-profile-btn"
+            onClick={() => {
+              const handle = (c.handle || "").replace(/^@/, "");
+              const profileId = handle || currentUserId;
+              if (!profileId) return;
+              shareProfile(`${window.location.origin}/creator/${profileId}`, c.name);
+            }}
+            className="px-5 py-2.5 rounded-full bg-[#0A0A0A] text-white font-bold text-sm flex items-center justify-center gap-1.5"
+          >
+            <Share2 size={13} /> Share
+          </button>
+        </div>
+
+        {/* Tools row */}
+        <div className="grid grid-cols-2 gap-2 mt-2">
+          <button
+            data-testid="audience-insights-btn"
+            onClick={() => setShowInsights(true)}
+            className="flex items-center gap-2.5 px-3.5 py-3 bg-white border border-[#E5E5E5] rounded-2xl hover:border-[#E25238]/40 hover:bg-[#E25238]/5 transition-colors"
+          >
+            <div className="w-7 h-7 rounded-xl bg-[#E25238] flex items-center justify-center flex-shrink-0">
+              <BarChart2 size={14} className="text-white" />
+            </div>
+            <div className="text-left min-w-0">
+              <p className="text-xs font-bold text-[#0A0A0A] leading-tight">Audience</p>
+              <p className="text-[10px] text-[#525252] font-medium leading-tight">Insights</p>
+            </div>
+          </button>
+          <button
+            data-testid="service-pricing-btn"
+            onClick={() => setShowPricing(true)}
+            className="flex items-center gap-2.5 px-3.5 py-3 bg-white border border-[#E5E5E5] rounded-2xl hover:border-[#E25238]/40 hover:bg-[#E25238]/5 transition-colors"
+          >
+            <div className="w-7 h-7 rounded-xl bg-[#E25238] flex items-center justify-center flex-shrink-0">
+              <IndianRupee size={14} className="text-white" />
+            </div>
+            <div className="text-left min-w-0">
+              <p className="text-xs font-bold text-[#0A0A0A] leading-tight">My Rates</p>
+              <p className="text-[10px] text-[#525252] font-medium leading-tight">Service Pricing</p>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      {/* ── Worked With ── */}
+      {workedWith.length > 0 && (
+        <div className="px-5 mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#525252]">Worked With</p>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#525252]">
+              {workedWith.length} brands
+            </span>
+          </div>
+          <div data-testid="worked-with" className="flex items-start gap-3 overflow-x-auto scrollbar-hide -mx-1 px-1 pb-1">
+            {workedWith.map((b) => (
+              <WorkedWithItem key={b.id} brand={b} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Social links ── */}
+      {(c.youtubeUrl || c.tiktokUrl || c.linkedinUrl || c.websiteUrl) && (
+        <div className="px-5 mb-6">
+          <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#525252] mb-2">Links</p>
+          <div className="flex items-center gap-2 flex-wrap">
             {c.youtubeUrl && (
               <button
                 onClick={() => window.open(c.youtubeUrl, "_blank", "noopener,noreferrer")}
@@ -397,67 +445,24 @@ export default function MyProfile() {
                 <Globe size={11} /> Website
               </button>
             )}
-          </div>
-        )}
-
-        {/* Worked With – small horizontal logo row with names */}
-        <div className="mt-6">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#525252]">Worked With</p>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#525252]">
-              {workedWith.length} brands
-            </span>
-          </div>
-          <div data-testid="worked-with" className="flex items-start gap-3 overflow-x-auto scrollbar-hide -mx-1 px-1 pb-1">
-            {workedWith.map((b) => (
-              <WorkedWithItem key={b.id} brand={b} />
+            {c.language?.length > 0 && c.language.slice(0, 2).map((lang) => (
+              <span
+                key={lang}
+                className="px-3 py-1.5 rounded-full bg-[#F3F3F3] border border-[#E5E5E5] text-[10px] font-bold uppercase tracking-[0.1em] text-[#525252]"
+              >
+                {lang}
+              </span>
             ))}
           </div>
         </div>
+      )}
 
-        {/* Action buttons */}
-        <div className="flex gap-3 mt-6">
-          <button
-            data-testid="edit-profile-btn"
-            onClick={() => navigate("/profile/edit")}
-            className="flex-1 py-3 rounded-full border-2 border-[#0A0A0A] font-bold text-sm flex items-center justify-center gap-2 hover:bg-[#0A0A0A] hover:text-white transition-colors"
-          >
-            <Pencil size={14} /> Edit Profile
-          </button>
-          <button
-            data-testid="share-profile-btn"
-            onClick={() => {
-              const handle = (c.handle || "").replace(/^@/, "");
-              const profileId = handle || currentUserId;
-              if (!profileId) return;
-              shareProfile(`${window.location.origin}/creator/${profileId}`, c.name);
-            }}
-            className="px-5 py-3 rounded-full bg-[#0A0A0A] text-white font-bold text-sm flex items-center justify-center gap-2"
-          >
-            <Share2 size={14} /> Share
-          </button>
-        </div>
-        <button
-          data-testid="audience-insights-btn"
-          onClick={() => setShowInsights(true)}
-          className="w-full mt-3 flex items-center gap-3 px-4 py-3.5 bg-[#E25238]/8 border border-[#E25238]/20 rounded-2xl hover:bg-[#E25238]/15 transition-colors"
-        >
-          <div className="w-8 h-8 rounded-xl bg-[#E25238] flex items-center justify-center flex-shrink-0">
-            <BarChart2 size={16} className="text-white" />
-          </div>
-          <div className="flex-1 text-left">
-            <p className="text-sm font-bold text-[#0A0A0A]">Audience Insights</p>
-            <p className="text-xs text-[#525252] font-medium">Share your demographics with brands</p>
-          </div>
-        </button>
-      </div>
-
-      {/* PORTFOLIO – main focus */}
-      <div className="mt-9">
+      {/* ── Featured Reels ── */}
+      <div>
         <div className="px-5 flex items-end justify-between mb-4">
           <div>
             <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#E25238]">Portfolio</p>
-            <h3 className="font-display font-black text-2xl text-[#0A0A0A] tracking-tight leading-tight mt-1">
+            <h3 className="font-display font-black text-2xl text-[#0A0A0A] tracking-tight leading-tight mt-0.5">
               Featured Reels
             </h3>
           </div>
@@ -468,7 +473,7 @@ export default function MyProfile() {
 
         <div data-testid="reels-grid" className="px-5 grid grid-cols-2 gap-3">
           {reels.length === 0 ? (
-            <div className="col-span-2 py-8 text-center">
+            <div className="col-span-2 py-10 text-center">
               <p className="text-sm font-medium text-[#525252]">No reels yet.</p>
               <p className="text-xs text-[#525252] mt-1">Add featured reels from Edit Profile.</p>
             </div>
@@ -485,10 +490,18 @@ export default function MyProfile() {
         </div>
       </div>
 
+      {/* ── Modals ── */}
       {showInsights && (
         <AudienceInsightsModal
           open={showInsights}
           onClose={() => setShowInsights(false)}
+          isOwner={true}
+        />
+      )}
+      {showPricing && (
+        <ServicePricingModal
+          open={showPricing}
+          onClose={() => setShowPricing(false)}
           isOwner={true}
         />
       )}

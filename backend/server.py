@@ -222,6 +222,21 @@ class AudienceInsightsImageIn(BaseModel):
     image_data: str
     platform: Optional[str] = "Instagram"
 
+class CustomServiceItem(BaseModel):
+    name: str
+    price: Optional[int] = None
+
+class CreatorPricingIn(BaseModel):
+    currency: Optional[str] = "INR"
+    negotiable: Optional[bool] = False
+    ig_reel: Optional[int] = None
+    ig_post: Optional[int] = None
+    ig_story: Optional[int] = None
+    reel_story_package: Optional[int] = None
+    ugc_video: Optional[int] = None
+    event_appearance: Optional[int] = None
+    custom_services: Optional[List[dict]] = []
+
 class ApplicationStatusIn(BaseModel):
     status: str  # applied | shortlisted | accepted | rejected
 
@@ -1371,6 +1386,77 @@ async def list_categories():
     async with pool.acquire() as conn:
         rows = await conn.fetch("SELECT name FROM categories ORDER BY sort_order, name")
         return [r["name"] for r in rows]
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CREATOR PRICING
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _serialize_pricing(row: dict) -> dict:
+    import json as _json
+    cs = row.get("custom_services", [])
+    if isinstance(cs, str):
+        try: cs = _json.loads(cs)
+        except Exception: cs = []
+    return {
+        "currency": row.get("currency", "INR"),
+        "negotiable": row.get("negotiable", False),
+        "ig_reel": row.get("ig_reel"),
+        "ig_post": row.get("ig_post"),
+        "ig_story": row.get("ig_story"),
+        "reel_story_package": row.get("reel_story_package"),
+        "ugc_video": row.get("ugc_video"),
+        "event_appearance": row.get("event_appearance"),
+        "custom_services": cs if isinstance(cs, list) else [],
+        "updated_at": row.get("updated_at").isoformat() if row.get("updated_at") else None,
+    }
+
+
+@api_router.get("/creator-pricing")
+async def get_creator_pricing(user=Depends(current_user)):
+    if user["account_type"] != "creator":
+        raise HTTPException(status_code=403, detail="Creators only")
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow(
+            "SELECT * FROM creator_pricing WHERE creator_id=$1::uuid", user["id"]
+        )
+    if not row:
+        return {}
+    return _serialize_pricing(dict(row))
+
+
+@api_router.put("/creator-pricing")
+async def update_creator_pricing(body: CreatorPricingIn, user=Depends(current_user)):
+    if user["account_type"] != "creator":
+        raise HTTPException(status_code=403, detail="Creators only")
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        await conn.execute("""
+            INSERT INTO creator_pricing(
+                creator_id, currency, negotiable,
+                ig_reel, ig_post, ig_story, reel_story_package,
+                ugc_video, event_appearance, custom_services, updated_at
+            )
+            VALUES($1::uuid,$2,$3,$4,$5,$6,$7,$8,$9,$10::jsonb,NOW())
+            ON CONFLICT(creator_id) DO UPDATE SET
+                currency=$2, negotiable=$3,
+                ig_reel=$4, ig_post=$5, ig_story=$6, reel_story_package=$7,
+                ugc_video=$8, event_appearance=$9,
+                custom_services=$10::jsonb, updated_at=NOW()
+        """,
+            user["id"],
+            body.currency or "INR",
+            body.negotiable or False,
+            body.ig_reel,
+            body.ig_post,
+            body.ig_story,
+            body.reel_story_package,
+            body.ugc_video,
+            body.event_appearance,
+            json.dumps(body.custom_services or []),
+        )
+    return {"success": True}
 
 
 # ─────────────────────────────────────────────────────────────────────────────

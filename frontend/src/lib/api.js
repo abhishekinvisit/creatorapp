@@ -143,3 +143,9 @@ export const audienceInsightsApi = {
   save:    (data)      => api.put("/audience-insights", data),
   extract: (imageData) => api.post("/audience-insights/extract", { image_data: imageData }),
 };
+
+// ── Service Pricing ────────────────────────────────────────────────────────────
+export const pricingApi = {
+  get:  ()      => api.get("/creator-pricing"),
+  save: (data)  => api.put("/creator-pricing", data),
+};
