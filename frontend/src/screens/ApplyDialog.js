@@ -64,10 +64,9 @@ export const ApplyDialog = ({ opportunity, onClose, onApplied }) => {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-3 mb-5">
+        <div className="grid grid-cols-2 gap-3 mb-5">
           {[
             { label: "Followers", value: user.creator.followers },
-            { label: "Engagement", value: user.creator.engagement },
             { label: "Collabs", value: user.creator.collaborations },
           ].map((s) => (
             <div key={s.label} className="bg-[#F9F9F8] rounded-2xl p-3 text-center border border-[#E5E5E5]">
