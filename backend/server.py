@@ -82,23 +82,24 @@ async def create_notification(user_id, type_: str, icon: str, text: str):
 
 # ── Pydantic Models ───────────────────────────────────────────────────────────
 
-class CheckEmail(BaseModel):
-    email: str
+class CheckPhoneIn(BaseModel):
+    phone: str
 
-class RegisterIn(BaseModel):
-    email: str
-    password: str
+class SendOtpIn(BaseModel):
+    phone: str
+
+class VerifyOtpIn(BaseModel):
+    phone: str
+    otp: str
     account_type: str  # "creator" | "brand"
-
-class LoginIn(BaseModel):
-    email: str
-    password: str
 
 class CreatorProfileIn(BaseModel):
     full_name: Optional[str] = None
+    email: Optional[str] = None
     handle: Optional[str] = None
     bio: Optional[str] = None
     location: Optional[str] = None
+    state: Optional[str] = None
     gender: Optional[str] = None
     age: Optional[int] = None
     categories: Optional[List[str]] = None
@@ -124,24 +125,26 @@ class BrandProfileIn(BaseModel):
     instagram_url: Optional[str] = None
     website_url: Optional[str] = None
     gst_number: Optional[str] = None
+    official_email: Optional[str] = None
     logo_data: Optional[str] = None
 
 class CreatorOnboardIn(BaseModel):
     full_name: str
+    email: Optional[str] = ""
     gender: str
     age: int
-    area: Optional[str] = ""
     city: str
+    state: Optional[str] = ""
     country: str
     categories: List[str]
     instagram_url: str
     followers_count: int
-    years_experience: Optional[int] = 0
 
 class BrandOnboardIn(BaseModel):
     brand_name: str
     brand_category: str
-    gst_number: str
+    gst_number: Optional[str] = ""
+    official_email: Optional[str] = ""
     brand_bio: Optional[str] = ""
     logo_data: Optional[str] = ""
 
@@ -233,48 +236,56 @@ class OpenThreadIn(BaseModel):
 # AUTH ROUTES
 # ─────────────────────────────────────────────────────────────────────────────
 
-@api_router.post("/auth/check-email")
-async def check_email(body: CheckEmail):
+@api_router.post("/auth/check-phone")
+async def check_phone(body: CheckPhoneIn):
+    phone = body.phone.strip().replace(" ", "").replace("-", "")
     pool = await get_pool()
     async with pool.acquire() as conn:
-        row = await conn.fetchrow("SELECT id, account_type FROM users WHERE email=$1", body.email.lower().strip())
+        row = await conn.fetchrow("SELECT id, account_type FROM users WHERE phone_number=$1", phone)
     return {"exists": row is not None, "account_type": row["account_type"] if row else None}
 
 
-@api_router.post("/auth/register")
-async def register(body: RegisterIn):
+@api_router.post("/auth/send-otp")
+async def send_otp(body: SendOtpIn):
+    # Dummy OTP — in production, integrate with SMS gateway (Twilio, MSG91, etc.)
+    phone = body.phone.strip().replace(" ", "").replace("-", "")
+    if len(phone) < 10:
+        raise HTTPException(status_code=400, detail="Invalid phone number")
+    logger.info(f"[DUMMY OTP] Would send OTP to {phone}")
+    return {"success": True, "message": "OTP sent (demo mode — any 6-digit code works)"}
+
+
+@api_router.post("/auth/verify-otp")
+async def verify_otp(body: VerifyOtpIn):
+    phone = body.phone.strip().replace(" ", "").replace("-", "")
+    otp = body.otp.strip()
+    # Dummy validation — accept any 6-digit numeric code
+    if len(otp) != 6 or not otp.isdigit():
+        raise HTTPException(status_code=400, detail="OTP must be exactly 6 digits")
+    if body.account_type not in ("creator", "brand"):
+        raise HTTPException(status_code=400, detail="account_type must be 'creator' or 'brand'")
     pool = await get_pool()
     async with pool.acquire() as conn:
-        existing = await conn.fetchrow("SELECT id FROM users WHERE email=$1", body.email.lower().strip())
-        if existing:
-            raise HTTPException(status_code=409, detail="Email already registered")
-        pw_hash = hash_password(body.password)
+        user = await conn.fetchrow("SELECT * FROM users WHERE phone_number=$1", phone)
+        if user:
+            # Existing user — log in
+            token = create_access_token(str(user["id"]), user["account_type"])
+            return {
+                "token": token,
+                "account_type": user["account_type"],
+                "onboarding_complete": user["onboarding_complete"],
+            }
+        # New user — create account
         user = await conn.fetchrow(
-            "INSERT INTO users(email,password_hash,account_type) VALUES($1,$2,$3) RETURNING *",
-            body.email.lower().strip(), pw_hash, body.account_type,
+            "INSERT INTO users(phone_number, account_type) VALUES($1,$2) RETURNING *",
+            phone, body.account_type,
         )
-        # Create empty profile
         if body.account_type == "creator":
             await conn.execute("INSERT INTO creator_profiles(user_id) VALUES($1::uuid)", user["id"])
         else:
             await conn.execute("INSERT INTO brand_profiles(user_id) VALUES($1::uuid)", user["id"])
     token = create_access_token(str(user["id"]), body.account_type)
     return {"token": token, "account_type": body.account_type, "onboarding_complete": False}
-
-
-@api_router.post("/auth/login")
-async def login(body: LoginIn):
-    pool = await get_pool()
-    async with pool.acquire() as conn:
-        user = await conn.fetchrow("SELECT * FROM users WHERE email=$1", body.email.lower().strip())
-    if not user or not verify_password(body.password, user["password_hash"]):
-        raise HTTPException(status_code=401, detail="Invalid email or password")
-    token = create_access_token(str(user["id"]), user["account_type"])
-    return {
-        "token": token,
-        "account_type": user["account_type"],
-        "onboarding_complete": user["onboarding_complete"],
-    }
 
 
 def _serialize_profile(profile: dict) -> dict:
@@ -341,7 +352,8 @@ async def me(user=Depends(current_user)):
             profile = await conn.fetchrow("SELECT * FROM brand_profiles WHERE user_id=$1::uuid", user["id"])
     return {
         "id": str(user["id"]),
-        "email": user["email"],
+        "email": user["email"] or "",
+        "phone_number": user["phone_number"] or "",
         "account_type": user["account_type"],
         "onboarding_complete": user["onboarding_complete"],
         "profile": _serialize_profile(dict(profile)) if profile else {},
@@ -356,17 +368,17 @@ async def me(user=Depends(current_user)):
 async def onboard_creator(body: CreatorOnboardIn, user=Depends(current_user)):
     if user["account_type"] != "creator":
         raise HTTPException(status_code=403, detail="Not a creator account")
-    location = ", ".join(filter(None, [body.area, body.city, body.country]))
+    location = ", ".join(filter(None, [body.city, body.state, body.country]))
     pool = await get_pool()
     async with pool.acquire() as conn:
         await conn.execute("""
-            INSERT INTO creator_profiles(user_id,full_name,gender,age,location,categories,languages,instagram_url,followers_count,years_experience)
-            VALUES($1::uuid,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+            INSERT INTO creator_profiles(user_id,full_name,email,gender,age,location,state,categories,languages,instagram_url,followers_count)
+            VALUES($1::uuid,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
             ON CONFLICT(user_id) DO UPDATE SET
-              full_name=$2,gender=$3,age=$4,location=$5,categories=$6,languages=$7,
-              instagram_url=$8,followers_count=$9,years_experience=$10,updated_at=NOW()
-        """, user["id"], body.full_name, body.gender, body.age, location,
-            body.categories, [], body.instagram_url, body.followers_count, body.years_experience)
+              full_name=$2,email=$3,gender=$4,age=$5,location=$6,state=$7,categories=$8,languages=$9,
+              instagram_url=$10,followers_count=$11,updated_at=NOW()
+        """, user["id"], body.full_name, body.email or "", body.gender, body.age, location,
+            body.state or "", body.categories, [], body.instagram_url, body.followers_count)
         await conn.execute("UPDATE users SET onboarding_complete=TRUE WHERE id=$1::uuid", user["id"])
     return {"success": True}
 
@@ -381,11 +393,12 @@ async def onboard_brand(body: BrandOnboardIn, user=Depends(current_user)):
         if len(logo) > 500000:
             logo = ""
         await conn.execute("""
-            INSERT INTO brand_profiles(user_id,brand_name,category,gst_number,bio,logo_data)
-            VALUES($1::uuid,$2,$3,$4,$5,$6)
+            INSERT INTO brand_profiles(user_id,brand_name,category,gst_number,official_email,bio,logo_data)
+            VALUES($1::uuid,$2,$3,$4,$5,$6,$7)
             ON CONFLICT(user_id) DO UPDATE SET
-              brand_name=$2,category=$3,gst_number=$4,bio=$5,logo_data=$6,updated_at=NOW()
-        """, user["id"], body.brand_name, body.brand_category, body.gst_number, body.brand_bio, logo)
+              brand_name=$2,category=$3,gst_number=$4,official_email=$5,bio=$6,logo_data=$7,updated_at=NOW()
+        """, user["id"], body.brand_name, body.brand_category,
+            body.gst_number or "", body.official_email or "", body.brand_bio, logo)
         await conn.execute("UPDATE users SET onboarding_complete=TRUE WHERE id=$1::uuid", user["id"])
     return {"success": True}
 

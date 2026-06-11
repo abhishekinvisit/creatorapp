@@ -14,7 +14,7 @@ async def get_pool() -> asyncpg.Pool:
             dsn=os.environ["DATABASE_URL"],
             min_size=2,
             max_size=10,
-            statement_cache_size=0,  # required for PgBouncer compatibility
+            statement_cache_size=0,
         )
     return _pool
 
@@ -31,8 +31,9 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    email VARCHAR(255) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
+    email VARCHAR(255),
+    phone_number VARCHAR(20),
+    password_hash VARCHAR(255),
     account_type VARCHAR(20) NOT NULL,
     onboarding_complete BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMPTZ DEFAULT NOW()
@@ -42,9 +43,11 @@ CREATE TABLE IF NOT EXISTS creator_profiles (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES users(id) ON DELETE CASCADE UNIQUE,
     full_name VARCHAR(255) DEFAULT '',
+    email VARCHAR(255) DEFAULT '',
     handle VARCHAR(100) DEFAULT '',
     bio TEXT DEFAULT '',
     location VARCHAR(255) DEFAULT '',
+    state VARCHAR(255) DEFAULT '',
     gender VARCHAR(50) DEFAULT '',
     age INTEGER DEFAULT 0,
     categories TEXT[] DEFAULT '{}',
@@ -74,6 +77,7 @@ CREATE TABLE IF NOT EXISTS brand_profiles (
     instagram_url VARCHAR(500) DEFAULT '',
     website_url VARCHAR(500) DEFAULT '',
     gst_number VARCHAR(30) DEFAULT '',
+    official_email VARCHAR(255) DEFAULT '',
     logo_data TEXT DEFAULT '',
     verified BOOLEAN DEFAULT FALSE,
     updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -187,7 +191,6 @@ CREATE TABLE IF NOT EXISTS categories (
 CREATE INDEX IF NOT EXISTS idx_categories_name ON categories(name);
 """
 
-# Migrations for columns added after initial schema deployment
 MIGRATIONS = [
     "ALTER TABLE creator_profiles ADD COLUMN IF NOT EXISTS youtube_url VARCHAR(500) DEFAULT ''",
     "ALTER TABLE creator_profiles ADD COLUMN IF NOT EXISTS linkedin_url VARCHAR(500) DEFAULT ''",
@@ -202,7 +205,6 @@ MIGRATIONS = [
     "CREATE TABLE IF NOT EXISTS categories (id SERIAL PRIMARY KEY, name VARCHAR(100) UNIQUE NOT NULL, sort_order INTEGER DEFAULT 0)",
     "CREATE INDEX IF NOT EXISTS idx_categories_name ON categories(name)",
     "INSERT INTO categories (name, sort_order) VALUES ('Art & Illustration',1),('Automotive',2),('Beauty & Skincare',3),('Books & Literature',4),('Business & Entrepreneurship',5),('Campus & Student Life',6),('Career & Professional',7),('Comedy',8),('Culture & Society',9),('Dance',10),('DIY & Crafts',11),('Education',12),('Entertainment',13),('Events & Nightlife',14),('Family',15),('Fashion',16),('Finance & Investing',17),('Fitness',18),('Food & Cooking',19),('Gaming',20),('Health & Wellness',21),('Home Decor & Interior',22),('Jewelry & Accessories',23),('Kids Content',24),('Lifestyle',25),('Local Discovery',26),('Luxury',27),('Memes & Humor',28),('Mental Wellness',29),('Motivation & Self Growth',30),('Movies & TV',31),('Music',32),('News & Media',33),('Outdoor & Adventure',34),('Parenting',35),('Pets & Animals',36),('Photography',37),('Real Estate',38),('Relationships',39),('Science',40),('Shopping & Reviews',41),('Spirituality',42),('Sports',43),('Sustainability & Environment',44),('Technology',45),('Travel',46),('Unboxing',47),('Videography',48),('Web3 & Crypto',49),('Other',50) ON CONFLICT (name) DO NOTHING",
-    # Rytspot Platform Updates
     "ALTER TABLE opportunities ADD COLUMN IF NOT EXISTS payout_min INTEGER DEFAULT 0",
     "ALTER TABLE opportunities ADD COLUMN IF NOT EXISTS payout_max INTEGER DEFAULT 0",
     "ALTER TABLE opportunities ADD COLUMN IF NOT EXISTS followers_min INTEGER DEFAULT 0",
@@ -229,13 +231,19 @@ MIGRATIONS = [
         updated_at TIMESTAMPTZ DEFAULT NOW()
     )""",
     "CREATE INDEX IF NOT EXISTS idx_audience_insights_creator_id ON audience_insights(creator_id)",
+    # Phone-OTP auth + new profile fields
+    "ALTER TABLE users ALTER COLUMN email DROP NOT NULL",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS phone_number VARCHAR(20)",
+    "CREATE UNIQUE INDEX IF NOT EXISTS idx_users_phone ON users(phone_number) WHERE phone_number IS NOT NULL",
+    "ALTER TABLE creator_profiles ADD COLUMN IF NOT EXISTS email VARCHAR(255) DEFAULT ''",
+    "ALTER TABLE creator_profiles ADD COLUMN IF NOT EXISTS state VARCHAR(255) DEFAULT ''",
+    "ALTER TABLE brand_profiles ADD COLUMN IF NOT EXISTS official_email VARCHAR(255) DEFAULT ''",
 ]
 
 
 async def init_db():
     pool = await get_pool()
     async with pool.acquire() as conn:
-        # Split schema into individual statements and execute each one
         statements = [s.strip() for s in SCHEMA.split(";") if s.strip()]
         for stmt in statements:
             try:

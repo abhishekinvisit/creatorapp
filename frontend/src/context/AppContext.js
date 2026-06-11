@@ -47,9 +47,11 @@ function mapCreatorProfile(prev, p) {
     creator: {
       ...prev.creator,
       name:             p.full_name    != null ? p.full_name    : prev.creator.name,
+      email:            p.email        != null ? p.email        : (prev.creator.email || ""),
       handle:           p.handle       != null ? p.handle       : prev.creator.handle,
       bio:              p.bio          != null ? p.bio          : prev.creator.bio,
       location:         p.location     != null ? p.location     : prev.creator.location,
+      state:            p.state        != null ? p.state        : (prev.creator.state || ""),
       gender:           p.gender       != null ? p.gender       : prev.creator.gender,
       age:              p.age          != null ? p.age          : prev.creator.age,
       category:         p.categories   != null ? (p.categories.length ? p.categories : []) : prev.creator.category,
@@ -88,6 +90,7 @@ function mapBrandProfile(prev, p) {
       websiteUrl:     p.website_url    != null ? p.website_url    : (prev.brand.websiteUrl   || ""),
       logo:           isValidLogoData(logoRaw) ? logoRaw : "",
       gstNumber:      p.gst_number     != null ? p.gst_number     : "",
+      officialEmail:  p.official_email != null ? p.official_email : (prev.brand.officialEmail || ""),
     },
   };
 }

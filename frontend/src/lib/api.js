@@ -43,11 +43,10 @@ export const categoriesApi = {
 
 // ── Auth ─────────────────────────────────────────────────────────────────────
 export const authApi = {
-  checkEmail:  (email)            => api.post("/auth/check-email", { email }),
-  register:    (email, password, accountType) =>
-                 api.post("/auth/register", { email, password, account_type: accountType }),
-  login:       (email, password)  => api.post("/auth/login", { email, password }),
-  me:          ()                 => api.get("/auth/me"),
+  checkPhone:  (phone)                         => api.post("/auth/check-phone", { phone }),
+  sendOtp:     (phone)                         => api.post("/auth/send-otp", { phone }),
+  verifyOtp:   (phone, otp, accountType)       => api.post("/auth/verify-otp", { phone, otp, account_type: accountType }),
+  me:          ()                              => api.get("/auth/me"),
 };
 
 // ── Profile ───────────────────────────────────────────────────────────────────

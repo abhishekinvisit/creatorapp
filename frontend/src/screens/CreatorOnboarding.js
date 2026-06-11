@@ -7,9 +7,17 @@ import { toast } from "sonner";
 
 import { MASTER_CATEGORIES } from "@/data/categories";
 
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 3;
 const GENDERS = ["Male", "Female", "Non-binary", "Prefer not to say"];
 const COUNTRIES = ["India", "United States", "United Kingdom", "Canada", "Australia", "UAE", "Singapore", "Germany", "France", "Japan", "Other"];
+const INDIAN_STATES = [
+  "Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh","Goa","Gujarat",
+  "Haryana","Himachal Pradesh","Jharkhand","Karnataka","Kerala","Madhya Pradesh",
+  "Maharashtra","Manipur","Meghalaya","Mizoram","Nagaland","Odisha","Punjab",
+  "Rajasthan","Sikkim","Tamil Nadu","Telangana","Tripura","Uttar Pradesh",
+  "Uttarakhand","West Bengal","Delhi","Jammu & Kashmir","Ladakh","Chandigarh",
+  "Puducherry","Other",
+];
 
 function ProgressBar({ step }) {
   return (
@@ -18,7 +26,7 @@ function ProgressBar({ step }) {
         <div
           key={i}
           className={`h-1 rounded-full transition-all duration-500 ${
-            i < step ? "bg-[#E25238] flex-[2]" : i === step - 1 ? "bg-[#E25238] flex-[2]" : "bg-[#E5E5E5] flex-1"
+            i < step ? "bg-[#E25238] flex-[2]" : "bg-[#E5E5E5] flex-1"
           }`}
         />
       ))}
@@ -53,24 +61,22 @@ export default function CreatorOnboarding() {
   const [step, setStep] = useState(1);
   const [saving, setSaving] = useState(false);
 
-  // Step 1 — Personal
+  // Step 1 — Personal Info
   const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
   const [gender, setGender] = useState("");
   const [age, setAge] = useState("");
 
   // Step 2 — Location
-  const [area, setArea] = useState("");
   const [city, setCity] = useState("");
+  const [state, setState] = useState("");
   const [country, setCountry] = useState("India");
 
-  // Step 3 — Categories
+  // Step 3 — Creator Details
   const [categories, setCategories] = useState([]);
   const [catSearch, setCatSearch] = useState("");
-
-  // Step 4 — Instagram
   const [instagramUrl, setInstagramUrl] = useState("");
   const [followersCount, setFollowersCount] = useState("");
-  const [yearsExp, setYearsExp] = useState("");
 
   const toggleCategory = (c) => {
     setCategories((prev) =>
@@ -86,7 +92,10 @@ export default function CreatorOnboarding() {
     if (step === 1) {
       if (!fullName.trim()) { toast.error("Please enter your full name"); return false; }
       if (!gender) { toast.error("Please select your gender"); return false; }
-      if (!age || isNaN(age) || Number(age) < 13 || Number(age) > 100) { toast.error("Please enter a valid age (13–100)"); return false; }
+      if (!age || isNaN(age) || Number(age) < 13 || Number(age) > 100) {
+        toast.error("Please enter a valid age (13–100)"); return false;
+      }
+      if (email && !email.includes("@")) { toast.error("Enter a valid email address"); return false; }
     }
     if (step === 2) {
       if (!city.trim()) { toast.error("Please enter your city"); return false; }
@@ -94,10 +103,10 @@ export default function CreatorOnboarding() {
     }
     if (step === 3) {
       if (categories.length === 0) { toast.error("Select at least one category"); return false; }
-    }
-    if (step === 4) {
       if (!instagramUrl.trim()) { toast.error("Please enter your Instagram profile link"); return false; }
-      if (!followersCount || isNaN(followersCount) || Number(followersCount) < 0) { toast.error("Please enter a valid follower count"); return false; }
+      if (!followersCount || isNaN(followersCount) || Number(followersCount) < 0) {
+        toast.error("Please enter a valid follower count"); return false;
+      }
     }
     return true;
   };
@@ -108,36 +117,32 @@ export default function CreatorOnboarding() {
       setStep((s) => s + 1);
       return;
     }
-    // Final step — save
     setSaving(true);
     try {
       await onboardingApi.completeCreator({
         full_name: fullName,
+        email: email || "",
         gender,
         age: Number(age),
-        area,
         city,
+        state: state || "",
         country,
         categories,
         instagram_url: instagramUrl,
         followers_count: Number(followersCount),
-        years_experience: Number(yearsExp) || 0,
       });
-    } catch (_) {
-      // Non-fatal — we still complete onboarding locally
-    }
+    } catch (_) {}
     completeOnboarding({
       fullName,
       gender,
       age: Number(age),
-      location: [area, city, country].filter(Boolean).join(", "),
+      location: [city, state, country].filter(Boolean).join(", "),
       categories,
       instagramUrl,
       followersCount: Number(followersCount),
-      yearsExp: Number(yearsExp) || 0,
     });
     setSaving(false);
-    toast.success("Welcome to OLLCOLLAB! 🎉");
+    toast.success("Welcome to Rytspot! 🎉");
     navigate("/home");
   };
 
@@ -146,18 +151,16 @@ export default function CreatorOnboarding() {
     setStep((s) => s - 1);
   };
 
-  const stepLabels = ["Personal Info", "Location", "Your Niche", "Instagram"];
+  const stepLabels = ["Personal Info", "Location", "Creator Details"];
   const stepHeadings = [
     ["Tell us about", "yourself"],
     ["Where are", "you based?"],
-    ["What do you", "create?"],
-    ["Your Instagram", "presence"],
+    ["Your creator", "profile"],
   ];
   const stepSubs = [
     "Help brands find the right creator.",
     "Brands look for local creators too.",
-    "Pick up to 3 content categories.",
-    "Link your profile so brands can verify you.",
+    "Link your Instagram and pick your niche.",
   ];
 
   return (
@@ -176,12 +179,10 @@ export default function CreatorOnboarding() {
         </p>
       </div>
 
-      {/* Progress */}
       <div className="px-5 pt-2">
         <ProgressBar step={step} />
       </div>
 
-      {/* Headings */}
       <div className="px-5 mb-7">
         <h1 className="font-display font-black text-[2.1rem] leading-[1.05] tracking-[-0.03em] text-[#0A0A0A]">
           {stepHeadings[step - 1][0]}<br />{stepHeadings[step - 1][1]}
@@ -189,15 +190,25 @@ export default function CreatorOnboarding() {
         <p className="text-sm text-[#525252] font-medium mt-2">{stepSubs[step - 1]}</p>
       </div>
 
-      {/* Step content */}
       <div className="flex-1 px-5 overflow-y-auto">
 
-        {/* ── Step 1: Personal ── */}
+        {/* ── Step 1: Personal Info ── */}
         {step === 1 && (
           <div className="space-y-5">
             <div>
               <Label required>Full Name</Label>
               <Input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="e.g. Priya Sharma" />
+            </div>
+
+            <div>
+              <Label>Personal Email</Label>
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="priya@email.com (optional)"
+              />
+              <p className="text-[11px] text-[#525252] mt-1.5 font-medium">Used for brand communications</p>
             </div>
 
             <div>
@@ -237,19 +248,16 @@ export default function CreatorOnboarding() {
         {step === 2 && (
           <div className="space-y-5">
             <div>
-              <Label>Area / Neighbourhood</Label>
-              <Input value={area} onChange={(e) => setArea(e.target.value)} placeholder="e.g. Bandra, Koramangala" />
-            </div>
-            <div>
               <Label required>City</Label>
               <Input value={city} onChange={(e) => setCity(e.target.value)} placeholder="e.g. Mumbai" />
             </div>
+
             <div>
               <Label required>Country</Label>
               <div className="relative">
                 <select
                   value={country}
-                  onChange={(e) => setCountry(e.target.value)}
+                  onChange={(e) => { setCountry(e.target.value); if (e.target.value !== "India") setState(""); }}
                   className="w-full px-4 py-4 bg-white border-2 border-[#E5E5E5] rounded-2xl text-[#0A0A0A] font-medium text-sm outline-none focus:border-[#0A0A0A] transition-colors appearance-none"
                 >
                   {COUNTRIES.map((c) => (
@@ -259,52 +267,30 @@ export default function CreatorOnboarding() {
                 <Globe size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#525252] pointer-events-none" />
               </div>
             </div>
-          </div>
-        )}
 
-        {/* ── Step 3: Categories ── */}
-        {step === 3 && (
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-xs text-[#525252] font-medium">Select up to 3</p>
-              <span className={`text-xs font-black ${categories.length === 3 ? "text-[#E25238]" : "text-[#525252]"}`}>
-                {categories.length}/3
-              </span>
-            </div>
-            <input
-              value={catSearch}
-              onChange={(e) => setCatSearch(e.target.value)}
-              placeholder="Search categories…"
-              className="w-full px-4 py-3 mb-3 bg-white border-2 border-[#E5E5E5] rounded-2xl text-[#0A0A0A] font-medium text-sm outline-none focus:border-[#0A0A0A] transition-colors placeholder:text-[#B0B0B0]"
-            />
-            <div className="flex flex-wrap gap-2">
-              {MASTER_CATEGORIES.filter((c) => c.toLowerCase().includes(catSearch.toLowerCase())).map((c) => {
-                const active = categories.includes(c);
-                const disabled = !active && categories.length === 3;
-                return (
-                  <button
-                    key={c}
-                    onClick={() => toggleCategory(c)}
-                    disabled={disabled}
-                    className={`px-4 py-2.5 rounded-full text-sm font-bold transition-all ${
-                      active
-                        ? "bg-[#0A0A0A] text-white"
-                        : disabled
-                        ? "bg-white border-2 border-[#E5E5E5] text-[#B0B0B0] cursor-not-allowed"
-                        : "bg-white border-2 border-[#E5E5E5] text-[#525252] hover:border-[#0A0A0A]"
-                    }`}
+            {country === "India" && (
+              <div>
+                <Label>State</Label>
+                <div className="relative">
+                  <select
+                    value={state}
+                    onChange={(e) => setState(e.target.value)}
+                    className="w-full px-4 py-4 bg-white border-2 border-[#E5E5E5] rounded-2xl text-[#0A0A0A] font-medium text-sm outline-none focus:border-[#0A0A0A] transition-colors appearance-none"
                   >
-                    {active && <Check size={12} className="inline mr-1.5 -mt-0.5" />}
-                    {c}
-                  </button>
-                );
-              })}
-            </div>
+                    <option value="">Select state (optional)</option>
+                    {INDIAN_STATES.map((s) => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                  <Globe size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#525252] pointer-events-none" />
+                </div>
+              </div>
+            )}
           </div>
         )}
 
-        {/* ── Step 4: Instagram ── */}
-        {step === 4 && (
+        {/* ── Step 3: Creator Details ── */}
+        {step === 3 && (
           <div className="space-y-5">
             <div>
               <Label required>Instagram Profile Link</Label>
@@ -331,15 +317,42 @@ export default function CreatorOnboarding() {
             </div>
 
             <div>
-              <Label>Years of Experience</Label>
-              <Input
-                type="number"
-                value={yearsExp}
-                onChange={(e) => setYearsExp(e.target.value)}
-                placeholder="e.g. 2  (optional)"
-                min="0"
-                max="30"
+              <div className="flex items-center justify-between mb-3">
+                <Label required>Content Niche</Label>
+                <span className={`text-xs font-black ${categories.length === 3 ? "text-[#E25238]" : "text-[#525252]"}`}>
+                  {categories.length}/3
+                </span>
+              </div>
+              <p className="text-xs text-[#525252] font-medium mb-3">Select up to 3 categories</p>
+              <input
+                value={catSearch}
+                onChange={(e) => setCatSearch(e.target.value)}
+                placeholder="Search categories…"
+                className="w-full px-4 py-3 mb-3 bg-white border-2 border-[#E5E5E5] rounded-2xl text-[#0A0A0A] font-medium text-sm outline-none focus:border-[#0A0A0A] transition-colors placeholder:text-[#B0B0B0]"
               />
+              <div className="flex flex-wrap gap-2">
+                {MASTER_CATEGORIES.filter((c) => c.toLowerCase().includes(catSearch.toLowerCase())).map((c) => {
+                  const active = categories.includes(c);
+                  const disabled = !active && categories.length === 3;
+                  return (
+                    <button
+                      key={c}
+                      onClick={() => toggleCategory(c)}
+                      disabled={disabled}
+                      className={`px-4 py-2.5 rounded-full text-sm font-bold transition-all ${
+                        active
+                          ? "bg-[#0A0A0A] text-white"
+                          : disabled
+                          ? "bg-white border-2 border-[#E5E5E5] text-[#B0B0B0] cursor-not-allowed"
+                          : "bg-white border-2 border-[#E5E5E5] text-[#525252] hover:border-[#0A0A0A]"
+                      }`}
+                    >
+                      {active && <Check size={12} className="inline mr-1.5 -mt-0.5" />}
+                      {c}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
         )}
@@ -347,7 +360,6 @@ export default function CreatorOnboarding() {
 
       {/* CTA */}
       <div className="px-5 pt-4 pb-8 mt-4">
-        {/* Step dots */}
         <div className="flex items-center justify-center gap-1.5 mb-5">
           {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
             <div
@@ -373,13 +385,9 @@ export default function CreatorOnboarding() {
               Saving…
             </span>
           ) : step === TOTAL_STEPS ? (
-            <>
-              Complete Setup <Check size={16} />
-            </>
+            <>Complete Setup <Check size={16} /></>
           ) : (
-            <>
-              Continue <ChevronRight size={16} />
-            </>
+            <>Continue <ChevronRight size={16} /></>
           )}
         </button>
       </div>

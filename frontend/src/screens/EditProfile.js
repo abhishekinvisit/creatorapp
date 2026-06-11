@@ -52,6 +52,8 @@ export default function EditProfile() {
 
   // Creator-only form state
   const [handle, setHandle] = useState(profile.handle || "");
+  const [creatorEmail, setCreatorEmail] = useState(profile.email || "");
+  const [state, setState] = useState(profile.state || "");
   const [location, setLocation] = useState(profile.location || "");
   const [instagramUrl, setInstagramUrl] = useState(profile.instagramUrl || "");
   const [youtubeUrl, setYoutubeUrl] = useState(profile.youtubeUrl || "");
@@ -71,6 +73,7 @@ export default function EditProfile() {
   // Brand-only form state
   const [brandInstagramUrl, setBrandInstagramUrl] = useState(profile.instagramUrl || "");
   const [brandWebsiteUrl, setBrandWebsiteUrl] = useState(profile.websiteUrl || "");
+  const [officialEmail, setOfficialEmail] = useState(profile.officialEmail || "");
 
   // Reels
   const [reels, setReels] = useState([]);
@@ -89,12 +92,15 @@ export default function EditProfile() {
         setBio(p.bio || "");
         setBrandInstagramUrl(p.instagram_url || "");
         setBrandWebsiteUrl(p.website_url || "");
+        setOfficialEmail(p.official_email || "");
         const logo = p.logo_data || "";
         setAvatar(isValidImg(logo) ? logo : "");
       } else {
         setName(p.full_name || "");
         setBio(p.bio || "");
         setHandle(p.handle || "");
+        setCreatorEmail(p.email || "");
+        setState(p.state || "");
         setLocation(p.location || "");
         setInstagramUrl(p.instagram_url || "");
         setYoutubeUrl(p.youtube_url || "");
@@ -134,7 +140,7 @@ export default function EditProfile() {
     if (accountType === "brand") {
       setUser((prev) => ({
         ...prev,
-        brand: { ...prev.brand, name, bio, logo: avatar, instagramUrl: brandInstagramUrl, websiteUrl: brandWebsiteUrl },
+        brand: { ...prev.brand, name, bio, logo: avatar, instagramUrl: brandInstagramUrl, websiteUrl: brandWebsiteUrl, officialEmail },
       }));
       try {
         await profileApi.updateBrand({
@@ -143,6 +149,7 @@ export default function EditProfile() {
           logo_data: avatar,
           instagram_url: brandInstagramUrl,
           website_url: brandWebsiteUrl,
+          official_email: officialEmail,
         });
         await refreshProfile();
         toast.success("Profile updated");
@@ -160,7 +167,7 @@ export default function EditProfile() {
         ...prev,
         creator: {
           ...prev.creator,
-          name, handle, bio, instagramUrl, youtubeUrl, linkedinUrl, tiktokUrl, websiteUrl,
+          name, handle, bio, email: creatorEmail, state, instagramUrl, youtubeUrl, linkedinUrl, tiktokUrl, websiteUrl,
           category: cats, location, language: languages, avatar,
           followersCount: Number(followersCount) || prev.creator.followersCount,
           followers: followersCount
@@ -172,6 +179,7 @@ export default function EditProfile() {
       try {
         await profileApi.updateCreator({
           full_name: name,
+          email: creatorEmail,
           handle,
           bio,
           instagram_url: instagramUrl,
@@ -181,6 +189,7 @@ export default function EditProfile() {
           website_url: websiteUrl,
           categories: cats,
           location,
+          state,
           languages,
           avatar_url: avatar,
           followers_count: Number(followersCount) || undefined,
@@ -324,6 +333,17 @@ export default function EditProfile() {
             />
           </Field>
           {accountType !== "brand" && (
+            <Field label="Personal Email">
+              <input
+                type="email"
+                value={creatorEmail}
+                onChange={(e) => setCreatorEmail(e.target.value)}
+                placeholder="your@email.com"
+                className="w-full bg-white border border-[#E5E5E5] rounded-2xl px-4 py-4 outline-none font-medium focus:border-[#0A0A0A] transition-colors text-sm"
+              />
+            </Field>
+          )}
+          {accountType !== "brand" && (
             <Field label="Location">
               <div className="flex items-center bg-white border border-[#E5E5E5] rounded-2xl overflow-hidden focus-within:border-[#0A0A0A] transition-colors">
                 <div className="px-4 py-4 border-r border-[#E5E5E5] bg-[#F9F9F8]">
@@ -337,6 +357,16 @@ export default function EditProfile() {
                   className="flex-1 px-3 py-4 outline-none font-medium bg-transparent text-sm"
                 />
               </div>
+            </Field>
+          )}
+          {accountType !== "brand" && (
+            <Field label="State">
+              <input
+                value={state}
+                onChange={(e) => setState(e.target.value)}
+                placeholder="e.g. Maharashtra"
+                className="w-full bg-white border border-[#E5E5E5] rounded-2xl px-4 py-4 outline-none font-medium focus:border-[#0A0A0A] transition-colors text-sm"
+              />
             </Field>
           )}
         </Section>
@@ -429,6 +459,15 @@ export default function EditProfile() {
               onChange={setBrandWebsiteUrl}
               placeholder="https://yourbrand.com"
             />
+            <Field label="Official Email">
+              <input
+                type="email"
+                value={officialEmail}
+                onChange={(e) => setOfficialEmail(e.target.value)}
+                placeholder="brand@company.com"
+                className="w-full bg-white border border-[#E5E5E5] rounded-2xl px-4 py-4 outline-none font-medium focus:border-[#0A0A0A] transition-colors text-sm"
+              />
+            </Field>
           </Section>
         )}
 
