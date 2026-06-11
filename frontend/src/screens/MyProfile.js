@@ -336,6 +336,7 @@ export default function MyProfile() {
 
         {/* Categories */}
         <div className="flex flex-wrap gap-2 mt-4">
+          
           {c.category.map((cat) => (
             <span
               key={cat}

@@ -94,11 +94,16 @@ export default function BrandPostDetail() {
         ...(form.requirements || []),
       ].filter(Boolean);
 
+      const payoutMin = parseInt(form.payoutMin) || 0;
+      const payoutMax = parseInt(form.payoutMax) || 0;
+      const payoutVal = payoutMax || payoutMin || parseInt(form.payout) || 0;
       await opportunitiesApi.update(id, {
         title: form.title,
         pitch: form.description,
         description: form.description,
-        payout: parseInt(form.payout) || 0,
+        payout: payoutVal,
+        payout_min: payoutMin,
+        payout_max: payoutMax,
         creators_needed: parseInt(form.needed) || 1,
         deadline: form.deadline,
         cover_url: form.cover_url || "",
@@ -110,7 +115,9 @@ export default function BrandPostDetail() {
       });
       const updated = {
         ...post, ...form,
-        payout: parseInt(form.payout) || 0,
+        payout: payoutVal,
+        payout_min: payoutMin,
+        payout_max: payoutMax,
         needed: parseInt(form.needed) || 1,
         category: form.category || "",
         requirements: builtRequirements,
@@ -243,6 +250,8 @@ function buildForm(post) {
     title: post.title || "",
     description: post.description || post.pitch || "",
     payout: post.payout || "",
+    payoutMin: post.payout_min || post.payoutMin || "",
+    payoutMax: post.payout_max || post.payoutMax || "",
     needed: post.needed || "",
     deadline: post.deadline || "",
     cover_url: post.cover_url || "",
@@ -267,7 +276,15 @@ const ViewBody = ({ post }) => {
       )}
 
       <div className="grid grid-cols-3 gap-3 mt-6">
-        <Stat icon={Wallet} label="Payout" value={post.payout ? `₹${post.payout}` : "—"} />
+        <Stat
+          icon={Wallet}
+          label="Payout"
+          value={
+            post.payout_min && post.payout_max
+              ? `₹${post.payout_min.toLocaleString("en-IN")}–₹${post.payout_max.toLocaleString("en-IN")}`
+              : post.payout ? `₹${post.payout.toLocaleString("en-IN")}` : "—"
+          }
+        />
         <Stat icon={Users} label="Needed" value={post.needed || "—"} />
         <Stat icon={Calendar} label="Deadline" value={post.deadline || "—"} />
       </div>
@@ -403,25 +420,34 @@ const EditForm = ({ form, setForm }) => {
       </Field>
 
       <div className="grid grid-cols-2 gap-3">
-        <Field label="Payout (₹)">
+        <Field label="Payout Min (₹)">
           <input
-            data-testid="edit-payout"
+            data-testid="edit-payout-min"
             type="number"
-            value={form.payout}
-            onChange={(e) => setForm({ ...form, payout: e.target.value })}
+            value={form.payoutMin}
+            onChange={(e) => setForm({ ...form, payoutMin: e.target.value })}
             className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-4 outline-none text-white font-medium focus:border-[#E25238]"
           />
         </Field>
-        <Field label="Creators Needed">
+        <Field label="Payout Max (₹)">
           <input
-            data-testid="edit-needed"
+            data-testid="edit-payout-max"
             type="number"
-            value={form.needed}
-            onChange={(e) => setForm({ ...form, needed: e.target.value })}
+            value={form.payoutMax}
+            onChange={(e) => setForm({ ...form, payoutMax: e.target.value })}
             className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-4 outline-none text-white font-medium focus:border-[#E25238]"
           />
         </Field>
       </div>
+      <Field label="Creators Needed">
+        <input
+          data-testid="edit-needed"
+          type="number"
+          value={form.needed}
+          onChange={(e) => setForm({ ...form, needed: e.target.value })}
+          className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-4 outline-none text-white font-medium focus:border-[#E25238]"
+        />
+      </Field>
 
       <Field label="Deadline">
         <input
