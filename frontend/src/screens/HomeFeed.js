@@ -53,6 +53,7 @@ export default function HomeFeed() {
   const [search, setSearch] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [discoverAll, setDiscoverAll] = useState(false);
+  const [activeCat, setActiveCat] = useState("All");
 
   // Creator's chosen niche categories
   const creatorCats = accountType === "creator" ? (user?.creator?.category || []) : [];
