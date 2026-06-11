@@ -208,16 +208,6 @@ export default function HomeFeed() {
               Discover All
             </button>
 
-            {/* Niche badge */}
-            {!discoverAll && (
-              <div className="ml-auto flex items-center gap-1 flex-wrap justify-end">
-                {creatorCats.slice(0, 3).map((c) => (
-                  <span key={c} className="px-2 py-0.5 rounded-full bg-[#E25238]/10 text-[#E25238] text-[9px] font-black uppercase tracking-wider">
-                    {c}
-                  </span>
-                ))}
-              </div>
-            )}
           </div>
         )}
 
