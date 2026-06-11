@@ -1187,7 +1187,7 @@ async def create_reel(body: ReelIn, user=Depends(current_user)):
     if user["account_type"] != "creator":
         raise HTTPException(status_code=403, detail="Creators only")
     thumb = body.thumbnail or ""
-    if len(thumb) > 2000000:
+    if len(thumb) > 5000000:
         thumb = ""
     pool = await get_pool()
     async with pool.acquire() as conn:
@@ -1209,7 +1209,7 @@ async def update_reel(reel_id: str, body: ReelUpdate, user=Depends(current_user)
         updates = {k: v for k, v in body.model_dump().items() if v is not None}
         if not updates:
             return {"success": True}
-        if "thumbnail" in updates and len(updates["thumbnail"]) > 2000000:
+        if "thumbnail" in updates and len(updates["thumbnail"]) > 5000000:
             updates["thumbnail"] = ""
         cols = ", ".join(f"{k}=${i+2}" for i, k in enumerate(updates))
         await conn.execute(

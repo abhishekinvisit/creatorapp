@@ -896,7 +896,11 @@ const ReelEditor = ({ reel, onClose, onSave }) => {
     if (!file.type.startsWith("image/")) { toast.error("Please select an image"); return; }
     if (file.size > 3 * 1024 * 1024) { toast.error("Image must be under 3MB"); return; }
     const reader = new FileReader();
-    reader.onload = () => setData((d) => ({ ...d, thumbnail: reader.result }));
+    reader.onload = () => {
+      const result = reader.result;
+      if (result.length > 5000000) { toast.error("Image too large after encoding"); return; }
+      setData((d) => ({ ...d, thumbnail: result }));
+    };
     reader.readAsDataURL(file);
   };
 
