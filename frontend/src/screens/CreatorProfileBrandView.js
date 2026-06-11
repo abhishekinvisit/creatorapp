@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { MapPin, Bookmark, Globe } from "lucide-react";
+import { MapPin, Bookmark, Globe, BarChart2 } from "lucide-react";
 
 const InstagramIcon = ({ size = 16, className = "", strokeWidth = 2, ...props }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
@@ -26,6 +26,7 @@ const TiktokIcon = ({ size = 16, className = "", ...props }) => (
 import { TopBar } from "@/components/TopBar";
 import { BrandLogo } from "@/components/BrandLogo";
 import { ReelCard } from "@/components/ReelCard";
+import { AudienceInsightsModal } from "@/components/AudienceInsightsModal";
 import { creatorsApi, messagesApi } from "@/lib/api";
 import { useApp } from "@/context/AppContext";
 import { toast } from "sonner";
@@ -43,6 +44,7 @@ export default function CreatorProfileBrandView() {
   const { currentUserId, isCreatorSaved, saveCreator, unsaveCreator } = useApp();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showInsights, setShowInsights] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -104,6 +106,13 @@ export default function CreatorProfileBrandView() {
   else if (typeof c.worked_with === "string") {
     try { workedWith = JSON.parse(c.worked_with); } catch (_) {}
   }
+
+  const ai = c.audience_insights;
+  const hasInsights = ai && (
+    (ai.gender_male > 0) || (ai.gender_female > 0) ||
+    (ai.age_18_24 > 0) || (ai.age_25_34 > 0) ||
+    (ai.top_cities?.length > 0) || (ai.top_states?.length > 0)
+  );
 
   return (
     <div data-testid="creator-profile-brand" className="min-h-full bg-[#F9F9F8] flex flex-col pb-2">
@@ -174,6 +183,22 @@ export default function CreatorProfileBrandView() {
 
         {c.bio && (
           <p className="text-sm font-medium text-[#0A0A0A] mt-4 leading-relaxed">{c.bio}</p>
+        )}
+
+        {/* Audience Insights button */}
+        {hasInsights && (
+          <button
+            onClick={() => setShowInsights(true)}
+            className="w-full mt-4 flex items-center gap-3 px-4 py-3.5 bg-[#E25238]/8 border border-[#E25238]/20 rounded-2xl hover:bg-[#E25238]/15 transition-colors"
+          >
+            <div className="w-8 h-8 rounded-xl bg-[#E25238] flex items-center justify-center flex-shrink-0">
+              <BarChart2 size={16} className="text-white" />
+            </div>
+            <div className="flex-1 text-left">
+              <p className="text-sm font-bold text-[#0A0A0A]">Audience Insights</p>
+              <p className="text-xs text-[#525252] font-medium">View demographics &amp; reach data</p>
+            </div>
+          </button>
         )}
 
         {/* Social links */}
@@ -347,6 +372,16 @@ export default function CreatorProfileBrandView() {
           </button>
         </div>
       </div>
+
+      {/* Audience Insights Modal (read-only for brand view) */}
+      {showInsights && hasInsights && (
+        <AudienceInsightsModal
+          open={true}
+          onClose={() => setShowInsights(false)}
+          isOwner={false}
+          initialData={ai}
+        />
+      )}
     </div>
   );
 }
