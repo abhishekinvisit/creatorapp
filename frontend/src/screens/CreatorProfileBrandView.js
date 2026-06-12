@@ -193,14 +193,14 @@ export default function CreatorProfileBrandView() {
             {hasInsights && (
               <button
                 onClick={() => setShowInsights(true)}
-                className="flex-1 flex items-center gap-3 px-4 py-3.5 bg-[#E25238]/8 border border-[#E25238]/20 rounded-2xl hover:bg-[#E25238]/15 transition-colors"
+                className="flex-1 flex items-center gap-3 px-4 py-3 bg-white border border-[#E5E5E5] rounded-2xl hover:border-[#E25238] transition-colors"
               >
-                <div className="w-8 h-8 rounded-xl bg-[#E25238] flex items-center justify-center flex-shrink-0">
+                <div className="w-9 h-9 rounded-full bg-[#E25238] flex items-center justify-center flex-shrink-0">
                   <BarChart2 size={16} className="text-white" />
                 </div>
-                <div className="flex-1 text-left min-w-0">
-                  <p className="text-sm font-bold text-[#0A0A0A]">Audience Insights</p>
-                  <p className="text-xs text-[#525252] font-medium">View demographics &amp; reach data</p>
+                <div className="text-left min-w-0">
+                  <p className="text-sm font-bold text-[#0A0A0A] leading-tight">Audience Insights</p>
+                  <p className="text-xs text-[#525252] font-medium leading-tight">View demographics</p>
                 </div>
               </button>
             )}
@@ -208,14 +208,14 @@ export default function CreatorProfileBrandView() {
             {c.pricing && (c.pricing.ig_reel || c.pricing.ig_post || c.pricing.ig_story || c.pricing.reel_story_package || c.pricing.ugc_video || c.pricing.event_appearance || (c.pricing.custom_services?.length > 0)) && (
               <button
                 onClick={() => setShowPricing(true)}
-                className="flex-1 flex items-center gap-3 px-4 py-3.5 bg-[#E25238]/8 border border-[#E25238]/20 rounded-2xl hover:bg-[#E25238]/15 transition-colors"
+                className="flex-1 flex items-center gap-3 px-4 py-3 bg-white border border-[#E5E5E5] rounded-2xl hover:border-[#E25238] transition-colors"
               >
-                <div className="w-8 h-8 rounded-xl bg-[#E25238] flex items-center justify-center flex-shrink-0">
+                <div className="w-9 h-9 rounded-full bg-[#E25238] flex items-center justify-center flex-shrink-0">
                   <IndianRupee size={16} className="text-white" />
                 </div>
-                <div className="flex-1 text-left min-w-0">
-                  <p className="text-sm font-bold text-[#0A0A0A]">My Rates</p>
-                  <p className="text-xs text-[#525252] font-medium">View service pricing &amp; packages</p>
+                <div className="text-left min-w-0">
+                  <p className="text-sm font-bold text-[#0A0A0A] leading-tight">My Rates</p>
+                  <p className="text-xs text-[#525252] font-medium leading-tight">Service Pricing</p>
                 </div>
               </button>
             )}
