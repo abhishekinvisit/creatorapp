@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Camera, Plus, X, Link2, Pencil, MapPin, BarChart2, ChevronDown } from "lucide-react";
+import { Camera, Plus, X, Link2, Pencil, MapPin, BarChart2, ChevronDown, Loader2 } from "lucide-react";
 
 const InstagramIcon = ({ size = 16, className = "", ...props }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
@@ -136,13 +136,16 @@ export default function EditProfile() {
     reader.readAsDataURL(file);
   };
 
+  const [saving, setSaving] = useState(false);
+
   const save = async () => {
-    if (accountType === "brand") {
-      setUser((prev) => ({
-        ...prev,
-        brand: { ...prev.brand, name, bio, logo: avatar, instagramUrl: brandInstagramUrl, websiteUrl: brandWebsiteUrl, officialEmail },
-      }));
-      try {
+    setSaving(true);
+    try {
+      if (accountType === "brand") {
+        setUser((prev) => ({
+          ...prev,
+          brand: { ...prev.brand, name, bio, logo: avatar, instagramUrl: brandInstagramUrl, websiteUrl: brandWebsiteUrl, officialEmail },
+        }));
         await profileApi.updateBrand({
           brand_name: name,
           bio,
@@ -154,29 +157,25 @@ export default function EditProfile() {
         await refreshProfile();
         toast.success("Profile updated");
         navigate(-1);
-      } catch (_) {
-        toast.error("Failed to save profile. Please try again.");
-      }
-    } else {
-      const workedWithPayload = workedWith.map((b) => ({
-        id: b.id || String(Math.random()),
-        name: b.name || b.brand_name || "",
-        logo: b.logo || b.logo_data || "",
-      }));
-      setUser((prev) => ({
-        ...prev,
-        creator: {
-          ...prev.creator,
-          name, handle, bio, email: creatorEmail, state, instagramUrl, youtubeUrl, linkedinUrl, tiktokUrl, websiteUrl,
-          category: cats, location, language: languages, avatar,
-          followersCount: Number(followersCount) || prev.creator.followersCount,
-          followers: followersCount
-            ? Number(followersCount).toLocaleString("en-IN")
-            : prev.creator.followers,
-          collaborations: Number(collaborations) || prev.creator.collaborations,
-        },
-      }));
-      try {
+      } else {
+        const workedWithPayload = workedWith.map((b) => ({
+          id: b.id || String(Math.random()),
+          name: b.name || b.brand_name || "",
+          logo: b.logo || b.logo_data || "",
+        }));
+        setUser((prev) => ({
+          ...prev,
+          creator: {
+            ...prev.creator,
+            name, handle, bio, email: creatorEmail, state, instagramUrl, youtubeUrl, linkedinUrl, tiktokUrl, websiteUrl,
+            category: cats, location, language: languages, avatar,
+            followersCount: Number(followersCount) || prev.creator.followersCount,
+            followers: followersCount
+              ? Number(followersCount).toLocaleString("en-IN")
+              : prev.creator.followers,
+            collaborations: Number(collaborations) || prev.creator.collaborations,
+          },
+        }));
         await profileApi.updateCreator({
           full_name: name,
           email: creatorEmail,
@@ -200,9 +199,11 @@ export default function EditProfile() {
         await refreshProfile();
         toast.success("Profile updated");
         navigate(-1);
-      } catch (_) {
-        toast.error("Failed to save profile. Please try again.");
       }
+    } catch (_) {
+      toast.error("Failed to save profile. Please try again.");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -264,9 +265,15 @@ export default function EditProfile() {
           <button
             data-testid="save-profile"
             onClick={save}
-            className="px-5 py-2 bg-[#0A0A0A] text-white rounded-full text-xs font-bold uppercase tracking-[0.15em]"
+            disabled={saving}
+            className="flex items-center gap-1.5 px-5 py-2 bg-[#0A0A0A] text-white rounded-full text-xs font-bold uppercase tracking-[0.15em] disabled:opacity-60 transition-opacity"
           >
-            Save
+            {saving ? (
+              <>
+                <Loader2 size={12} className="animate-spin" />
+                Saving…
+              </>
+            ) : "Save"}
           </button>
         }
       />
