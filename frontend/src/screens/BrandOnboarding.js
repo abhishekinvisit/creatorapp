@@ -173,7 +173,7 @@ export default function BrandOnboarding() {
             type="email"
             value={officialEmail}
             onChange={(e) => setOfficialEmail(e.target.value)}
-            placeholder="brand@company.com (optional)"
+            placeholder="brand@company.com"
           />
         </div>
 
