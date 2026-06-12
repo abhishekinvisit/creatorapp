@@ -1,4 +1,4 @@
-modules = ["nodejs-20", "python-3.12", "web", "postgresql-16"]
+modules = ["nodejs-20", "python-3.12", "web"]
 [agent]
 expertMode = true
 stack = "BEST_EFFORT_FALLBACK"
@@ -11,7 +11,6 @@ packages = ["cargo", "libiconv", "libxcrypt", "postgresql", "rustc"]
 
 [userenv.shared]
 CORS_ORIGINS = "*"
-JWT_SECRET = "replit-ollcollab-jwt-secret-2024"
 
 [workflows]
 runButton = "Project"
@@ -50,16 +49,12 @@ outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd backend && python3 -m uvicorn server:app --host 0.0.0.0 --port 8000 --reload"
+args = "cd backend && /home/runner/workspace/.pythonlibs/bin/python3 -m uvicorn server:app --host 0.0.0.0 --port 8000 --reload"
 waitForPort = 8000
 
 [[ports]]
 localPort = 5000
 externalPort = 80
-
-[[ports]]
-localPort = 8000
-externalPort = 8000
 
 [deployment]
 deploymentTarget = "autoscale"
