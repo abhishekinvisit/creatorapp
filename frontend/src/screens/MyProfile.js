@@ -291,9 +291,9 @@ export default function MyProfile() {
                 data-testid="ig-link"
                 onClick={() => window.open(c.instagramUrl, "_blank", "noopener,noreferrer")}
                 aria-label="Open Instagram"
-                className="w-5 h-5 rounded-[6px] bg-gradient-to-tr from-[#833ab4] via-[#e1306c] to-[#f77737] flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform"
+                className="w-7 h-7 rounded-[6px] bg-gradient-to-tr from-[#833ab4] via-[#e1306c] to-[#f77737] flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform"
               >
-                <InstagramIcon size={10} className="text-white" strokeWidth={2.6} />
+                <InstagramIcon size={14} className="text-white" strokeWidth={2.6} />
               </button>
             </div>
             {c.location && (
