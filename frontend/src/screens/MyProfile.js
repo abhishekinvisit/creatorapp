@@ -321,15 +321,6 @@ export default function MyProfile() {
             <p className="font-display font-black text-lg text-[#0A0A0A] leading-none">{c.collaborations}</p>
             <p className="text-[10px] font-bold tracking-[0.15em] uppercase text-[#525252] mt-1">Collabs</p>
           </div>
-          {c.category?.length > 0 && (
-            <>
-              <div className="w-px h-7 bg-[#E5E5E5]" />
-              <div className="flex-1 min-w-0">
-                <p className="text-[10px] font-bold tracking-[0.15em] uppercase text-[#525252] mb-1">Category</p>
-                <p className="text-xs font-bold text-[#0A0A0A] truncate">{c.category[0]}</p>
-              </div>
-            </>
-          )}
         </div>
 
         {/* Bio */}
