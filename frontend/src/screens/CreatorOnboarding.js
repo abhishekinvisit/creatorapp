@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Check, Globe } from "lucide-react";
+import { ChevronLeft, ChevronRight, Check, Globe, ChevronDown } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { onboardingApi } from "@/lib/api";
 import { toast } from "sonner";
@@ -75,6 +75,7 @@ export default function CreatorOnboarding() {
   // Step 3 — Creator Details
   const [categories, setCategories] = useState([]);
   const [catSearch, setCatSearch] = useState("");
+  const [catOpen, setCatOpen] = useState(false);
   const [instagramUrl, setInstagramUrl] = useState("");
   const [followersCount, setFollowersCount] = useState("");
 
@@ -316,7 +317,7 @@ export default function CreatorOnboarding() {
               />
             </div>
 
-            <div>
+            <div className="relative">
               <div className="flex items-center justify-between mb-3">
                 <Label required>Content Niche</Label>
                 <span className={`text-xs font-black ${categories.length === 3 ? "text-[#E25238]" : "text-[#525252]"}`}>
@@ -324,35 +325,46 @@ export default function CreatorOnboarding() {
                 </span>
               </div>
               <p className="text-xs text-[#525252] font-medium mb-3">Select up to 3 categories</p>
-              <input
-                value={catSearch}
-                onChange={(e) => setCatSearch(e.target.value)}
-                placeholder="Search categories…"
-                className="w-full px-4 py-3 mb-3 bg-white border-2 border-[#E5E5E5] rounded-2xl text-[#0A0A0A] font-medium text-sm outline-none focus:border-[#0A0A0A] transition-colors placeholder:text-[#B0B0B0]"
-              />
-              <div className="flex flex-wrap gap-2">
-                {MASTER_CATEGORIES.filter((c) => c.toLowerCase().includes(catSearch.toLowerCase())).map((c) => {
-                  const active = categories.includes(c);
-                  const disabled = !active && categories.length === 3;
-                  return (
-                    <button
-                      key={c}
-                      onClick={() => toggleCategory(c)}
-                      disabled={disabled}
-                      className={`px-4 py-2.5 rounded-full text-sm font-bold transition-all ${
-                        active
-                          ? "bg-[#0A0A0A] text-white"
-                          : disabled
-                          ? "bg-white border-2 border-[#E5E5E5] text-[#B0B0B0] cursor-not-allowed"
-                          : "bg-white border-2 border-[#E5E5E5] text-[#525252] hover:border-[#0A0A0A]"
-                      }`}
-                    >
-                      {active && <Check size={12} className="inline mr-1.5 -mt-0.5" />}
-                      {c}
-                    </button>
-                  );
-                })}
-              </div>
+              <button
+                onClick={() => setCatOpen((o) => !o)}
+                className="w-full flex items-center justify-between px-4 py-4 bg-white border-2 border-[#E5E5E5] rounded-2xl text-sm font-medium text-[#0A0A0A] hover:border-[#0A0A0A] transition-colors"
+              >
+                <span className={categories.length ? "text-[#0A0A0A]" : "text-[#B0B0B0]"}>
+                  {categories.length ? categories.join(", ") : "Select categories"}
+                </span>
+                <ChevronDown size={16} className={`text-[#525252] transition-transform ${catOpen ? "rotate-180" : ""}`} />
+              </button>
+              {catOpen && (
+                <div className="absolute z-20 mt-1 w-full bg-white border-2 border-[#E5E5E5] rounded-2xl shadow-lg max-h-60 overflow-y-auto p-2">
+                  <input
+                    value={catSearch}
+                    onChange={(e) => setCatSearch(e.target.value)}
+                    placeholder="Search categories…"
+                    className="w-full px-3 py-2 mb-2 bg-[#F9F9F8] border border-[#E5E5E5] rounded-xl text-sm font-medium text-[#0A0A0A] outline-none focus:border-[#0A0A0A] placeholder:text-[#B0B0B0]"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                  {MASTER_CATEGORIES.filter((c) => c.toLowerCase().includes(catSearch.toLowerCase())).map((c) => {
+                    const active = categories.includes(c);
+                    return (
+                      <button
+                        key={c}
+                        onClick={() => {
+                          toggleCategory(c);
+                          if (categories.includes(c) ? categories.length - 1 : categories.length + 1 >= 3) {
+                            setCatOpen(false);
+                          }
+                        }}
+                        className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-all mb-1 ${
+                          active ? "bg-[#0A0A0A] text-white" : "hover:bg-[#F3F3F3] text-[#0A0A0A]"
+                        }`}
+                      >
+                        {active && <Check size={12} className="inline mr-1.5 -mt-0.5" />}
+                        {c}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         )}

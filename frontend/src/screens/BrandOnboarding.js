@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Check, Camera, Building2 } from "lucide-react";
+import { Check, Camera, Building2, ChevronDown } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { onboardingApi } from "@/lib/api";
 import { toast } from "sonner";
@@ -38,6 +38,7 @@ export default function BrandOnboarding() {
   const [brandName, setBrandName] = useState("");
   const [brandCategory, setBrandCategory] = useState("");
   const [catSearch, setCatSearch] = useState("");
+  const [catOpen, setCatOpen] = useState(false);
   const [gstNumber, setGstNumber] = useState("");
   const [officialEmail, setOfficialEmail] = useState("");
   const [brandBio, setBrandBio] = useState("");
@@ -129,30 +130,40 @@ export default function BrandOnboarding() {
         </div>
 
         {/* Category */}
-        <div>
+        <div className="relative">
           <Label required>Brand Category</Label>
-          <input
-            value={catSearch}
-            onChange={(e) => setCatSearch(e.target.value)}
-            placeholder="Search categories…"
-            className="w-full px-4 py-3 mb-3 bg-white border-2 border-[#E5E5E5] rounded-2xl text-[#0A0A0A] font-medium text-sm outline-none focus:border-[#0A0A0A] transition-colors placeholder:text-[#B0B0B0]"
-          />
-          <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto">
-            {MASTER_CATEGORIES.filter((c) => c.toLowerCase().includes(catSearch.toLowerCase())).map((c) => (
-              <button
-                key={c}
-                onClick={() => setBrandCategory(c)}
-                className={`px-3.5 py-2 rounded-full text-xs font-bold transition-all ${
-                  brandCategory === c
-                    ? "bg-[#0A0A0A] text-white"
-                    : "bg-white border-2 border-[#E5E5E5] text-[#525252] hover:border-[#0A0A0A]"
-                }`}
-              >
-                {brandCategory === c && <Check size={10} className="inline mr-1 -mt-0.5" />}
-                {c}
-              </button>
-            ))}
-          </div>
+          <button
+            onClick={() => setCatOpen((o) => !o)}
+            className="w-full flex items-center justify-between px-4 py-4 bg-white border-2 border-[#E5E5E5] rounded-2xl text-sm font-medium text-[#0A0A0A] hover:border-[#0A0A0A] transition-colors mt-2"
+          >
+            <span className={brandCategory ? "text-[#0A0A0A]" : "text-[#B0B0B0]"}>
+              {brandCategory || "Select a category"}
+            </span>
+            <ChevronDown size={16} className={`text-[#525252] transition-transform ${catOpen ? "rotate-180" : ""}`} />
+          </button>
+          {catOpen && (
+            <div className="absolute z-20 mt-1 w-full bg-white border-2 border-[#E5E5E5] rounded-2xl shadow-lg max-h-60 overflow-y-auto p-2">
+              <input
+                value={catSearch}
+                onChange={(e) => setCatSearch(e.target.value)}
+                placeholder="Search categories…"
+                className="w-full px-3 py-2 mb-2 bg-[#F9F9F8] border border-[#E5E5E5] rounded-xl text-sm font-medium text-[#0A0A0A] outline-none focus:border-[#0A0A0A] placeholder:text-[#B0B0B0]"
+                onClick={(e) => e.stopPropagation()}
+              />
+              {MASTER_CATEGORIES.filter((c) => c.toLowerCase().includes(catSearch.toLowerCase())).map((c) => (
+                <button
+                  key={c}
+                  onClick={() => { setBrandCategory(c); setCatOpen(false); }}
+                  className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-all mb-1 ${
+                    brandCategory === c ? "bg-[#0A0A0A] text-white" : "hover:bg-[#F3F3F3] text-[#0A0A0A]"
+                  }`}
+                >
+                  {brandCategory === c && <Check size={12} className="inline mr-1.5 -mt-0.5" />}
+                  {c}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Official Email */}
