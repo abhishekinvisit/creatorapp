@@ -337,6 +337,35 @@ export default function MyProfile() {
           <p className="text-sm font-medium text-[#525252] mt-4 leading-relaxed">{c.bio}</p>
         )}
 
+        {/* Categories */}
+        {c.category?.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-4">
+            {c.category.map((cat) => (
+              <span
+                key={cat}
+                className="px-3 py-1.5 rounded-full bg-white border border-[#E5E5E5] text-[10px] font-bold uppercase tracking-[0.15em] text-[#0A0A0A]"
+              >
+                {cat}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Languages */}
+        {c.language?.length > 0 && (
+          <div className="flex items-center gap-2 mt-2 flex-wrap">
+            <Globe size={12} className="text-[#525252] flex-shrink-0" />
+            {c.language.map((lang) => (
+              <span
+                key={lang}
+                className="px-2.5 py-1 rounded-full bg-[#F3F3F3] border border-[#E5E5E5] text-[10px] font-bold uppercase tracking-[0.12em] text-[#525252]"
+              >
+                {lang}
+              </span>
+            ))}
+          </div>
+        )}
+
         {/* Action row */}
         <div className="flex gap-2 mt-5">
           <button
