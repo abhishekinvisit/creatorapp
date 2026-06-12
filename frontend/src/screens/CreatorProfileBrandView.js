@@ -146,7 +146,7 @@ export default function CreatorProfileBrandView() {
                   data-testid="ig-link"
                   onClick={openInstagram}
                   aria-label="Open Instagram"
-                  className="w-5 h-5 rounded-[6px] bg-gradient-to-tr from-[#E25238] via-[#F59E0B] to-[#E25238] flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform"
+                  className="w-5 h-5 rounded-[6px] bg-gradient-to-tr from-[#833ab4] via-[#e1306c] to-[#f77737] flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform"
                 >
                   <InstagramIcon size={10} className="text-white" strokeWidth={2.6} />
                 </button>
@@ -168,7 +168,7 @@ export default function CreatorProfileBrandView() {
               {formatFollowers(c.followers_count)}
             </p>
             <div className="flex items-center gap-1 mt-1">
-              <div className="w-3 h-3 rounded-[3px] bg-gradient-to-tr from-[#E25238] via-[#F59E0B] to-[#E25238] flex items-center justify-center">
+              <div className="w-3 h-3 rounded-[3px] bg-gradient-to-tr from-[#833ab4] via-[#e1306c] to-[#f77737] flex items-center justify-center">
                 <InstagramIcon size={7} className="text-white" strokeWidth={2.8} />
               </div>
               <p className="text-[10px] font-bold tracking-[0.15em] uppercase text-[#525252]">Followers</p>
@@ -232,7 +232,7 @@ export default function CreatorProfileBrandView() {
                   href={c.instagram_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-3 py-2 rounded-full bg-gradient-to-tr from-[#E25238] via-[#F59E0B] to-[#E25238] text-white text-xs font-bold hover:opacity-90 transition-opacity"
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-tr from-[#833ab4] via-[#e1306c] to-[#f77737] text-white text-xs font-bold hover:opacity-90 transition-opacity"
                 >
                   <InstagramIcon size={13} /> Instagram
                 </a>

@@ -291,7 +291,7 @@ export default function MyProfile() {
                 data-testid="ig-link"
                 onClick={() => window.open(c.instagramUrl, "_blank", "noopener,noreferrer")}
                 aria-label="Open Instagram"
-                className="w-5 h-5 rounded-[6px] bg-gradient-to-tr from-[#E25238] via-[#F59E0B] to-[#E25238] flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform"
+                className="w-5 h-5 rounded-[6px] bg-gradient-to-tr from-[#833ab4] via-[#e1306c] to-[#f77737] flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform"
               >
                 <InstagramIcon size={10} className="text-white" strokeWidth={2.6} />
               </button>
@@ -310,7 +310,7 @@ export default function MyProfile() {
           <div data-testid="stat-followers">
             <p className="font-display font-black text-lg text-[#0A0A0A] leading-none">{c.followers}</p>
             <div className="flex items-center gap-1 mt-1">
-              <div className="w-3 h-3 rounded-[3px] bg-gradient-to-tr from-[#E25238] via-[#F59E0B] to-[#E25238] flex items-center justify-center">
+              <div className="w-3 h-3 rounded-[3px] bg-gradient-to-tr from-[#833ab4] via-[#e1306c] to-[#f77737] flex items-center justify-center">
                 <InstagramIcon size={7} className="text-white" strokeWidth={2.8} />
               </div>
               <p className="text-[10px] font-bold tracking-[0.15em] uppercase text-[#525252]">Followers</p>

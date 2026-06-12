@@ -241,7 +241,11 @@ export default function PublicCreatorProfile() {
                   href={s.url.startsWith("http") ? s.url : `https://${s.url}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-4 py-2.5 bg-white border border-[#E5E5E5] rounded-2xl text-sm font-bold text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white hover:border-[#0A0A0A] transition-all"
+                  className={
+                    s.label === "Instagram"
+                      ? "flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-tr from-[#833ab4] via-[#e1306c] to-[#f77737] text-white text-sm font-bold hover:opacity-90 transition-all"
+                      : "flex items-center gap-2 px-4 py-2.5 bg-white border border-[#E5E5E5] rounded-2xl text-sm font-bold text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white hover:border-[#0A0A0A] transition-all"
+                  }
                 >
                   {s.icon} {s.label}
                 </a>
