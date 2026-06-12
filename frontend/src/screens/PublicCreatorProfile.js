@@ -209,7 +209,7 @@ export default function PublicCreatorProfile() {
           <div className="bg-white border border-[#E5E5E5] rounded-2xl p-4 mb-4 space-y-3">
             {categories.length > 0 && (
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#E25238] mb-2">Niches</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#E25238] mb-2">Categories</p>
                 <div className="flex flex-wrap gap-1.5">
                   {categories.map((c) => (
                     <span key={c} className="px-3 py-1.5 bg-[#F3F3F3] text-[#0A0A0A] text-xs font-bold rounded-full">{c}</span>
