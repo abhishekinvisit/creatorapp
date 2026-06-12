@@ -474,14 +474,6 @@ export default function MyProfile() {
                 <Globe size={11} /> Website
               </button>
             )}
-            {c.language?.length > 0 && c.language.slice(0, 2).map((lang) => (
-              <span
-                key={lang}
-                className="px-3 py-1.5 rounded-full bg-[#F3F3F3] border border-[#E5E5E5] text-[10px] font-bold uppercase tracking-[0.1em] text-[#525252]"
-              >
-                {lang}
-              </span>
-            ))}
           </div>
         </div>
       )}
