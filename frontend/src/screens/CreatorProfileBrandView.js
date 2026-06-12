@@ -117,7 +117,7 @@ export default function CreatorProfileBrandView() {
   );
 
   return (
-    <div data-testid="creator-profile-brand" className="min-h-full bg-[#F9F9F8] pb-8">
+    <div data-testid="creator-profile-brand" className="min-h-full bg-[#F9F9F8] flex flex-col pb-2">
       <TopBar title="Creator Profile" showMore />
 
       {/* HEADER */}
@@ -128,10 +128,10 @@ export default function CreatorProfileBrandView() {
             <img
               src={c.avatar_url}
               alt={c.full_name}
-              className="w-[72px] h-[72px] rounded-[22px] object-cover ring-2 ring-white shadow-md flex-shrink-0"
+              className="w-[72px] h-[72px] rounded-[22px] object-cover ring-4 ring-white shadow-md flex-shrink-0"
             />
           ) : (
-            <div className="w-[72px] h-[72px] rounded-[22px] bg-gradient-to-br from-[#E25238] to-[#F59E0B] flex items-center justify-center ring-2 ring-white shadow-md flex-shrink-0">
+            <div className="w-[72px] h-[72px] rounded-[22px] bg-gradient-to-br from-[#E25238] to-[#F59E0B] flex items-center justify-center ring-4 ring-white shadow-md flex-shrink-0">
               <span className="text-white font-black text-2xl">{(c.full_name || "C")[0]}</span>
             </div>
           )}
@@ -183,94 +183,41 @@ export default function CreatorProfileBrandView() {
           </div>
         </div>
 
-        {/* Bio */}
         {c.bio && (
-          <p className="text-sm font-medium text-[#525252] mt-4 leading-relaxed">{c.bio}</p>
+          <p className="text-sm font-medium text-[#0A0A0A] mt-4 leading-relaxed">{c.bio}</p>
         )}
 
-        {/* Categories */}
-        {c.categories?.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-4">
-            {c.categories.map((cat) => (
-              <span
-                key={cat}
-                className="px-3 py-1.5 rounded-full bg-white border border-[#E5E5E5] text-[10px] font-bold uppercase tracking-[0.15em] text-[#0A0A0A]"
-              >
-                {cat}
-              </span>
-            ))}
-          </div>
-        )}
-
-        {/* Languages */}
-        {c.languages?.length > 0 && (
-          <div className="flex items-center gap-2 mt-2 flex-wrap">
-            <Globe size={12} className="text-[#525252] flex-shrink-0" />
-            {c.languages.map((lang) => (
-              <span
-                key={lang}
-                className="px-2.5 py-1 rounded-full bg-[#F3F3F3] border border-[#E5E5E5] text-[10px] font-bold uppercase tracking-[0.12em] text-[#525252]"
-              >
-                {lang}
-              </span>
-            ))}
-          </div>
-        )}
-
-        {/* Action row */}
-        <div className="flex gap-2 mt-5">
+        {/* Audience Insights button */}
+        {hasInsights && (
           <button
-            data-testid="save-btn"
-            onClick={handleToggleSave}
-            className={`flex-1 py-2.5 rounded-full border-2 font-bold text-sm flex items-center justify-center gap-1.5 transition-colors ${
-              isCreatorSaved(id)
-                ? "bg-[#E25238] border-[#E25238] text-white"
-                : "border-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white"
-            }`}
+            onClick={() => setShowInsights(true)}
+            className="w-full mt-4 flex items-center gap-3 px-4 py-3.5 bg-[#E25238]/8 border border-[#E25238]/20 rounded-2xl hover:bg-[#E25238]/15 transition-colors"
           >
-            <Bookmark size={14} fill={isCreatorSaved(id) ? "currentColor" : "none"} />
-            {isCreatorSaved(id) ? "Saved" : "Save"}
+            <div className="w-8 h-8 rounded-xl bg-[#E25238] flex items-center justify-center flex-shrink-0">
+              <BarChart2 size={16} className="text-white" />
+            </div>
+            <div className="flex-1 text-left">
+              <p className="text-sm font-bold text-[#0A0A0A]">Audience Insights</p>
+              <p className="text-xs text-[#525252] font-medium">View demographics &amp; reach data</p>
+            </div>
           </button>
-          <button
-            data-testid="message-btn"
-            onClick={handleMessage}
-            className="flex-1 py-2.5 rounded-full bg-[#0A0A0A] text-white font-bold text-sm flex items-center justify-center gap-1.5 hover:bg-[#E25238] transition-colors"
-          >
-            Message
-          </button>
-        </div>
+        )}
 
-        {/* Tools row */}
-        <div className="grid grid-cols-2 gap-2 mt-2">
-          {hasInsights && (
-            <button
-              onClick={() => setShowInsights(true)}
-              className="flex items-center gap-2.5 px-3.5 py-3 bg-white border border-[#E5E5E5] rounded-2xl hover:border-[#E25238]/40 hover:bg-[#E25238]/5 transition-colors"
-            >
-              <div className="w-7 h-7 rounded-xl bg-[#E25238] flex items-center justify-center flex-shrink-0">
-                <BarChart2 size={14} className="text-white" />
-              </div>
-              <div className="text-left min-w-0">
-                <p className="text-xs font-bold text-[#0A0A0A] leading-tight">Audience</p>
-                <p className="text-[10px] text-[#525252] font-medium leading-tight">Insights</p>
-              </div>
-            </button>
-          )}
-          {c.pricing && (c.pricing.ig_reel || c.pricing.ig_post || c.pricing.ig_story || c.pricing.reel_story_package || c.pricing.ugc_video || c.pricing.event_appearance || (c.pricing.custom_services?.length > 0)) && (
-            <button
-              onClick={() => setShowPricing(true)}
-              className="flex items-center gap-2.5 px-3.5 py-3 bg-white border border-[#E5E5E5] rounded-2xl hover:border-[#E25238]/40 hover:bg-[#E25238]/5 transition-colors"
-            >
-              <div className="w-7 h-7 rounded-xl bg-[#E25238] flex items-center justify-center flex-shrink-0">
-                <IndianRupee size={14} className="text-white" />
-              </div>
-              <div className="text-left min-w-0">
-                <p className="text-xs font-bold text-[#0A0A0A] leading-tight">My Rates</p>
-                <p className="text-[10px] text-[#525252] font-medium leading-tight">Service Pricing</p>
-              </div>
-            </button>
-          )}
-        </div>
+        {/* Service Pricing button */}
+        {c.pricing && (c.pricing.ig_reel || c.pricing.ig_post || c.pricing.ig_story || c.pricing.reel_story_package || c.pricing.ugc_video || c.pricing.event_appearance || (c.pricing.custom_services?.length > 0)) && (
+          <button
+            onClick={() => setShowPricing(true)}
+            className="w-full mt-3 flex items-center gap-3 px-4 py-3.5 bg-[#E25238]/8 border border-[#E25238]/20 rounded-2xl hover:bg-[#E25238]/15 transition-colors"
+          >
+            <div className="w-8 h-8 rounded-xl bg-[#E25238] flex items-center justify-center flex-shrink-0">
+              <IndianRupee size={16} className="text-white" />
+            </div>
+            <div className="flex-1 text-left">
+              <p className="text-sm font-bold text-[#0A0A0A]">My Rates</p>
+              <p className="text-xs text-[#525252] font-medium">View service pricing &amp; packages</p>
+            </div>
+          </button>
+        )}
 
         {/* Social links */}
         {(c.instagram_url || c.youtube_url || c.linkedin_url || c.tiktok_url || c.website_url) && (
@@ -331,89 +278,69 @@ export default function CreatorProfileBrandView() {
           </div>
         )}
 
-        {/* Social links */}
-        {(c.youtube_url || c.tiktok_url || c.linkedin_url || c.website_url) && (
+        {(c.categories?.length > 0) && (
+          <div className="flex flex-wrap gap-2 mt-4">
+            {c.categories.map((cat) => (
+              <span
+                key={cat}
+                className="px-3 py-1.5 rounded-full bg-white border border-[#E5E5E5] text-[10px] font-bold uppercase tracking-[0.15em]"
+              >
+                {cat}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {(c.languages?.length > 0) && (
           <div className="mt-4">
-            <div className="flex items-center gap-2 flex-wrap">
-              {c.youtube_url && (
-                <a
-                  href={c.youtube_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-[#E5E5E5] text-[10px] font-bold uppercase tracking-[0.1em] text-[#525252] hover:border-[#E25238] hover:text-[#E25238] transition-colors"
+            <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#525252] mb-2">Content Languages</p>
+            <div className="flex flex-wrap gap-2">
+              {c.languages.map((lang) => (
+                <span
+                  key={lang}
+                  className="px-3 py-1.5 rounded-full bg-[#E25238]/10 border border-[#E25238]/20 text-[10px] font-bold uppercase tracking-[0.15em] text-[#E25238]"
                 >
-                  <YoutubeIcon size={11} /> YouTube
-                </a>
-              )}
-              {c.tiktok_url && (
-                <a
-                  href={c.tiktok_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-[#E5E5E5] text-[10px] font-bold uppercase tracking-[0.1em] text-[#525252] hover:border-[#0A0A0A] hover:text-[#0A0A0A] transition-colors"
-                >
-                  <TiktokIcon size={11} /> TikTok
-                </a>
-              )}
-              {c.linkedin_url && (
-                <a
-                  href={c.linkedin_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-[#E5E5E5] text-[10px] font-bold uppercase tracking-[0.1em] text-[#525252] hover:border-[#0A66C2] hover:text-[#0A66C2] transition-colors"
-                >
-                  <LinkedinIcon size={11} /> LinkedIn
-                </a>
-              )}
-              {c.website_url && (
-                <a
-                  href={c.website_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-[#E5E5E5] text-[10px] font-bold uppercase tracking-[0.1em] text-[#525252] hover:border-[#0A0A0A] hover:text-[#0A0A0A] transition-colors"
-                >
-                  <Globe size={11} /> Website
-                </a>
-              )}
+                  {lang}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {workedWith.length > 0 && (
+          <div className="mt-6">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#525252]">Worked With</p>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#525252]">
+                {workedWith.length} brand{workedWith.length !== 1 ? "s" : ""}
+              </span>
+            </div>
+            <div className="flex items-start gap-3 overflow-x-auto scrollbar-hide -mx-1 px-1 pb-1">
+              {workedWith.map((b, i) => {
+                const logoSrc = b.logo || b.customLogo || "";
+                const isValidLogo = logoSrc && (logoSrc.startsWith("data:") || logoSrc.startsWith("http"));
+                const displayName = b.name || b.brand_name || "";
+                const item = (
+                  <div key={b.id || i} className="flex flex-col items-center gap-1.5 flex-shrink-0 w-14">
+                    <BrandLogo name={displayName || "B"} size={48} src={isValidLogo ? logoSrc : undefined} />
+                    <p className="text-[9px] font-bold text-center text-[#525252] leading-tight truncate w-full">
+                      {displayName}
+                    </p>
+                  </div>
+                );
+                return b.link ? (
+                  <a key={b.id || i} href={b.link.startsWith("http") ? b.link : `https://${b.link}`} target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">
+                    {item}
+                  </a>
+                ) : item;
+              })}
             </div>
           </div>
         )}
       </div>
 
-      {/* WORKED WITH */}
-      {workedWith.length > 0 && (
-        <div className="px-5 mb-6">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#525252]">Worked With</p>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#525252]">
-              {workedWith.length} brand{workedWith.length !== 1 ? "s" : ""}
-            </span>
-          </div>
-          <div className="flex items-start gap-3 overflow-x-auto scrollbar-hide -mx-1 px-1 pb-1">
-            {workedWith.map((b, i) => {
-              const logoSrc = b.logo || b.customLogo || "";
-              const isValidLogo = logoSrc && (logoSrc.startsWith("data:") || logoSrc.startsWith("http"));
-              const displayName = b.name || b.brand_name || "";
-              const item = (
-                <div key={b.id || i} className="flex flex-col items-center gap-1.5 flex-shrink-0 w-14">
-                  <BrandLogo name={displayName || "B"} size={48} src={isValidLogo ? logoSrc : undefined} />
-                  <p className="text-[9px] font-bold text-center text-[#525252] leading-tight truncate w-full">
-                    {displayName}
-                  </p>
-                </div>
-              );
-              return b.link ? (
-                <a key={b.id || i} href={b.link.startsWith("http") ? b.link : `https://${b.link}`} target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">
-                  {item}
-                </a>
-              ) : item;
-            })}
-          </div>
-        </div>
-      )}
-
       {/* PORTFOLIO */}
-      <div className="mt-2">
+      <div className="mt-8">
         <div className="px-5 flex items-end justify-between mb-4">
           <div>
             <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#E25238]">Portfolio</p>
@@ -437,6 +364,31 @@ export default function CreatorProfileBrandView() {
             <p className="text-sm text-[#525252] font-medium">No reels added yet.</p>
           </div>
         )}
+      </div>
+
+      {/* Floating actions */}
+      <div className="sticky bottom-0 left-0 right-0 z-20 mt-6">
+        <div className="px-5 py-4 bg-gradient-to-t from-[#F9F9F8] via-[#F9F9F8]/95 to-transparent flex gap-3">
+          <button
+            data-testid="save-btn"
+            onClick={handleToggleSave}
+            className={`flex-1 py-4 rounded-full border-2 font-bold flex items-center justify-center gap-2 transition-colors ${
+              isCreatorSaved(id)
+                ? "bg-[#E25238] border-[#E25238] text-white"
+                : "border-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white"
+            }`}
+          >
+            <Bookmark size={16} fill={isCreatorSaved(id) ? "currentColor" : "none"} />
+            {isCreatorSaved(id) ? "Saved" : "Save"}
+          </button>
+          <button
+            data-testid="message-btn"
+            onClick={handleMessage}
+            className="flex-1 py-4 rounded-full bg-[#0A0A0A] text-white font-bold hover:bg-[#E25238] transition-colors"
+          >
+            Message
+          </button>
+        </div>
       </div>
 
       {/* Audience Insights Modal (read-only for brand view) */}
