@@ -189,18 +189,18 @@ export default function CreatorProfileBrandView() {
 
         {/* Audience Insights + My Rates row */}
         {(hasInsights || (c.pricing && (c.pricing.ig_reel || c.pricing.ig_post || c.pricing.ig_story || c.pricing.reel_story_package || c.pricing.ugc_video || c.pricing.event_appearance || (c.pricing.custom_services?.length > 0)))) && (
-          <div className="flex gap-3 mt-4">
+          <div className="grid grid-cols-2 gap-2 mt-2">
             {hasInsights && (
               <button
                 onClick={() => setShowInsights(true)}
-                className="flex-1 flex items-center gap-3 px-4 py-3 bg-white border border-[#E5E5E5] rounded-2xl hover:border-[#E25238] transition-colors"
+                className="flex items-center gap-2.5 px-3.5 py-3 bg-white border border-[#E5E5E5] rounded-2xl hover:border-[#E25238]/40 hover:bg-[#E25238]/5 transition-colors"
               >
-                <div className="w-9 h-9 rounded-full bg-[#E25238] flex items-center justify-center flex-shrink-0">
-                  <BarChart2 size={16} className="text-white" />
+                <div className="w-7 h-7 rounded-xl bg-[#E25238] flex items-center justify-center flex-shrink-0">
+                  <BarChart2 size={14} className="text-white" />
                 </div>
                 <div className="text-left min-w-0">
-                  <p className="text-sm font-bold text-[#0A0A0A] leading-tight">Audience Insights</p>
-                  <p className="text-xs text-[#525252] font-medium leading-tight">View demographics</p>
+                  <p className="text-xs font-bold text-[#0A0A0A] leading-tight">Audience</p>
+                  <p className="text-[10px] text-[#525252] font-medium leading-tight">Insights</p>
                 </div>
               </button>
             )}
@@ -208,14 +208,14 @@ export default function CreatorProfileBrandView() {
             {c.pricing && (c.pricing.ig_reel || c.pricing.ig_post || c.pricing.ig_story || c.pricing.reel_story_package || c.pricing.ugc_video || c.pricing.event_appearance || (c.pricing.custom_services?.length > 0)) && (
               <button
                 onClick={() => setShowPricing(true)}
-                className="flex-1 flex items-center gap-3 px-4 py-3 bg-white border border-[#E5E5E5] rounded-2xl hover:border-[#E25238] transition-colors"
+                className="flex items-center gap-2.5 px-3.5 py-3 bg-white border border-[#E5E5E5] rounded-2xl hover:border-[#E25238]/40 hover:bg-[#E25238]/5 transition-colors"
               >
-                <div className="w-9 h-9 rounded-full bg-[#E25238] flex items-center justify-center flex-shrink-0">
-                  <IndianRupee size={16} className="text-white" />
+                <div className="w-7 h-7 rounded-xl bg-[#E25238] flex items-center justify-center flex-shrink-0">
+                  <IndianRupee size={14} className="text-white" />
                 </div>
                 <div className="text-left min-w-0">
-                  <p className="text-sm font-bold text-[#0A0A0A] leading-tight">My Rates</p>
-                  <p className="text-xs text-[#525252] font-medium leading-tight">Service Pricing</p>
+                  <p className="text-xs font-bold text-[#0A0A0A] leading-tight">My Rates</p>
+                  <p className="text-[10px] text-[#525252] font-medium leading-tight">Service Pricing</p>
                 </div>
               </button>
             )}
