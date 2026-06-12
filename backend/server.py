@@ -1486,12 +1486,33 @@ app.add_middleware(
 )
 
 # ── Serve React frontend in production ────────────────────────────────────────
-FRONTEND_BUILD = ROOT_DIR.parent / "frontend" / "build"
+# Try multiple candidate paths so it works in dev and in the production container
+_candidates = [
+    ROOT_DIR / "build",                           # copied here by build command
+    ROOT_DIR.parent / "frontend" / "build",       # dev workspace layout
+    Path("/home/runner/workspace") / "frontend" / "build",
+    Path("/app") / "frontend" / "build",
+]
+FRONTEND_BUILD = next((p for p in _candidates if p.exists()), None)
 
-if FRONTEND_BUILD.exists():
-    app.mount("/static", StaticFiles(directory=str(FRONTEND_BUILD / "static")), name="static")
+logger.info(f"Frontend build search paths: {[str(p) for p in _candidates]}")
+logger.info(f"Frontend build found at: {FRONTEND_BUILD}")
+
+if FRONTEND_BUILD and FRONTEND_BUILD.exists():
+    _static_dir = FRONTEND_BUILD / "static"
+    if _static_dir.exists():
+        app.mount("/static", StaticFiles(directory=str(_static_dir)), name="static")
+
+    @app.get("/")
+    async def serve_root():
+        index = FRONTEND_BUILD / "index.html"
+        return FileResponse(str(index))
 
     @app.get("/{full_path:path}")
     async def serve_spa(full_path: str):
         index = FRONTEND_BUILD / "index.html"
         return FileResponse(str(index))
+else:
+    @app.get("/")
+    async def serve_root_fallback():
+        return {"status": "backend running", "frontend": "not found", "searched": [str(p) for p in _candidates]}
