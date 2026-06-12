@@ -653,10 +653,14 @@ async def get_creator_by_handle(handle: str, user=Depends(optional_user)):
         ai = await conn.fetchrow(
             "SELECT * FROM audience_insights WHERE creator_id=$1::uuid", creator_user_id
         )
+        pr = await conn.fetchrow(
+            "SELECT * FROM creator_pricing WHERE creator_id=$1::uuid", creator_user_id
+        )
     profile = _serialize_profile(dict(cp))
     profile["creator_user_id"] = creator_user_id
     profile["is_public"] = cp.get("is_public", True)
     profile["audience_insights"] = _serialize_ai(ai) if ai else None
+    profile["pricing"] = _serialize_pricing(dict(pr)) if pr else None
     profile["reels"] = [_reel_row(r) for r in reels]
     return profile
 
@@ -676,11 +680,15 @@ async def get_creator_public(creator_user_id: str, user=Depends(optional_user)):
         ai = await conn.fetchrow(
             "SELECT * FROM audience_insights WHERE creator_id=$1::uuid", creator_user_id
         )
+        pr = await conn.fetchrow(
+            "SELECT * FROM creator_pricing WHERE creator_id=$1::uuid", creator_user_id
+        )
     if not cp:
         raise HTTPException(status_code=404, detail="Creator not found")
     profile = _serialize_profile(dict(cp))
     profile["is_public"] = cp.get("is_public", True)
     profile["audience_insights"] = _serialize_ai(dict(ai)) if ai else None
+    profile["pricing"] = _serialize_pricing(dict(pr)) if pr else None
     profile["reels"] = [
         {
             "id": str(r["id"]),

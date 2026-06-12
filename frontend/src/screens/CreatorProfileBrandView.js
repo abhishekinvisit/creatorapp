@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { MapPin, Bookmark, Globe, BarChart2 } from "lucide-react";
+import { MapPin, Bookmark, Globe, BarChart2, IndianRupee } from "lucide-react";
 
 const InstagramIcon = ({ size = 16, className = "", strokeWidth = 2, ...props }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
@@ -27,6 +27,7 @@ import { TopBar } from "@/components/TopBar";
 import { BrandLogo } from "@/components/BrandLogo";
 import { ReelCard } from "@/components/ReelCard";
 import { AudienceInsightsModal } from "@/components/AudienceInsightsModal";
+import { ServicePricingModal } from "@/components/ServicePricingModal";
 import { creatorsApi, messagesApi } from "@/lib/api";
 import { useApp } from "@/context/AppContext";
 import { toast } from "sonner";
@@ -45,6 +46,7 @@ export default function CreatorProfileBrandView() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showInsights, setShowInsights] = useState(false);
+  const [showPricing, setShowPricing] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -197,6 +199,22 @@ export default function CreatorProfileBrandView() {
             <div className="flex-1 text-left">
               <p className="text-sm font-bold text-[#0A0A0A]">Audience Insights</p>
               <p className="text-xs text-[#525252] font-medium">View demographics &amp; reach data</p>
+            </div>
+          </button>
+        )}
+
+        {/* Service Pricing button */}
+        {c.pricing && (c.pricing.ig_reel || c.pricing.ig_post || c.pricing.ig_story || c.pricing.reel_story_package || c.pricing.ugc_video || c.pricing.event_appearance || (c.pricing.custom_services?.length > 0)) && (
+          <button
+            onClick={() => setShowPricing(true)}
+            className="w-full mt-3 flex items-center gap-3 px-4 py-3.5 bg-[#E25238]/8 border border-[#E25238]/20 rounded-2xl hover:bg-[#E25238]/15 transition-colors"
+          >
+            <div className="w-8 h-8 rounded-xl bg-[#E25238] flex items-center justify-center flex-shrink-0">
+              <IndianRupee size={16} className="text-white" />
+            </div>
+            <div className="flex-1 text-left">
+              <p className="text-sm font-bold text-[#0A0A0A]">My Rates</p>
+              <p className="text-xs text-[#525252] font-medium">View service pricing &amp; packages</p>
             </div>
           </button>
         )}
@@ -380,6 +398,15 @@ export default function CreatorProfileBrandView() {
           onClose={() => setShowInsights(false)}
           isOwner={false}
           initialData={ai}
+        />
+      )}
+      {/* Service Pricing Modal (read-only for brand view) */}
+      {showPricing && c.pricing && (
+        <ServicePricingModal
+          open={showPricing}
+          onClose={() => setShowPricing(false)}
+          isOwner={false}
+          initialData={c.pricing}
         />
       )}
     </div>

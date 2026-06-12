@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ChevronLeft, MapPin, Users, Star, Link2, ExternalLink, BarChart2 } from "lucide-react";
+import { ChevronLeft, MapPin, Users, Star, Link2, ExternalLink, BarChart2, IndianRupee } from "lucide-react";
 import { creatorsApi } from "@/lib/api";
 import { AudienceInsightsModal } from "@/components/AudienceInsightsModal";
+import { ServicePricingModal } from "@/components/ServicePricingModal";
 
 const InstagramIcon = ({ size = 16, className = "" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -36,6 +37,12 @@ export default function PublicCreatorProfile() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [showInsights, setShowInsights] = useState(false);
+  const [showPricing, setShowPricing] = useState(false);
+
+  const pricing = profile?.pricing;
+  const hasPricing = pricing && (
+    pricing.ig_reel || pricing.ig_post || pricing.ig_story || pricing.reel_story_package || pricing.ugc_video || pricing.event_appearance || (pricing.custom_services?.length > 0)
+  );
 
   useEffect(() => {
     const fetchProfile = UUID_RE.test(id)
@@ -169,7 +176,23 @@ export default function PublicCreatorProfile() {
             </div>
             <div className="flex-1 text-left">
               <p className="text-sm font-bold text-[#0A0A0A]">Audience Insights</p>
-              <p className="text-xs text-[#525252] font-medium">View demographics & reach data</p>
+              <p className="text-xs text-[#525252] font-medium">View demographics &amp; reach data</p>
+            </div>
+          </button>
+        )}
+
+        {/* Service Pricing button */}
+        {hasPricing && (
+          <button
+            onClick={() => setShowPricing(true)}
+            className="w-full mb-4 flex items-center gap-3 px-4 py-3.5 bg-[#E25238]/8 border border-[#E25238]/20 rounded-2xl hover:bg-[#E25238]/15 transition-colors"
+          >
+            <div className="w-8 h-8 rounded-xl bg-[#E25238] flex items-center justify-center flex-shrink-0">
+              <IndianRupee size={16} className="text-white" />
+            </div>
+            <div className="flex-1 text-left">
+              <p className="text-sm font-bold text-[#0A0A0A]">My Rates</p>
+              <p className="text-xs text-[#525252] font-medium">View service pricing &amp; packages</p>
             </div>
           </button>
         )}
@@ -303,6 +326,14 @@ export default function PublicCreatorProfile() {
           onClose={() => setShowInsights(false)}
           isOwner={false}
           initialData={ai}
+        />
+      )}
+      {showPricing && (
+        <ServicePricingModal
+          open={showPricing}
+          onClose={() => setShowPricing(false)}
+          isOwner={false}
+          initialData={pricing}
         />
       )}
     </div>
