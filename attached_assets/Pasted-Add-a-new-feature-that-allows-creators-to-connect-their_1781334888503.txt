@@ -1,0 +1,152 @@
+Add a new feature that allows creators to connect their Instagram account and automatically import Instagram data into their existing creator profile.
+
+## Objective
+
+Allow creators to securely connect Instagram through Instagram API and fetch creator analytics data. The fetched data should automatically populate the existing creator profile without creating duplicate fields.
+
+## Instagram Connection Flow
+
+Add a new option in Creator Settings:
+
+**"Connect Instagram"**
+
+Flow:
+
+1. Creator clicks Connect Instagram.
+2. Redirect to Instagram OAuth login.
+3. Ask creator to authorize required permissions.
+4. After successful connection:
+
+   * Store Instagram account connection.
+   * Fetch available profile and analytics data.
+   * Sync data with creator profile.
+
+## Data To Fetch
+
+### Basic Profile Data
+
+Fetch and display:
+
+* Instagram Username
+* Profile Picture
+* Followers Count
+* Following Count
+* Total Posts
+* Account Type
+* Bio (optional sync)
+
+### Audience Insights
+
+Fetch:
+
+* Audience Gender Distribution
+* Audience Age Groups
+* Top Locations / Cities
+* Top Countries
+* Audience Growth
+* Follower Trends
+
+Display this data inside the existing Audience Insights feature.
+
+Do not create a new section.
+
+### Engagement Data
+
+Calculate and display:
+
+* Engagement Rate
+* Average Likes
+* Average Comments
+* Average Reel Reach
+* Average Reel Views
+
+Formula:
+
+Engagement Rate =
+((Likes + Comments) / Followers) × 100
+
+### Reel Analytics
+
+Fetch reel-level insights:
+
+* Reel Views
+* Reach
+* Likes
+* Comments
+* Saves
+* Shares
+* Watch Time (if available)
+* Average Watch Time (if available)
+
+Show inside existing Portfolio/Reel insights area.
+
+## Profile Integration
+
+Automatically update existing creator profile fields:
+
+Followers → Instagram Followers
+
+Audience Insights → Instagram Insights
+
+Engagement Rate → Instagram Analytics
+
+Portfolio → Instagram Reels
+
+Do not duplicate any information.
+
+## Creator Controls
+
+Add:
+
+* Sync Now button
+* Last Synced Time
+* Disconnect Instagram option
+
+Allow creators to refresh data manually.
+
+## Database
+
+Create:
+
+instagram_connections table:
+
+* id
+* creator_id
+* instagram_user_id
+* username
+* access_token
+* refresh_token
+* connected_at
+* last_synced_at
+
+Create:
+
+instagram_insights table:
+
+* id
+* creator_id
+* followers
+* engagement_rate
+* audience_data
+* reel_data
+* synced_at
+
+## Privacy
+
+Creators must control visibility:
+
+* Show Instagram Insights publicly
+* Show only to brands
+* Private
+
+Brands/public users should only see allowed data.
+
+## UI Requirements
+
+* Match existing profile design.
+* Use a premium card similar to Audience Insights.
+* Show Instagram connected badge.
+* Use loading states while syncing.
+* Handle disconnected accounts gracefully.
+
+Build this as a scalable integration so future platforms like YouTube and TikTok can be added using the same architecture.
