@@ -60,4 +60,4 @@ externalPort = 80
 [deployment]
 deploymentTarget = "autoscale"
 run = ["bash", "-c", "cd backend && ../.venv/bin/python -m uvicorn server:app --host 0.0.0.0 --port 5000"]
-build = ["bash", "-c", "UV_PROJECT_ENVIRONMENT=.venv uv sync && cd frontend && npm install --legacy-peer-deps && CI=false npm run build && mkdir -p backend/build && cp -r frontend/dist/* backend/build/"]
+build = ["bash", "-c", "python3 -m venv .venv && .venv/bin/pip install --no-user -r backend/requirements.txt && cd frontend && npm install --legacy-peer-deps && CI=false npm run build && mkdir -p ../backend/build && cp -r dist/* ../backend/build/"]
