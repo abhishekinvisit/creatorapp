@@ -1499,9 +1499,13 @@ logger.info(f"Frontend build search paths: {[str(p) for p in _candidates]}")
 logger.info(f"Frontend build found at: {FRONTEND_BUILD}")
 
 if FRONTEND_BUILD and FRONTEND_BUILD.exists():
+    # CRA outputs /static, Vite outputs /assets — mount whichever exists
     _static_dir = FRONTEND_BUILD / "static"
+    _assets_dir = FRONTEND_BUILD / "assets"
     if _static_dir.exists():
         app.mount("/static", StaticFiles(directory=str(_static_dir)), name="static")
+    if _assets_dir.exists():
+        app.mount("/assets", StaticFiles(directory=str(_assets_dir)), name="assets")
 
     @app.get("/")
     async def serve_root():
