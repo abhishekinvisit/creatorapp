@@ -7,9 +7,10 @@ import { opportunitiesApi } from "@/lib/api";
 import { toast } from "sonner";
 
 import { MASTER_CATEGORIES as CATS } from "@/data/categories";
-const AGES = ["Any Age", "13-17", "18-24", "25-34", "35+"];
 const GENDERS = ["All", "Female", "Male", "Non-binary"];
 const LANGUAGES = ["English", "Hindi", "Tamil", "Telugu", "Kannada", "Bengali", "Marathi", "Malayalam", "Punjabi"];
+const MIN_AGE = 0;
+const MAX_AGE = 100;
 
 export default function BrandPostDetail() {
   const { id } = useParams();
@@ -87,8 +88,12 @@ export default function BrandPostDetail() {
     if (!form.title?.trim()) { toast.error("Campaign title is required"); return; }
     setSaving(true);
     try {
+      const ageMin = form.ageMin ?? MIN_AGE;
+      const ageMax = form.ageMax ?? MAX_AGE;
+      const ageRange = ageMin === MIN_AGE && ageMax === MAX_AGE ? "" : `${ageMin}-${ageMax}`;
+
       const builtRequirements = [
-        form.age && form.age !== "Any Age" ? `Age: ${form.age}` : "",
+        ageRange ? `Age: ${ageRange}` : "",
         form.gender && form.gender !== "All" ? `Gender: ${form.gender}` : "",
         form.location ? `Location: ${form.location}` : "",
         ...(form.requirements || []),
@@ -106,12 +111,14 @@ export default function BrandPostDetail() {
         payout_max: payoutMax,
         creators_needed: parseInt(form.needed) || 1,
         deadline: form.deadline,
-        cover_url: form.cover_url || "",
+        cover_url: "",
         category: form.category || "",
         languages: form.languages || [],
         requirements: builtRequirements,
         followers_min: parseInt(form.followers_min) || 0,
         followers_max: parseInt(form.followers_max) || 0,
+        age_min: ageMin,
+        age_max: ageMax,
       });
       const updated = {
         ...post, ...form,
@@ -123,6 +130,8 @@ export default function BrandPostDetail() {
         requirements: builtRequirements,
         followers_min: parseInt(form.followers_min) || 0,
         followers_max: parseInt(form.followers_max) || 0,
+        age_min: ageMin,
+        age_max: ageMax,
       };
       setPost(updated);
       setActivePosts((prev) => prev.map((p) => p.id === id ? updated : p));
@@ -245,7 +254,11 @@ function parseRequirements(reqs) {
 }
 
 function buildForm(post) {
-  const { age, gender, location, others } = parseRequirements(post.requirements || []);
+  const { gender, location, others } = parseRequirements(post.requirements || []);
+  // Prefer stored age_min/age_max; fall back to parsing the "Age: X-Y" requirement string
+  let ageMin = post.age_min != null ? post.age_min : MIN_AGE;
+  let ageMax = post.age_max != null ? post.age_max : MAX_AGE;
+  if (ageMin === 0 && ageMax === 0) { ageMin = MIN_AGE; ageMax = MAX_AGE; }
   return {
     title: post.title || "",
     description: post.description || post.pitch || "",
@@ -254,20 +267,23 @@ function buildForm(post) {
     payoutMax: post.payout_max || post.payoutMax || "",
     needed: post.needed || "",
     deadline: post.deadline || "",
-    cover_url: post.cover_url || "",
     category: post.category || "",
     languages: post.languages || [],
     requirements: others,
     followers_min: post.followers_min || post.followersMin || "",
     followers_max: post.followers_max || post.followersMax || "",
-    age,
+    ageMin,
+    ageMax,
     gender,
     location,
   };
 }
 
 const ViewBody = ({ post }) => {
-  const { age, gender, location, others } = parseRequirements(post.requirements || []);
+  const { gender, location, others } = parseRequirements(post.requirements || []);
+  const ageMin = post.age_min ?? MIN_AGE;
+  const ageMax = post.age_max ?? MAX_AGE;
+  const ageLabel = ageMin === MIN_AGE && ageMax === MAX_AGE ? null : `${ageMin} – ${ageMax}`;
   return (
     <>
       <h1 className="font-display font-black text-3xl tracking-tight leading-tight">{post.title}</h1>
@@ -307,7 +323,7 @@ const ViewBody = ({ post }) => {
               }
             />
           ) : null}
-          {age ? <Row icon={Filter} label="Age Group" value={age} /> : null}
+          {ageLabel ? <Row icon={Filter} label="Age Range" value={ageLabel} /> : null}
           {gender ? <Row icon={Filter} label="Gender" value={gender} /> : null}
           {location ? <Row icon={MapPin} label="Location" value={location} /> : null}
         </div>
@@ -365,41 +381,17 @@ const LanguageRow = ({ langs }) => (
 );
 
 const EditForm = ({ form, setForm }) => {
-  const handleCoverFile = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith("image/")) { toast.error("Please select an image"); return; }
-    if (file.size > 3 * 1024 * 1024) { toast.error("Image must be under 3MB"); return; }
-    const reader = new FileReader();
-    reader.onload = () => setForm((f) => ({ ...f, cover_url: reader.result }));
-    reader.readAsDataURL(file);
+  const handleAgeMin = (val) => {
+    const v = parseInt(val);
+    setForm((f) => v > f.ageMax ? { ...f, ageMin: v, ageMax: v } : { ...f, ageMin: v });
+  };
+  const handleAgeMax = (val) => {
+    const v = parseInt(val);
+    setForm((f) => v < f.ageMin ? { ...f, ageMin: v, ageMax: v } : { ...f, ageMax: v });
   };
 
   return (
     <div className="space-y-5">
-      <Field label="Cover Image">
-        <div
-          className="w-full h-36 rounded-2xl overflow-hidden border-2 border-dashed border-white/20 flex items-center justify-center cursor-pointer hover:border-[#E25238] transition-colors relative"
-          onClick={() => document.getElementById("cover-file-input")?.click()}
-        >
-          {form.cover_url ? (
-            <img src={form.cover_url} alt="cover" className="w-full h-full object-cover" />
-          ) : (
-            <div className="flex flex-col items-center gap-2 text-neutral-400">
-              <Wallet size={24} />
-              <span className="text-xs font-bold">Tap to upload cover image</span>
-            </div>
-          )}
-          <input
-            id="cover-file-input"
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleCoverFile}
-          />
-        </div>
-      </Field>
-
       <Field label="Campaign Title">
         <input
           data-testid="edit-title"
@@ -491,20 +483,32 @@ const EditForm = ({ form, setForm }) => {
         <p className="text-[11px] text-neutral-500 mt-1.5 font-medium">Leave blank to accept all follower counts</p>
       </Field>
 
-      <Field label="Audience Age Group">
-        <div className="flex flex-wrap gap-2">
-          {AGES.map((a) => (
-            <button
-              key={a}
-              type="button"
-              onClick={() => setForm({ ...form, age: form.age === a ? "" : a })}
-              className={`px-4 py-2.5 rounded-full text-sm font-bold transition-all ${
-                form.age === a ? "bg-[#E25238] text-white" : "bg-white/5 text-neutral-300 border border-white/10 hover:border-white/30"
-              }`}
-            >
-              {a}
-            </button>
-          ))}
+      <Field label="Audience Age Range">
+        <div className="pt-2 pb-1">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[10px] font-bold tracking-widest uppercase text-neutral-500">Min</span>
+            <span className="text-sm font-bold text-white">{form.ageMin} — {form.ageMax}</span>
+            <span className="text-[10px] font-bold tracking-widest uppercase text-neutral-500">Max</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <input
+              type="range"
+              min={MIN_AGE}
+              max={MAX_AGE}
+              value={form.ageMin}
+              onChange={(e) => handleAgeMin(e.target.value)}
+              className="flex-1 h-1.5 rounded-full bg-neutral-700 accent-[#E25238] cursor-pointer"
+            />
+            <input
+              type="range"
+              min={MIN_AGE}
+              max={MAX_AGE}
+              value={form.ageMax}
+              onChange={(e) => handleAgeMax(e.target.value)}
+              className="flex-1 h-1.5 rounded-full bg-neutral-700 accent-[#E25238] cursor-pointer"
+            />
+          </div>
+          <p className="text-[11px] text-neutral-500 mt-1.5 font-medium">Drag to set the age range for this campaign</p>
         </div>
       </Field>
 

@@ -182,6 +182,8 @@ class OpportunityUpdate(BaseModel):
     status: Optional[str] = None
     followers_min: Optional[int] = None
     followers_max: Optional[int] = None
+    age_min: Optional[int] = None
+    age_max: Optional[int] = None
 
 class ReelIn(BaseModel):
     brand: str
