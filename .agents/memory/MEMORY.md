@@ -1,4 +1,5 @@
-- [Replit migration](replit-migration.md) — frontend npm install needs --legacy-peer-deps (react-day-picker/date-fns conflict); workflows use python3 -m uvicorn (not bare uvicorn); DATABASE_URL auto-provisioned as secret.
+- [Replit migration](replit-migration.md) — frontend npm install needs --legacy-peer-deps (react-day-picker/date-fns conflict); workflows use python3.12 explicitly (packages live in .pythonlibs/lib/python3.12); DATABASE_URL auto-provisioned as secret.
+- [Admin system](admin-system.md) — full admin panel at /admin/*; separate JWT (ADMIN_JWT_SECRET); backend in admin_routes.py included in server.py; bootstrap_admin.py creates first super admin; default dev creds: +910000000000 / Admin@123
 - [Backend stack](backend-stack.md) — FastAPI + asyncpg + PostgreSQL; JWT via python-jose; bcrypt DIRECT (not passlib — passlib wrap-bug detection breaks with newer bcrypt); 30-day tokens
 - [bcrypt passlib conflict](bcrypt-passlib.md) — passlib's bcrypt wrap-bug detection crashes with newer bcrypt; use `import bcrypt as _bcrypt` directly in auth.py
 - [Reels persistence](reels-persistence.md) — creator_reels table; reelsApi in api.js; EditProfile/MyProfile load from API not mock

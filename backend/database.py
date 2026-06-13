@@ -257,6 +257,62 @@ MIGRATIONS = [
         updated_at TIMESTAMPTZ DEFAULT NOW()
     )""",
     "CREATE INDEX IF NOT EXISTS idx_creator_pricing_creator_id ON creator_pricing(creator_id)",
+    # Admin system
+    """CREATE TABLE IF NOT EXISTS admins (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        name VARCHAR(255) NOT NULL,
+        phone VARCHAR(20),
+        email VARCHAR(255),
+        password_hash VARCHAR(255) NOT NULL,
+        role VARCHAR(20) DEFAULT 'admin',
+        created_at TIMESTAMPTZ DEFAULT NOW()
+    )""",
+    "CREATE UNIQUE INDEX IF NOT EXISTS idx_admins_phone ON admins(phone) WHERE phone IS NOT NULL",
+    "CREATE UNIQUE INDEX IF NOT EXISTS idx_admins_email ON admins(email) WHERE email IS NOT NULL",
+    """CREATE TABLE IF NOT EXISTS verification_requests (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+        verified_by UUID REFERENCES admins(id),
+        status VARCHAR(20) DEFAULT 'approved',
+        note TEXT DEFAULT '',
+        created_at TIMESTAMPTZ DEFAULT NOW()
+    )""",
+    "CREATE INDEX IF NOT EXISTS idx_verification_requests_user_id ON verification_requests(user_id)",
+    """CREATE TABLE IF NOT EXISTS admin_logs (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        admin_id UUID REFERENCES admins(id) ON DELETE SET NULL,
+        admin_name VARCHAR(255) DEFAULT '',
+        action VARCHAR(255) NOT NULL,
+        target_id VARCHAR(255),
+        target_type VARCHAR(50),
+        details JSONB DEFAULT '{}',
+        timestamp TIMESTAMPTZ DEFAULT NOW()
+    )""",
+    "CREATE INDEX IF NOT EXISTS idx_admin_logs_timestamp ON admin_logs(timestamp DESC)",
+    """CREATE TABLE IF NOT EXISTS blogs (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        title VARCHAR(500) NOT NULL,
+        slug VARCHAR(500) UNIQUE NOT NULL,
+        content TEXT DEFAULT '',
+        cover_image TEXT DEFAULT '',
+        short_description TEXT DEFAULT '',
+        category VARCHAR(100) DEFAULT '',
+        author VARCHAR(255) DEFAULT '',
+        tags TEXT[] DEFAULT '{}',
+        seo_title VARCHAR(255) DEFAULT '',
+        seo_description TEXT DEFAULT '',
+        seo_keywords TEXT DEFAULT '',
+        canonical_url VARCHAR(500) DEFAULT '',
+        status VARCHAR(20) DEFAULT 'draft',
+        published_at TIMESTAMPTZ,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+    )""",
+    "CREATE UNIQUE INDEX IF NOT EXISTS idx_blogs_slug ON blogs(slug)",
+    "CREATE INDEX IF NOT EXISTS idx_blogs_status ON blogs(status)",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_suspended BOOLEAN DEFAULT FALSE",
+    "ALTER TABLE creator_profiles ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT FALSE",
+    "ALTER TABLE brand_profiles ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT FALSE",
 ]
 
 

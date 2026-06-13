@@ -10,6 +10,7 @@ import os, logging, json, base64
 from pathlib import Path
 from database import get_pool, init_db, close_pool
 from auth import hash_password, verify_password, create_access_token, decode_token
+from admin_routes import admin_router
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / ".env")
@@ -1485,6 +1486,7 @@ async def root():
 
 
 app.include_router(api_router)
+app.include_router(admin_router)
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,

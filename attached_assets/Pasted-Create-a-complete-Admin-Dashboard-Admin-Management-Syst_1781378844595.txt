@@ -1,0 +1,349 @@
+Create a complete **Admin Dashboard & Admin Management System** for the platform.
+
+## Objective
+
+Build a powerful admin panel where the platform owner can monitor, manage, analyze, and control every part of the application.
+
+The admin should have complete visibility and control over users, creators, brands, content, analytics, verification, SEO, and platform activity.
+
+---
+
+# Admin Authentication
+
+Create a secure admin login system.
+
+Features:
+
+* phone number/ password
+* Role-based access control
+* Secure admin routes
+* Session management
+* Logout option
+
+Admin roles:
+
+* Super Admin (full access)
+* Admin (limited access)
+
+---
+
+# Admin Dashboard Overview
+
+Create a dashboard with real-time analytics cards:
+
+## User Analytics
+
+Show:
+
+* Total registered users
+* Total creators
+* Total brands
+* New users today
+* New users this week
+* New users this month
+* User growth percentage
+* Active users
+* Inactive users
+
+## Creator Analytics
+
+Show:
+
+* Total creators
+* Verified creators
+* New creators today
+* Top creators by:
+
+  * Followers
+  * Engagement rate
+  * Profile views
+  * Collaboration requests
+
+## Brand Analytics
+
+Show:
+
+* Total brands
+* Verified brands
+* New brands today
+* Active brands
+* Top brands by activity
+
+---
+
+# Growth Analytics
+
+Create detailed charts:
+
+* Daily registrations graph
+* Weekly growth graph
+* Monthly growth graph
+* Creator vs Brand growth
+* User retention
+* Active users trend
+
+---
+
+# Platform Activity Tracking
+
+Track everything:
+
+## Profile Analytics
+
+* Total profile views
+* Profile views per user
+* Most viewed profiles
+* Search impressions
+* Profile clicks
+
+## Collaboration Analytics
+
+Track:
+
+* Total collaboration requests
+* Pending requests
+* Accepted requests
+* Rejected requests
+* Conversion rate
+
+## Messaging Analytics
+
+Track:
+
+* Total messages
+* Active conversations
+* Messages sent daily
+
+---
+
+# User Management
+
+Create a user management section.
+
+Features:
+
+Search users by:
+
+* Name
+* Email
+* Username
+* Phone
+* User ID
+
+Filters:
+
+* Creator
+* Brand
+* Verified
+* Non verified
+* Active
+* Blocked
+* followers
+* category
+
+Actions:
+
+* View profile
+* Edit user
+* Suspend user
+* Delete user
+* Verify user
+* Remove verification
+
+---
+
+# Verification Badge System
+
+Allow admin to manually verify any user.
+
+Verification options:
+
+* Creator verified badge
+* Brand verified badge
+
+Admin controls:
+
+* Give badge
+* Remove badge
+* Add verification note
+* View verification history
+
+Show verified badge everywhere:
+
+* Profile
+* Search
+* Creator cards
+* Brand cards
+
+---
+
+# Profile Viewer
+
+Admin should be able to view any profile on the platform.
+
+Ability to:
+
+* Open any creator profile
+* Open any brand profile
+* View private admin data
+* See account history
+* See activity logs
+
+---
+
+# Content Management System (CMS)
+
+Create Blog Management.
+
+Admin can:
+
+Create blogs with:
+
+* Title
+* Cover image
+* Content editor
+* Short description
+* Category
+* Author
+* Tags
+* SEO title
+* SEO description
+* SEO keywords
+* Canonical URL
+* Custom slug
+
+Example URL:
+
+website.com/blog/how-to-find-creators
+
+---
+
+# Blog Features
+
+Admin can:
+
+* Create blog
+* Edit blog
+* Delete blog
+* Draft blog
+* Publish blog
+* Schedule publish
+
+SEO requirements:
+
+* Unique URL slug
+* Meta title
+* Meta description
+* Open Graph image
+* Schema markup support
+
+---
+
+# Search & Discovery Analytics
+
+Track:
+
+* Most searched categories
+* Most searched creators
+* Failed searches
+* Trending niches
+
+---
+
+# Admin Activity Logs
+
+Track every admin action:
+
+Example:
+
+"Admin verified creator"
+"Admin deleted user"
+"Admin edited blog"
+
+Store:
+
+* Admin ID
+* Action
+* Date
+* Time
+* Target user/content
+
+---
+
+# Database Tables
+
+Create:
+
+admins
+
+* id
+* name
+* email
+* password_hash
+* role
+* created_at
+
+verification_requests
+
+* id
+* user_id
+* verified_by
+* status
+* created_at
+
+admin_logs
+
+* id
+* admin_id
+* action
+* target_id
+* timestamp
+
+blogs
+
+* id
+* title
+* slug
+* content
+* seo_title
+* seo_description
+* keywords
+* status
+* created_at
+
+analytics_events
+
+* id
+* user_id
+* event_name
+* metadata
+* created_at
+
+---
+
+# UI Requirements
+
+Admin panel design:
+
+* Modern SaaS dashboard style
+* Sidebar navigation
+* Dark/light mode
+* Responsive
+* Desktop + tablet compatible
+
+Sidebar:
+
+Dashboard
+Users
+Creators
+Brands
+Verification
+Analytics
+Blogs
+Reports
+Settings
+Admin Logs
+
+---
+
+Build this as a scalable admin system capable of handling millions of users and future platform expansion.

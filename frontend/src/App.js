@@ -33,7 +33,21 @@ import MyProfile from "@/screens/MyProfile";
 import SavedCreatorsScreen from "@/screens/SavedCreatorsScreen";
 import PublicCreatorProfile from "@/screens/PublicCreatorProfile";
 
-// Minimal spinner shown while session is being restored from localStorage
+// Admin
+import { AdminProvider, useAdmin } from "@/admin/AdminContext";
+import AdminLogin from "@/admin/AdminLogin";
+import AdminLayout from "@/admin/AdminLayout";
+import Dashboard from "@/admin/pages/Dashboard";
+import Users from "@/admin/pages/Users";
+import Creators from "@/admin/pages/Creators";
+import Brands from "@/admin/pages/Brands";
+import Verification from "@/admin/pages/Verification";
+import Analytics from "@/admin/pages/Analytics";
+import Blogs from "@/admin/pages/Blogs";
+import AdminLogs from "@/admin/pages/AdminLogs";
+import AdminSettings from "@/admin/pages/Settings";
+
+// ── Loading spinner ────────────────────────────────────────────────────────────
 function AuthLoading() {
   return (
     <div className="min-h-full flex items-center justify-center bg-[#F9F9F8]">
@@ -47,7 +61,7 @@ function AuthLoading() {
   );
 }
 
-// Route guard: must be authed AND have completed onboarding
+// ── Route guards (app) ────────────────────────────────────────────────────────
 function AppRoute({ children }) {
   const { isAuthed, onboardingComplete, authLoading } = useApp();
   if (authLoading) return <AuthLoading />;
@@ -56,7 +70,6 @@ function AppRoute({ children }) {
   return children;
 }
 
-// Route guard: must be authed but onboarding NOT yet done
 function OnboardingRoute({ children }) {
   const { isAuthed, onboardingComplete, accountType, authLoading } = useApp();
   if (authLoading) return <AuthLoading />;
@@ -67,11 +80,43 @@ function OnboardingRoute({ children }) {
   return children;
 }
 
+// ── Admin route guard ─────────────────────────────────────────────────────────
+function AdminRoute({ children }) {
+  const { admin, loading } = useAdmin();
+  if (loading) return (
+    <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#E25238] to-[#F59E0B] animate-pulse" />
+    </div>
+  );
+  if (!admin) return <Navigate to="/admin/login" replace />;
+  return children;
+}
+
+// ── App routes ────────────────────────────────────────────────────────────────
 function AppRoutes() {
   const { accountType } = useApp();
 
   return (
     <Routes>
+      {/* ── Admin panel (full-screen, no PhoneFrame) ─── */}
+      <Route path="/admin/login" element={<AdminLogin />} />
+      <Route
+        path="/admin"
+        element={<AdminRoute><AdminLayout /></AdminRoute>}
+      >
+        <Route index element={<Navigate to="/admin/dashboard" replace />} />
+        <Route path="dashboard"    element={<Dashboard />} />
+        <Route path="users"        element={<Users />} />
+        <Route path="creators"     element={<Creators />} />
+        <Route path="brands"       element={<Brands />} />
+        <Route path="verification" element={<Verification />} />
+        <Route path="analytics"    element={<Analytics />} />
+        <Route path="blogs"        element={<Blogs />} />
+        <Route path="logs"         element={<AdminLogs />} />
+        <Route path="settings"     element={<AdminSettings />} />
+      </Route>
+
+      {/* ── Main app (PhoneFrame) ─── */}
       <Route element={<PhoneFrame />}>
         {/* Public */}
         <Route path="/" element={<SplashScreen />} />
@@ -79,7 +124,7 @@ function AppRoutes() {
         <Route path="/login" element={<LoginScreen />} />
         <Route path="/creator/:id" element={<PublicCreatorProfile />} />
 
-        {/* Onboarding — authed but not yet complete */}
+        {/* Onboarding */}
         <Route
           path="/onboarding"
           element={
@@ -123,16 +168,19 @@ function AppRoutes() {
   );
 }
 
+// ── Root ──────────────────────────────────────────────────────────────────────
 function App() {
   return (
-    <AppProvider>
-      <div className="App">
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
-        <Toaster position="top-center" richColors />
-      </div>
-    </AppProvider>
+    <AdminProvider>
+      <AppProvider>
+        <div className="App">
+          <BrowserRouter>
+            <AppRoutes />
+          </BrowserRouter>
+          <Toaster position="top-center" richColors />
+        </div>
+      </AppProvider>
+    </AdminProvider>
   );
 }
 
