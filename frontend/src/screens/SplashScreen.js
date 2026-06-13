@@ -18,9 +18,11 @@ export default function SplashScreen() {
         {/* Logo mark */}
         <div className="relative mb-8">
           <div className="absolute inset-0 bg-[#E25238] rounded-[28px] blur-2xl opacity-40 scale-110" />
-          <div className="relative w-24 h-24 rounded-[24px] bg-gradient-to-br from-[#E25238] to-[#F59E0B] flex items-center justify-center shadow-2xl">
-            <span className="text-white font-black text-4xl tracking-tighter">O</span>
-          </div>
+          <img
+            src="/splash-logo.png"
+            alt="Rytspot"
+            className="relative w-24 h-24 rounded-[24px] shadow-2xl object-cover"
+          />
         </div>
 
         {/* Wordmark */}
