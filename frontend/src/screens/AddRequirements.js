@@ -9,8 +9,8 @@ import { MASTER_CATEGORIES as CATS } from "@/data/categories";
 const GENDERS = ["All", "Female", "Male", "Non-binary"];
 const LANGUAGES = ["English", "Hindi", "Tamil", "Telugu", "Kannada", "Bengali", "Marathi", "Malayalam", "Punjabi"];
 
-const MIN_AGE = 13;
-const MAX_AGE = 65;
+const MIN_AGE = 0;
+const MAX_AGE = 100;
 
 export default function AddRequirements() {
   const navigate = useNavigate();
