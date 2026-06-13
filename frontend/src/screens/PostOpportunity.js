@@ -1,6 +1,5 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Camera } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { useApp } from "@/context/AppContext";
 import { toast } from "sonner";
@@ -15,19 +14,7 @@ export default function PostOpportunity() {
     payoutMax: "",
     creatorsNeeded: "",
     deadline: "",
-    coverUrl: "",
   });
-  const coverRef = useRef(null);
-
-  const handleCoverFile = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith("image/")) { toast.error("Please select an image"); return; }
-    if (file.size > 3 * 1024 * 1024) { toast.error("Image must be under 3MB"); return; }
-    const reader = new FileReader();
-    reader.onload = () => setData((d) => ({ ...d, coverUrl: reader.result }));
-    reader.readAsDataURL(file);
-  };
 
   const handleContinue = () => {
     if (!data.title || !data.description) {
@@ -47,40 +34,6 @@ export default function PostOpportunity() {
       <TopBar title="Post Opportunity" dark />
 
       <div className="px-5 space-y-5">
-        {/* Cover image upload */}
-        <Field label="Cover Image (Optional)">
-          <div
-            data-testid="cover-upload-area"
-            onClick={() => coverRef.current?.click()}
-            className="w-full rounded-2xl overflow-hidden border-2 border-dashed border-white/15 cursor-pointer hover:border-[#E25238] transition-colors"
-          >
-            {data.coverUrl ? (
-              <div className="relative">
-                <img src={data.coverUrl} alt="cover" className="w-full h-40 object-cover" />
-                <button
-                  onClick={(e) => { e.stopPropagation(); setData((d) => ({ ...d, coverUrl: "" })); }}
-                  className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/70 text-white flex items-center justify-center hover:bg-[#EF4444] transition-colors"
-                >
-                  <span className="text-xs font-bold">✕</span>
-                </button>
-              </div>
-            ) : (
-              <div className="py-7 flex flex-col items-center justify-center gap-2 text-neutral-400">
-                <Camera size={24} />
-                <span className="font-bold text-sm">Upload Cover Image</span>
-                <span className="text-xs">JPG, PNG up to 3MB</span>
-              </div>
-            )}
-          </div>
-          <input
-            ref={coverRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleCoverFile}
-          />
-        </Field>
-
         <Field label="Campaign Title">
           <input
             data-testid="campaign-title"
