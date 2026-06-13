@@ -17,11 +17,11 @@ export default function SplashScreen() {
       <div className="flex-1 flex flex-col items-center justify-center px-8 relative z-10">
         {/* Logo mark */}
         <div className="relative mb-8">
-          <div className="absolute inset-0 bg-[#E25238] rounded-[28px] blur-2xl opacity-40 scale-110" />
+          <div className="absolute inset-0 bg-[#E25238] rounded-full blur-2xl opacity-30 scale-110" />
           <img
-            src="/splash-logo.png"
+            src="/rytspot-logo.png"
             alt="Rytspot"
-            className="relative w-24 h-24 rounded-[24px] shadow-2xl object-cover"
+            className="relative w-24 h-24 object-contain drop-shadow-2xl"
           />
         </div>
 
