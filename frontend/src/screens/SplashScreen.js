@@ -32,7 +32,7 @@ export default function SplashScreen() {
 
         {/* Tagline */}
         <p className="text-base font-medium text-neutral-400 text-center leading-relaxed max-w-xs">
-          Connecting the Right Creators with the Right Brands
+          Connecting Right Creators with Right Brands
         </p>
       </div>
 
