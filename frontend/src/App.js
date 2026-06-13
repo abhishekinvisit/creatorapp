@@ -1,54 +1,58 @@
 import "@/App.css";
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "sonner";
 import { AppProvider, useApp } from "@/context/AppContext";
 import { PhoneFrame } from "@/components/PhoneFrame";
-
-import SplashScreen from "@/screens/SplashScreen";
-import AccountTypeScreen from "@/screens/AccountTypeScreen";
-import LoginScreen from "@/screens/LoginScreen";
-import CreatorOnboarding from "@/screens/CreatorOnboarding";
-import BrandOnboarding from "@/screens/BrandOnboarding";
-import HomeFeed from "@/screens/HomeFeed";
-import OpportunityDetails from "@/screens/OpportunityDetails";
-import ApplicationSubmitted from "@/screens/ApplicationSubmitted";
-import MyApplications from "@/screens/MyApplications";
-import ApplicationStatus from "@/screens/ApplicationStatus";
-import BrandDashboard from "@/screens/BrandDashboard";
-import PostOpportunity from "@/screens/PostOpportunity";
-import AddRequirements from "@/screens/AddRequirements";
-import ApplicantsList from "@/screens/ApplicantsList";
-import BrandPostDetail from "@/screens/BrandPostDetail";
-import BrandDiscover from "@/screens/BrandDiscover";
-import CreatorProfileBrandView from "@/screens/CreatorProfileBrandView";
-import Messages from "@/screens/Messages";
-import ChatScreen from "@/screens/ChatScreen";
-import Notifications from "@/screens/Notifications";
-import SearchScreen from "@/screens/SearchScreen";
-import SavedScreen from "@/screens/SavedScreen";
-import Settings from "@/screens/Settings";
-import EditProfile from "@/screens/EditProfile";
-import BrandsList from "@/screens/BrandsList";
-import MyProfile from "@/screens/MyProfile";
-import SavedCreatorsScreen from "@/screens/SavedCreatorsScreen";
-import PublicCreatorProfile from "@/screens/PublicCreatorProfile";
-
-// Admin
 import { AdminProvider, useAdmin } from "@/admin/AdminContext";
-import AdminLogin from "@/admin/AdminLogin";
-import AdminLayout from "@/admin/AdminLayout";
-import Dashboard from "@/admin/pages/Dashboard";
-import Users from "@/admin/pages/Users";
-import Creators from "@/admin/pages/Creators";
-import Brands from "@/admin/pages/Brands";
-import Verification from "@/admin/pages/Verification";
-import Analytics from "@/admin/pages/Analytics";
-import Blogs from "@/admin/pages/Blogs";
-import AdminLogs from "@/admin/pages/AdminLogs";
-import AdminSettings from "@/admin/pages/Settings";
 
-// ── Loading spinner ────────────────────────────────────────────────────────────
-function AuthLoading() {
+// ── Eager (critical path — shown before any auth check) ───────────────────────
+import SplashScreen from "@/screens/SplashScreen";
+import LoginScreen from "@/screens/LoginScreen";
+import AccountTypeScreen from "@/screens/AccountTypeScreen";
+
+// ── Lazy: app screens ─────────────────────────────────────────────────────────
+const CreatorOnboarding       = lazy(() => import("@/screens/CreatorOnboarding"));
+const BrandOnboarding         = lazy(() => import("@/screens/BrandOnboarding"));
+const HomeFeed                = lazy(() => import("@/screens/HomeFeed"));
+const OpportunityDetails      = lazy(() => import("@/screens/OpportunityDetails"));
+const ApplicationSubmitted    = lazy(() => import("@/screens/ApplicationSubmitted"));
+const MyApplications          = lazy(() => import("@/screens/MyApplications"));
+const ApplicationStatus       = lazy(() => import("@/screens/ApplicationStatus"));
+const BrandDashboard          = lazy(() => import("@/screens/BrandDashboard"));
+const PostOpportunity         = lazy(() => import("@/screens/PostOpportunity"));
+const AddRequirements         = lazy(() => import("@/screens/AddRequirements"));
+const ApplicantsList          = lazy(() => import("@/screens/ApplicantsList"));
+const BrandPostDetail         = lazy(() => import("@/screens/BrandPostDetail"));
+const BrandDiscover           = lazy(() => import("@/screens/BrandDiscover"));
+const CreatorProfileBrandView = lazy(() => import("@/screens/CreatorProfileBrandView"));
+const Messages                = lazy(() => import("@/screens/Messages"));
+const ChatScreen              = lazy(() => import("@/screens/ChatScreen"));
+const Notifications           = lazy(() => import("@/screens/Notifications"));
+const SearchScreen            = lazy(() => import("@/screens/SearchScreen"));
+const SavedScreen             = lazy(() => import("@/screens/SavedScreen"));
+const Settings                = lazy(() => import("@/screens/Settings"));
+const EditProfile             = lazy(() => import("@/screens/EditProfile"));
+const BrandsList              = lazy(() => import("@/screens/BrandsList"));
+const MyProfile               = lazy(() => import("@/screens/MyProfile"));
+const SavedCreatorsScreen     = lazy(() => import("@/screens/SavedCreatorsScreen"));
+const PublicCreatorProfile    = lazy(() => import("@/screens/PublicCreatorProfile"));
+
+// ── Lazy: admin pages ─────────────────────────────────────────────────────────
+const AdminLogin    = lazy(() => import("@/admin/AdminLogin"));
+const AdminLayout   = lazy(() => import("@/admin/AdminLayout"));
+const Dashboard     = lazy(() => import("@/admin/pages/Dashboard"));
+const Users         = lazy(() => import("@/admin/pages/Users"));
+const Creators      = lazy(() => import("@/admin/pages/Creators"));
+const Brands        = lazy(() => import("@/admin/pages/Brands"));
+const Verification  = lazy(() => import("@/admin/pages/Verification"));
+const Analytics     = lazy(() => import("@/admin/pages/Analytics"));
+const Blogs         = lazy(() => import("@/admin/pages/Blogs"));
+const AdminLogs     = lazy(() => import("@/admin/pages/AdminLogs"));
+const AdminSettings = lazy(() => import("@/admin/pages/Settings"));
+
+// ── Fallback spinners ─────────────────────────────────────────────────────────
+function AppFallback() {
   return (
     <div className="min-h-full flex items-center justify-center bg-[#F9F9F8]">
       <div className="flex flex-col items-center gap-4">
@@ -61,7 +65,19 @@ function AuthLoading() {
   );
 }
 
-// ── Route guards (app) ────────────────────────────────────────────────────────
+function AdminFallback() {
+  return (
+    <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#E25238] to-[#F59E0B] animate-pulse" />
+    </div>
+  );
+}
+
+// ── Route guards ──────────────────────────────────────────────────────────────
+function AuthLoading() {
+  return <AppFallback />;
+}
+
 function AppRoute({ children }) {
   const { isAuthed, onboardingComplete, authLoading } = useApp();
   if (authLoading) return <AuthLoading />;
@@ -80,14 +96,9 @@ function OnboardingRoute({ children }) {
   return children;
 }
 
-// ── Admin route guard ─────────────────────────────────────────────────────────
 function AdminRoute({ children }) {
   const { admin, loading } = useAdmin();
-  if (loading) return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-      <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#E25238] to-[#F59E0B] animate-pulse" />
-    </div>
-  );
+  if (loading) return <AdminFallback />;
   if (!admin) return <Navigate to="/admin/login" replace />;
   return children;
 }
@@ -99,68 +110,88 @@ function AppRoutes() {
   return (
     <Routes>
       {/* ── Admin panel (full-screen, no PhoneFrame) ─── */}
-      <Route path="/admin/login" element={<AdminLogin />} />
+      <Route
+        path="/admin/login"
+        element={
+          <Suspense fallback={<AdminFallback />}>
+            <AdminLogin />
+          </Suspense>
+        }
+      />
       <Route
         path="/admin"
-        element={<AdminRoute><AdminLayout /></AdminRoute>}
+        element={
+          <AdminRoute>
+            <Suspense fallback={<AdminFallback />}>
+              <AdminLayout />
+            </Suspense>
+          </AdminRoute>
+        }
       >
         <Route index element={<Navigate to="/admin/dashboard" replace />} />
-        <Route path="dashboard"    element={<Dashboard />} />
-        <Route path="users"        element={<Users />} />
-        <Route path="creators"     element={<Creators />} />
-        <Route path="brands"       element={<Brands />} />
-        <Route path="verification" element={<Verification />} />
-        <Route path="analytics"    element={<Analytics />} />
-        <Route path="blogs"        element={<Blogs />} />
-        <Route path="logs"         element={<AdminLogs />} />
-        <Route path="settings"     element={<AdminSettings />} />
+        <Route path="dashboard"    element={<Suspense fallback={<AdminFallback />}><Dashboard /></Suspense>} />
+        <Route path="users"        element={<Suspense fallback={<AdminFallback />}><Users /></Suspense>} />
+        <Route path="creators"     element={<Suspense fallback={<AdminFallback />}><Creators /></Suspense>} />
+        <Route path="brands"       element={<Suspense fallback={<AdminFallback />}><Brands /></Suspense>} />
+        <Route path="verification" element={<Suspense fallback={<AdminFallback />}><Verification /></Suspense>} />
+        <Route path="analytics"    element={<Suspense fallback={<AdminFallback />}><Analytics /></Suspense>} />
+        <Route path="blogs"        element={<Suspense fallback={<AdminFallback />}><Blogs /></Suspense>} />
+        <Route path="logs"         element={<Suspense fallback={<AdminFallback />}><AdminLogs /></Suspense>} />
+        <Route path="settings"     element={<Suspense fallback={<AdminFallback />}><AdminSettings /></Suspense>} />
       </Route>
 
       {/* ── Main app (PhoneFrame) ─── */}
       <Route element={<PhoneFrame />}>
-        {/* Public */}
+        {/* Public — eager */}
         <Route path="/" element={<SplashScreen />} />
         <Route path="/account-type" element={<AccountTypeScreen />} />
         <Route path="/login" element={<LoginScreen />} />
-        <Route path="/creator/:id" element={<PublicCreatorProfile />} />
 
-        {/* Onboarding */}
+        {/* Public — lazy */}
+        <Route
+          path="/creator/:id"
+          element={<Suspense fallback={<AppFallback />}><PublicCreatorProfile /></Suspense>}
+        />
+
+        {/* Onboarding — lazy */}
         <Route
           path="/onboarding"
           element={
             <OnboardingRoute>
-              {accountType === "brand" ? <BrandOnboarding /> : <CreatorOnboarding />}
+              <Suspense fallback={<AppFallback />}>
+                {accountType === "brand" ? <BrandOnboarding /> : <CreatorOnboarding />}
+              </Suspense>
             </OnboardingRoute>
           }
         />
 
-        {/* Creator — protected */}
-        <Route path="/home" element={<AppRoute><HomeFeed /></AppRoute>} />
-        <Route path="/opportunity/:id" element={<AppRoute><OpportunityDetails /></AppRoute>} />
-        <Route path="/application-submitted" element={<AppRoute><ApplicationSubmitted /></AppRoute>} />
-        <Route path="/applications" element={<AppRoute><MyApplications /></AppRoute>} />
-        <Route path="/application/:id" element={<AppRoute><ApplicationStatus /></AppRoute>} />
-        <Route path="/search" element={<AppRoute><SearchScreen /></AppRoute>} />
-        <Route path="/saved" element={<AppRoute><SavedScreen /></AppRoute>} />
-        <Route path="/brands" element={<AppRoute><BrandsList /></AppRoute>} />
+        {/* Creator — lazy + protected */}
+        <Route path="/home"                element={<AppRoute><Suspense fallback={<AppFallback />}><HomeFeed /></Suspense></AppRoute>} />
+        <Route path="/opportunity/:id"     element={<AppRoute><Suspense fallback={<AppFallback />}><OpportunityDetails /></Suspense></AppRoute>} />
+        <Route path="/application-submitted" element={<AppRoute><Suspense fallback={<AppFallback />}><ApplicationSubmitted /></Suspense></AppRoute>} />
+        <Route path="/applications"        element={<AppRoute><Suspense fallback={<AppFallback />}><MyApplications /></Suspense></AppRoute>} />
+        <Route path="/application/:id"     element={<AppRoute><Suspense fallback={<AppFallback />}><ApplicationStatus /></Suspense></AppRoute>} />
+        <Route path="/search"              element={<AppRoute><Suspense fallback={<AppFallback />}><SearchScreen /></Suspense></AppRoute>} />
+        <Route path="/saved"               element={<AppRoute><Suspense fallback={<AppFallback />}><SavedScreen /></Suspense></AppRoute>} />
+        <Route path="/brands"              element={<AppRoute><Suspense fallback={<AppFallback />}><BrandsList /></Suspense></AppRoute>} />
 
-        {/* Shared — protected */}
-        <Route path="/messages" element={<AppRoute><Messages /></AppRoute>} />
-        <Route path="/chat/:id" element={<AppRoute><ChatScreen /></AppRoute>} />
-        <Route path="/notifications" element={<AppRoute><Notifications /></AppRoute>} />
-        <Route path="/profile" element={<AppRoute><MyProfile /></AppRoute>} />
-        <Route path="/profile/edit" element={<AppRoute><EditProfile /></AppRoute>} />
-        <Route path="/settings" element={<AppRoute><Settings /></AppRoute>} />
+        {/* Shared — lazy + protected */}
+        <Route path="/messages"            element={<AppRoute><Suspense fallback={<AppFallback />}><Messages /></Suspense></AppRoute>} />
+        <Route path="/chat/:id"            element={<AppRoute><Suspense fallback={<AppFallback />}><ChatScreen /></Suspense></AppRoute>} />
+        <Route path="/notifications"       element={<AppRoute><Suspense fallback={<AppFallback />}><Notifications /></Suspense></AppRoute>} />
+        <Route path="/profile"             element={<AppRoute><Suspense fallback={<AppFallback />}><MyProfile /></Suspense></AppRoute>} />
+        <Route path="/profile/edit"        element={<AppRoute><Suspense fallback={<AppFallback />}><EditProfile /></Suspense></AppRoute>} />
+        <Route path="/settings"            element={<AppRoute><Suspense fallback={<AppFallback />}><Settings /></Suspense></AppRoute>} />
 
-        {/* Brand — protected */}
-        <Route path="/brand/dashboard" element={<AppRoute><BrandDashboard /></AppRoute>} />
-        <Route path="/brand/applicants" element={<AppRoute><ApplicantsList /></AppRoute>} />
-        <Route path="/brand/discover" element={<AppRoute><BrandDiscover /></AppRoute>} />
-        <Route path="/brand/post" element={<AppRoute><PostOpportunity /></AppRoute>} />
-        <Route path="/brand/post/:id" element={<AppRoute><BrandPostDetail /></AppRoute>} />
-        <Route path="/brand/requirements" element={<AppRoute><AddRequirements /></AppRoute>} />
-        <Route path="/brand/creator/:id" element={<AppRoute><CreatorProfileBrandView /></AppRoute>} />
-        <Route path="/brand/saved-creators" element={<AppRoute><SavedCreatorsScreen /></AppRoute>} />
+        {/* Brand — lazy + protected */}
+        <Route path="/brand/dashboard"     element={<AppRoute><Suspense fallback={<AppFallback />}><BrandDashboard /></Suspense></AppRoute>} />
+        <Route path="/brand/applicants"    element={<AppRoute><Suspense fallback={<AppFallback />}><ApplicantsList /></Suspense></AppRoute>} />
+        <Route path="/brand/discover"      element={<AppRoute><Suspense fallback={<AppFallback />}><BrandDiscover /></Suspense></AppRoute>} />
+        <Route path="/brand/post"          element={<AppRoute><Suspense fallback={<AppFallback />}><PostOpportunity /></Suspense></AppRoute>} />
+        <Route path="/brand/post/:id"      element={<AppRoute><Suspense fallback={<AppFallback />}><BrandPostDetail /></Suspense></AppRoute>} />
+        <Route path="/brand/requirements"  element={<AppRoute><Suspense fallback={<AppFallback />}><AddRequirements /></Suspense></AppRoute>} />
+        <Route path="/brand/creator/:id"   element={<AppRoute><Suspense fallback={<AppFallback />}><CreatorProfileBrandView /></Suspense></AppRoute>} />
+        <Route path="/brand/saved-creators" element={<AppRoute><Suspense fallback={<AppFallback />}><SavedCreatorsScreen /></Suspense></AppRoute>} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
