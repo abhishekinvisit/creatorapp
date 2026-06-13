@@ -29,11 +29,13 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          // React core
+          // React core + router (keep all react-ecosystem together to avoid
+          // circular deps between @remix-run/router and react-router-dom)
           if (id.includes("node_modules/react/") ||
               id.includes("node_modules/react-dom/") ||
               id.includes("node_modules/react-router-dom/") ||
-              id.includes("node_modules/react-router/")) {
+              id.includes("node_modules/react-router/") ||
+              id.includes("node_modules/@remix-run/")) {
             return "vendor-react";
           }
           // Radix UI + shadcn primitives
@@ -55,10 +57,8 @@ export default defineConfig({
               id.includes("node_modules/date-fns")) {
             return "vendor-utils";
           }
-          // All other node_modules go into a general vendor chunk
-          if (id.includes("node_modules/")) {
-            return "vendor-misc";
-          }
+          // All other node_modules: let Rollup handle automatically
+          // (no catch-all — avoids circular deps with React ecosystem)
         },
       },
     },

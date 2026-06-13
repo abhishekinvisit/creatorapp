@@ -1,1 +1,0 @@
-import{j as r}from"./vendor-react-DtEcmJmq.js";import t from"./Users-4ljzdeGM.js";import"./vendor-misc-CDkJH4Y8.js";import"./index-7jGTxFwc.js";import"./vendor-utils-DISafoXL.js";function i(){return r.jsx(t,{accountType:"creator"})}export{i as default};
