@@ -211,6 +211,8 @@ MIGRATIONS = [
     "ALTER TABLE opportunities ADD COLUMN IF NOT EXISTS payout_max INTEGER DEFAULT 0",
     "ALTER TABLE opportunities ADD COLUMN IF NOT EXISTS followers_min INTEGER DEFAULT 0",
     "ALTER TABLE opportunities ADD COLUMN IF NOT EXISTS followers_max INTEGER DEFAULT 0",
+    "ALTER TABLE opportunities ADD COLUMN IF NOT EXISTS age_min INTEGER DEFAULT 0",
+    "ALTER TABLE opportunities ADD COLUMN IF NOT EXISTS age_max INTEGER DEFAULT 0",
     "ALTER TABLE applications ADD COLUMN IF NOT EXISTS counter_amount INTEGER",
     "ALTER TABLE creator_profiles ADD COLUMN IF NOT EXISTS is_public BOOLEAN DEFAULT TRUE",
     """CREATE TABLE IF NOT EXISTS audience_insights (
