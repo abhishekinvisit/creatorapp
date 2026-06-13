@@ -163,6 +163,8 @@ class OpportunityIn(BaseModel):
     languages: Optional[List[str]] = []
     followers_min: Optional[int] = 0
     followers_max: Optional[int] = 0
+    age_min: Optional[int] = 0
+    age_max: Optional[int] = 0
 
 class OpportunityUpdate(BaseModel):
     title: Optional[str] = None
@@ -729,6 +731,8 @@ def _opp_row(row):
     d["payout_max"] = d.get("payout_max") or 0
     d["followers_min"] = d.get("followers_min") or 0
     d["followers_max"] = d.get("followers_max") or 0
+    d["age_min"] = d.get("age_min") or 0
+    d["age_max"] = d.get("age_max") or 0
     if "created_at" in d and hasattr(d["created_at"], "isoformat"):
         d["created_at"] = d["created_at"].isoformat()
     return d
@@ -818,14 +822,16 @@ async def create_opportunity(body: OpportunityIn, user=Depends(current_user)):
         row = await conn.fetchrow("""
             INSERT INTO opportunities(brand_id,brand_name,brand_category,title,pitch,description,
               payout,payout_min,payout_max,followers_min,followers_max,
-              creators_needed,deadline,category,cover_url,requirements,languages,verified)
-            VALUES($1::uuid,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
+              creators_needed,deadline,category,cover_url,requirements,languages,
+              age_min,age_max,verified)
+            VALUES($1::uuid,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)
             RETURNING *
         """, user["id"], brand_name, brand_cat, body.title, body.pitch, body.description,
             payout_val, body.payout_min or 0, body.payout_max or 0,
             body.followers_min or 0, body.followers_max or 0,
             body.creators_needed, body.deadline, body.category,
-            cover, body.requirements, body.languages, verified)
+            cover, body.requirements, body.languages,
+            body.age_min or 0, body.age_max or 0, verified)
     return _opp_row(row)
 
 

@@ -1,15 +1,16 @@
-import React, { useState, useRef } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Camera } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { useApp } from "@/context/AppContext";
 import { opportunitiesApi } from "@/lib/api";
 import { toast } from "sonner";
 
 import { MASTER_CATEGORIES as CATS } from "@/data/categories";
-const AGES = ["Any Age", "13-17", "18-24", "25-34", "35+"];
 const GENDERS = ["All", "Female", "Male", "Non-binary"];
 const LANGUAGES = ["English", "Hindi", "Tamil", "Telugu", "Kannada", "Bengali", "Marathi", "Malayalam", "Punjabi"];
+
+const MIN_AGE = 13;
+const MAX_AGE = 65;
 
 export default function AddRequirements() {
   const navigate = useNavigate();
@@ -18,14 +19,13 @@ export default function AddRequirements() {
     category: "",
     followersMin: "",
     followersMax: "",
-    age: "",
+    ageMin: MIN_AGE,
+    ageMax: MAX_AGE,
     gender: "",
     location: "",
     language: [],
   });
-  const [coverUrl, setCoverUrl] = useState("");
   const [saving, setSaving] = useState(false);
-  const coverRef = useRef(null);
 
   const toggleLanguage = (lang) => {
     setData((prev) => ({
@@ -36,14 +36,20 @@ export default function AddRequirements() {
     }));
   };
 
-  const handleCoverFile = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith("image/")) { toast.error("Please select an image"); return; }
-    if (file.size > 3 * 1024 * 1024) { toast.error("Image must be under 3MB"); return; }
-    const reader = new FileReader();
-    reader.onload = () => setCoverUrl(reader.result);
-    reader.readAsDataURL(file);
+  const handleAgeMin = (val) => {
+    const v = parseInt(val);
+    setData((prev) => {
+      if (v > prev.ageMax) return { ...prev, ageMin: v, ageMax: v };
+      return { ...prev, ageMin: v };
+    });
+  };
+
+  const handleAgeMax = (val) => {
+    const v = parseInt(val);
+    setData((prev) => {
+      if (v < prev.ageMin) return { ...prev, ageMin: v, ageMax: v };
+      return { ...prev, ageMax: v };
+    });
   };
 
   const handlePublish = async () => {
@@ -54,8 +60,13 @@ export default function AddRequirements() {
       const followersMin = parseInt(data.followersMin || 0);
       const followersMax = parseInt(data.followersMax || 0);
 
+      const ageRange =
+        data.ageMin === MIN_AGE && data.ageMax === MAX_AGE
+          ? ""
+          : `${data.ageMin}-${data.ageMax}`;
+
       const requirements = [
-        data.age && data.age !== "Any Age" ? `Age: ${data.age}` : "",
+        ageRange ? `Age: ${ageRange}` : "",
         data.gender && data.gender !== "All" ? `Gender: ${data.gender}` : "",
         data.location ? `Location: ${data.location}` : "",
       ].filter(Boolean);
@@ -69,10 +80,12 @@ export default function AddRequirements() {
         payout_max: payoutMax,
         followers_min: followersMin,
         followers_max: followersMax,
+        age_min: data.ageMin,
+        age_max: data.ageMax,
         creators_needed: parseInt(draftOpportunity.creatorsNeeded || 5),
         deadline: draftOpportunity.deadline || "",
         category: data.category || "Lifestyle",
-        cover_url: coverUrl || draftOpportunity.coverUrl || "",
+        cover_url: "",
         requirements,
         languages: data.language,
       };
@@ -96,7 +109,7 @@ export default function AddRequirements() {
         languages: created.languages || [],
         requirements: created.requirements || [],
       });
-      toast.success("Opportunity published! 🚀");
+      toast.success("Opportunity published! \uD83D\uDE80");
       navigate("/brand/dashboard");
     } catch (err) {
       toast.error(err.message || "Failed to publish. Please try again.");
@@ -142,8 +155,33 @@ export default function AddRequirements() {
           <p className="text-[11px] text-neutral-500 mt-1.5 font-medium">Leave blank to accept all follower counts</p>
         </Field>
 
-        <Field label="Audience Age Group">
-          <Pills options={AGES} value={data.age} onChange={(v) => setData({ ...data, age: v })} testId="req-age" />
+        <Field label="Audience Age Range">
+          <div className="pt-2 pb-1">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[10px] font-bold tracking-widest uppercase text-neutral-500">Min</span>
+              <span className="text-sm font-bold text-white">{data.ageMin} — {data.ageMax}</span>
+              <span className="text-[10px] font-bold tracking-widest uppercase text-neutral-500">Max</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <input
+                type="range"
+                min={MIN_AGE}
+                max={MAX_AGE}
+                value={data.ageMin}
+                onChange={(e) => handleAgeMin(e.target.value)}
+                className="flex-1 h-1.5 rounded-full bg-neutral-700 accent-[#E25238] cursor-pointer"
+              />
+              <input
+                type="range"
+                min={MIN_AGE}
+                max={MAX_AGE}
+                value={data.ageMax}
+                onChange={(e) => handleAgeMax(e.target.value)}
+                className="flex-1 h-1.5 rounded-full bg-neutral-700 accent-[#E25238] cursor-pointer"
+              />
+            </div>
+            <p className="text-[11px] text-neutral-500 mt-1.5 font-medium">Drag to set the age range for this campaign</p>
+          </div>
         </Field>
 
         <Field label="Gender (Audience)">
@@ -162,40 +200,6 @@ export default function AddRequirements() {
 
         <Field label="Content Language">
           <MultiPills options={LANGUAGES} value={data.language} onToggle={toggleLanguage} testId="req-lang" />
-        </Field>
-
-        <Field label="Cover Image (Optional)">
-          <div
-            data-testid="cover-upload-area"
-            onClick={() => coverRef.current?.click()}
-            className="w-full rounded-2xl overflow-hidden border-2 border-dashed border-white/15 cursor-pointer hover:border-[#E25238] transition-colors"
-          >
-            {coverUrl ? (
-              <div className="relative">
-                <img src={coverUrl} alt="cover" className="w-full h-40 object-cover" />
-                <button
-                  onClick={(e) => { e.stopPropagation(); setCoverUrl(""); }}
-                  className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/70 text-white flex items-center justify-center hover:bg-[#EF4444] transition-colors"
-                >
-                  <span className="text-xs font-bold">✕</span>
-                </button>
-              </div>
-            ) : (
-              <div className="py-8 flex flex-col items-center justify-center gap-2 text-neutral-400">
-                <Camera size={24} />
-                <span className="font-bold text-sm">Upload Cover Image</span>
-                <span className="text-xs">JPG, PNG up to 3MB</span>
-              </div>
-            )}
-          </div>
-          <input
-            ref={coverRef}
-            data-testid="req-cover-input"
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleCoverFile}
-          />
         </Field>
       </div>
 

@@ -98,6 +98,8 @@ CREATE TABLE IF NOT EXISTS opportunities (
     cover_url TEXT DEFAULT '',
     requirements TEXT[] DEFAULT '{}',
     languages TEXT[] DEFAULT '{}',
+    age_min INTEGER DEFAULT 0,
+    age_max INTEGER DEFAULT 0,
     verified BOOLEAN DEFAULT FALSE,
     status VARCHAR(20) DEFAULT 'active',
     applicants_count INTEGER DEFAULT 0,
