@@ -19,7 +19,7 @@ export default function SplashScreen() {
         <div className="relative mb-8">
           <div className="absolute inset-0 bg-[#E25238] rounded-[28px] blur-2xl opacity-40 scale-110" />
           <div className="relative w-24 h-24 rounded-[24px] bg-gradient-to-br from-[#E25238] to-[#F59E0B] flex items-center justify-center shadow-2xl">
-            <div className="w-11 h-11 rounded-full border-[4px] border-white opacity-90" />
+            <span className="text-white font-black text-4xl tracking-tighter">O</span>
           </div>
         </div>
 
