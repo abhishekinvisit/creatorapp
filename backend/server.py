@@ -1487,6 +1487,61 @@ async def root():
 
 app.include_router(api_router)
 app.include_router(admin_router)
+
+# ── Public Blog endpoints ──────────────────────────────────────────────────────
+blog_router = APIRouter(prefix="/api/blog")
+
+def _fmt_blog(r: dict) -> dict:
+    d = dict(r)
+    for k in ("id", "published_at", "created_at", "updated_at"):
+        if d.get(k):
+            d[k] = str(d[k])
+    if d.get("tags") and isinstance(d["tags"], str):
+        import json as _json
+        try:
+            d["tags"] = _json.loads(d["tags"])
+        except Exception:
+            pass
+    return d
+
+@blog_router.get("")
+async def public_list_blogs(limit: int = 20, offset: int = 0, category: Optional[str] = None):
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        conditions = ["status='published'"]
+        params: list = []
+        idx = 1
+        if category:
+            conditions.append(f"category=${idx}"); params.append(category); idx += 1
+        where = "WHERE " + " AND ".join(conditions)
+        rows = await conn.fetch(
+            f"SELECT id, title, slug, cover_image, short_description, category, author, tags, published_at, created_at FROM blogs {where} ORDER BY published_at DESC NULLS LAST, created_at DESC LIMIT ${idx} OFFSET ${idx+1}",
+            *params, limit, offset
+        )
+        total = await conn.fetchval(f"SELECT COUNT(*) FROM blogs {where}", *params)
+    return {"blogs": [_fmt_blog(r) for r in rows], "total": total}
+
+@blog_router.get("/categories")
+async def public_blog_categories():
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        rows = await conn.fetch(
+            "SELECT DISTINCT category FROM blogs WHERE status='published' AND category IS NOT NULL AND category != '' ORDER BY category"
+        )
+    return {"categories": [r["category"] for r in rows]}
+
+@blog_router.get("/{slug}")
+async def public_get_blog(slug: str):
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow(
+            "SELECT * FROM blogs WHERE slug=$1 AND status='published'", slug
+        )
+        if not row:
+            raise HTTPException(status_code=404, detail="Blog post not found")
+    return _fmt_blog(dict(row))
+
+app.include_router(blog_router)
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,

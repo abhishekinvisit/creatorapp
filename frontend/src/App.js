@@ -37,6 +37,8 @@ const BrandsList              = lazy(() => import("@/screens/BrandsList"));
 const MyProfile               = lazy(() => import("@/screens/MyProfile"));
 const SavedCreatorsScreen     = lazy(() => import("@/screens/SavedCreatorsScreen"));
 const PublicCreatorProfile    = lazy(() => import("@/screens/PublicCreatorProfile"));
+const BlogList                = lazy(() => import("@/screens/BlogList"));
+const BlogPost                = lazy(() => import("@/screens/BlogPost"));
 
 // ── Lazy: admin pages ─────────────────────────────────────────────────────────
 const AdminLogin    = lazy(() => import("@/admin/AdminLogin"));
@@ -109,6 +111,10 @@ function AppRoutes() {
 
   return (
     <Routes>
+      {/* ── Public blog (full-screen, no PhoneFrame) ─── */}
+      <Route path="/blog" element={<Suspense fallback={<AppFallback />}><BlogList /></Suspense>} />
+      <Route path="/blog/:slug" element={<Suspense fallback={<AppFallback />}><BlogPost /></Suspense>} />
+
       {/* ── Admin panel (full-screen, no PhoneFrame) ─── */}
       <Route
         path="/admin/login"

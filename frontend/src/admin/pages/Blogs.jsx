@@ -280,6 +280,12 @@ export default function Blogs() {
                       Unpublish
                     </button>
                   )}
+                  {b.status === "published" && (
+                    <a href={`/blog/${b.slug}`} target="_blank" rel="noreferrer"
+                      className="text-xs text-purple-400 hover:text-purple-300 px-2 py-1 rounded-lg hover:bg-purple-500/10 transition-colors">
+                      View ↗
+                    </a>
+                  )}
                   <button onClick={() => openEdit(b.id)}
                     className="text-xs text-blue-400 hover:text-blue-300 px-2 py-1 rounded-lg hover:bg-blue-500/10 transition-colors">
                     Edit
