@@ -137,9 +137,7 @@ export default function HomeFeed() {
       {/* Brand wordmark */}
       <div className="-mt-12 px-5 pb-3 flex flex-col items-center pointer-events-none">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-[10px] bg-gradient-to-br from-[#E25238] to-[#F59E0B] flex items-center justify-center">
-            <div className="w-3 h-3 rounded-full border-2 border-white" />
-          </div>
+          <img src="/rytspot-logo.png" alt="Rytspot" className="w-7 h-7 object-contain" />
           <h1 className="font-display font-black text-2xl tracking-[-0.04em] text-[#0A0A0A]">
             RYTSPOT
           </h1>

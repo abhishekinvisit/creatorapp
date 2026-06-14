@@ -30,9 +30,7 @@ export default function AdminLogin() {
     <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-[#E25238] to-[#F59E0B] mb-4">
-            <div className="w-6 h-6 rounded-full border-2 border-white" />
-          </div>
+          <img src="/rytspot-logo.png" alt="Rytspot" className="w-14 h-14 object-contain mb-4" />
           <h1 className="text-2xl font-bold text-white font-display">Rytspot Admin</h1>
           <p className="text-gray-400 text-sm mt-1">Sign in to manage your platform</p>
         </div>

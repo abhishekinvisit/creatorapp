@@ -61,9 +61,7 @@ const SidebarNav = ({ isDark }) => {
     >
       {/* Logo */}
       <div className={`flex items-center gap-3 px-3 xl:px-5 py-[18px] border-b ${border}`}>
-        <div className="w-8 h-8 rounded-[10px] bg-gradient-to-br from-[#E25238] to-[#F59E0B] flex items-center justify-center flex-shrink-0">
-          <div className="w-3.5 h-3.5 rounded-full border-[2.5px] border-white" />
-        </div>
+        <img src="/rytspot-logo.png" alt="Rytspot" className="w-8 h-8 object-contain flex-shrink-0" />
         <span className={`hidden xl:block font-display font-black text-lg tracking-[-0.04em] ${isDark ? "text-white" : "text-[#0A0A0A]"}`}>
           OLLCOLLAB
         </span>

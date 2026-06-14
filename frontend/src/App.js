@@ -58,9 +58,7 @@ function AppFallback() {
   return (
     <div className="min-h-full flex items-center justify-center bg-[#F9F9F8]">
       <div className="flex flex-col items-center gap-4">
-        <div className="w-10 h-10 rounded-[14px] bg-gradient-to-br from-[#E25238] to-[#F59E0B] flex items-center justify-center animate-pulse">
-          <div className="w-4 h-4 rounded-full border-2 border-white" />
-        </div>
+        <img src="/rytspot-logo.png" alt="Rytspot" className="w-10 h-10 object-contain animate-pulse" />
         <p className="text-sm font-bold text-[#525252] uppercase tracking-widest">RYTSPOT</p>
       </div>
     </div>
@@ -70,7 +68,7 @@ function AppFallback() {
 function AdminFallback() {
   return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-      <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#E25238] to-[#F59E0B] animate-pulse" />
+      <img src="/rytspot-logo.png" alt="Rytspot" className="w-8 h-8 object-contain animate-pulse" />
     </div>
   );
 }

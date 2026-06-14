@@ -30,9 +30,7 @@ export default function AdminLayout() {
       <aside className={`flex flex-col bg-gray-900 border-r border-gray-800 transition-all duration-200 ${collapsed ? "w-16" : "w-56"} flex-shrink-0`}>
         {/* Logo */}
         <div className={`flex items-center gap-3 px-4 py-5 border-b border-gray-800 ${collapsed ? "justify-center" : ""}`}>
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#E25238] to-[#F59E0B] flex items-center justify-center flex-shrink-0">
-            <div className="w-3 h-3 rounded-full border-2 border-white" />
-          </div>
+          <img src="/rytspot-logo.png" alt="Rytspot" className="w-8 h-8 object-contain flex-shrink-0" />
           {!collapsed && <span className="font-bold text-white font-display text-sm">Rytspot Admin</span>}
         </div>
 
