@@ -6,7 +6,7 @@
 - [Login profile mapping](login-profile-mapping.md) — loginWithToken is async; calls /me after setting token; refreshProfile() in AppContext for post-save refresh
 - [Image upload pattern](image-upload-pattern.md) — FileReader base64 → stored as TEXT in DB; 3MB client limit; avatar_url / logo_data / cover_url / thumbnail columns
 - [Brand post data shape](brand-post-data-shape.md) — activePosts stores payout as raw number (not "₹N"); BrandPostDetail fetches from API if not in context; save/delete call opportunitiesApi
-- [Auth flow](auth-flow.md) — phone+OTP 2-step UX (dummy: any 6-digit code); endpoints: check-phone / send-otp / verify-otp; token stored as `ollcollab_token`; users.email is now nullable; phone_number is the login key
+- [Auth flow](auth-flow.md) — phone+OTP 2-step UX (dummy: any 6-digit code); endpoints: check-phone / send-otp / verify-otp; token stored as `rytspot_token` (was ollcollab_token); users.email is now nullable; phone_number is the login key
 - [API proxy](api-proxy.md) — frontend uses `/api/...` which craco proxies to localhost:8000; always use relative paths in frontend code
 - [Data shape mapping](data-shape-mapping.md) — API uses snake_case; frontend context uses camelCase; mapApiOpp() in HomeFeed.js bridges the two
 - [No mock data in state](no-mock-data.md) — AppContext state starts empty ([]); mergeOpportunities() replaces (not merges); savedIds in localStorage; BrandsList/SearchScreen derive brands from opportunities
@@ -14,7 +14,7 @@
 - [Lucide icons](lucide-icons.md) — Instagram/Youtube icons removed from lucide-react; use inline SVGs instead
 - [Saved creators feature](saved-creators.md) — saved_creators table (UNIQUE brand_id+creator_id); savedCreatorsApi in api.js; savedCreatorIds Set in AppContext; loaded on brand login
 - [addApplication signature](add-application-sig.md) — takes full object {id, opportunityId, brandName, brandId, opportunityTitle, appliedOn, status, note}; brandId needed for Message button
-- [savedIds logout behavior](saved-ids-logout.md) — savedIds now per-user (key: ollcollab_saved_${userId}), loaded on login, cleared on logout; logout also clears avatar/logo from user state
+- [savedIds logout behavior](saved-ids-logout.md) — savedIds now per-user (key: rytspot_saved_${userId}), loaded on login, cleared on logout; logout also clears avatar/logo from user state
 - [categories system](categories-system.md) — 50 MASTER_CATEGORIES in categories.js; DB categories table seeded via MIGRATIONS; GET /api/categories; all screens import from @/data/categories with searchable pill UIs
 - [Brand logo validity](brand-logo-validity.md) — always guard with isValidImg(s) before rendering <img> for brand logos; DEFAULT_USER has logo="GLOW" (text, not image)
 - [Applications persistence](applications-persistence.md) — must call applicationsApi.myApplications() in both restoreSession and loginWithToken for creator accounts; context exports hasApplied(id) and loadMyApplications

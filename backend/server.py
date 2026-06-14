@@ -18,7 +18,7 @@ load_dotenv(ROOT_DIR / ".env")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="OLLCOLLAB API")
+app = FastAPI(title="Rytspot API")
 api_router = APIRouter(prefix="/api")
 security = HTTPBearer(auto_error=False)
 
@@ -1482,7 +1482,7 @@ async def update_creator_pricing(body: CreatorPricingIn, user=Depends(current_us
 
 @api_router.get("/")
 async def root():
-    return {"message": "OLLCOLLAB API v3"}
+    return {"message": "Rytspot API v3"}
 
 
 app.include_router(api_router)

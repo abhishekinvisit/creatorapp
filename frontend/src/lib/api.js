@@ -2,7 +2,7 @@ const BASE = "/api";
 
 let _categoriesCache = null;
 
-export const TOKEN_KEY = "ollcollab_token";
+export const TOKEN_KEY = "rytspot_token";
 
 export const getToken = () => localStorage.getItem(TOKEN_KEY);
 export const setToken = (t) => localStorage.setItem(TOKEN_KEY, t);

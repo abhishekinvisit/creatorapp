@@ -1,4 +1,4 @@
-// Mock data for OLLCOLLAB
+// Mock data for Rytspot
 
 export const CATEGORIES = ["All", "Beauty", "Fashion", "Lifestyle", "Fitness", "Food", "Tech"];
 
