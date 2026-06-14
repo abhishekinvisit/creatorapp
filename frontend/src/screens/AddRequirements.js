@@ -85,7 +85,7 @@ export default function AddRequirements() {
         creators_needed: parseInt(draftOpportunity.creatorsNeeded || 5),
         deadline: draftOpportunity.deadline || "",
         category: data.category || "Lifestyle",
-        cover_url: "",
+        cover_url: draftOpportunity.coverUrl || "",
         requirements,
         languages: data.language,
       };
